@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+- new `opensim save|load iar|oar` saves and loads the inventory of an account or a region through the console of a running simulator, in `<data of the grid>/backups/iar` and `oar` (the default of the core is its own `bin` folder, which nobody can write): the files are named after what they hold, `gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar` and `gridnick-sim[-region]-stamp[-noassets][-perm<P>][-publish].oar`, the newest one is loaded when no file is given, and the end of the command is read from the log of the simulator
+- new `opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]` makes what it takes to install a grid again as it is: configuration, persistent data and a dump of each database, one archive per grid or for one simulator
 - update the advanced setup has one screen per subject, whatever its fields (text, choice, yes/no, checklist, some shown only when they apply): the grid, its network and web side, its database, the simulator, the estate and its owner, the region, and what to do once it is written (apply, enable, start)
 - fix the database account of a second simulator is the one of the first (host, user and password), the password is no longer made up again
 - update a database that does not work shows the error and asks its settings again at once, without a question before

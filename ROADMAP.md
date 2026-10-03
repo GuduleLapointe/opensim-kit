@@ -17,6 +17,10 @@
 
 ## Critical improvements
 
+- [x] `opensim save|load iar|oar` and `opensim backup`: the archives of the users in `<data of the grid>/backups`, the backup of the administrator (configuration, data, databases)
+- [ ] `opensim restore` of a backup of the administrator on a new machine (the install, the databases, the data), and a check of what the archive holds
+- [ ] the archives of the users: `opensim save oar` for every region of a grid (a rotation, `--keep N`), and the OAR of a region that belongs to a user who is not the owner of the grid (what the owners of regions can ask for themselves)
+- [ ] backup: the rotation of the old backups (`--keep N`), and the same for the archives
 - [x] bulk avatar creation (from a list provided by a third-party source: CSV, JSON or YAML), directly in the database, as `opensim import [grid] FILE --users`; relies on the install the profile gives, with or without the kit
 - [ ] try the accounts made in the database with a viewer (login, inventory, default outfit) on a test grid, and check the numbers of the system folders (`Settings` 56 and `Material` 57) against the core
 - [ ] test `opensim import` on real grids (the config of a grid or of a simulator, a setup file, a list of accounts: what works, what is missing)

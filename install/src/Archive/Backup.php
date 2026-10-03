@@ -119,7 +119,7 @@ final class Backup
                 'archives' => (bool) ($options['archives'] ?? false),
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
 
-            $this->tar(['-cf', $tar, '-C', $stage, '.']);
+            $this->tar(['-cf', $tar, '-C', $stage, 'manifest.json', 'db']);
             // The configuration
             $paths = $slug === null ? ["grids/$nick"] : [];
             $excludes = [];

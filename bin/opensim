@@ -106,6 +106,24 @@ opensim next <grid> location [X,Y] [COUNT] [-e X,Y]
                         the free places nearest to X,Y (default: the public port of the grid, twice) by
                         the rule of the grid
 
+Archives and backups
+opensim save [GRID [SIM]] iar [options] FIRST LAST PATH [PASSWORD] [FILE]
+opensim load [GRID [SIM]] iar [-m|--merge] FIRST LAST PATH [PASSWORD] [FILE]
+                        the inventory of an account, saved or loaded through a
+                        running simulator of the grid. Saved by default in the
+                        backups/iar folder of the data of the grid, as
+                        gridnick-first-last[-noassets][-perm<P>]-stamp.iar
+opensim save [GRID [SIM]] oar [--region NAME] [--all] [options] [FILE]
+opensim load [GRID [SIM]] oar [--region NAME] [--merge] [options] [FILE]
+                        a region (or all of the simulator with --all), saved in
+                        backups/oar as gridnick-sim[-region]-stamp[-modes].oar;
+                        without FILE, load takes the newest one. The options
+                        are the ones of the console of the simulator
+opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]
+                        everything to install the grids again as they are
+                        (configuration, databases, data), one archive per grid
+                        or for one simulator, in <data>/backups/admin
+
 This machine
 opensim next port [-e PORT] [MIN] [COUNT]
                         free ports from MIN (default 9010)

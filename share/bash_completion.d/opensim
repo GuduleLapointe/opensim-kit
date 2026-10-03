@@ -48,7 +48,7 @@ _opensim()
   cur=${COMP_WORDS[COMP_CWORD]}
   case $COMP_CWORD in
     1)
-      COMPREPLY=( $(compgen -W "start stop restart status setup enable disable console screen command rest ports next web import install-dotnet help" -- "$cur") )
+      COMPREPLY=( $(compgen -W "start stop restart status setup enable disable console screen command rest ports next web import save load backup install-dotnet help" -- "$cur") )
       ;;
     *)
       case ${COMP_WORDS[1]} in
@@ -80,6 +80,30 @@ _opensim()
             COMPREPLY=( $(compgen -f -W "$(_opensim_grids)" -- "$cur") )
           else
             COMPREPLY=( $(compgen -f -W "--grid --simulator --users --apply --core --name --keep-going --result --format" -- "$cur") )
+          fi
+          ;;
+        save|load)
+          # opensim save|load [GRID [SIM]] iar|oar [options] ...: the words before iar or oar are the instance
+          local kind= w
+          for w in "${COMP_WORDS[@]:2:COMP_CWORD-2}"; do case $w in iar|oar) kind=$w ;; esac; done
+          if [ -z "$kind" ]; then
+            COMPREPLY=( $(compgen -W "iar oar $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
+          elif [ "$kind" = iar ] && [ "${COMP_WORDS[1]}" = save ]; then
+            COMPREPLY=( $(compgen -f -W "--home --verbose --noassets --perm= --skipbadassets --creators --exclude --excludefolder" -- "$cur") )
+          elif [ "$kind" = iar ]; then
+            COMPREPLY=( $(compgen -f -W "--merge" -- "$cur") )
+          elif [ "${COMP_WORDS[1]}" = save ]; then
+            COMPREPLY=( $(compgen -f -W "--region --all --noassets --home --publish --perm=" -- "$cur") )
+          else
+            COMPREPLY=( $(compgen -f -W "--region --merge --skip-assets --force-terrain --force-parcels --no-objects --displacement --rotation --default-user" -- "$cur") )
+          fi
+          ;;
+        backup)
+          # opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]
+          if [ "${COMP_WORDS[COMP_CWORD-1]}" = --output ]; then
+            COMPREPLY=( $(compgen -d -- "$cur") )
+          else
+            COMPREPLY=( $(compgen -W "--logs --archives --output $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
           fi
           ;;
         web)
