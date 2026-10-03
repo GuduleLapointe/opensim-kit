@@ -305,6 +305,16 @@ check "a region is reconfigured in place, its UUID kept" "grep -q 'exit code: 0'
 # with both the places the registry has and the ones the region files have (Sim1North is registered at
 # 8003,8002 until its simulator restarts, its file says 8002,8003)
 check "opensim next location gives the free place nearest to the first one" "[ \"\$(opensim next testgrid location)\" = 8001,8002 ]"
+# The archives of the users are made in the folder of the grid, the backup of the administrator beside the data
+(cd /tmp && runuser -u opensim -- opensim save testgrid Sim1 oar --region Sim1 >/tmp/saveoar.out 2>&1; echo "exit code: $?" >>/tmp/saveoar.out)
+check "opensim save oar makes the archive of a region in the folder of the grid" "grep -q 'exit code: 0' /tmp/saveoar.out &&
+    ls /var/lib/opensim/data/testgrid/backups/oar/testgrid-sim1-Sim1-*.oar >/dev/null 2>&1"
+(cd /tmp && runuser -u opensim -- opensim load testgrid Sim1 oar --region Sim1 --merge >/tmp/loadoar.out 2>&1; echo "exit code: $?" >>/tmp/loadoar.out)
+check "opensim load oar loads the newest one" "grep -q 'exit code: 0' /tmp/loadoar.out && grep -q 'Successfully loaded archive' /tmp/loadoar.out"
+(cd /tmp && runuser -u opensim -- opensim backup testgrid >/tmp/backup.out 2>&1; echo "exit code: $?" >>/tmp/backup.out)
+check "opensim backup makes an archive of the grid with its configuration, its data and its databases" "grep -q 'exit code: 0' /tmp/backup.out &&
+    f=\$(ls /var/lib/opensim/data/backups/admin/testgrid-*.tar.gz | head -1) && tar -tzf \$f | grep -q '^etc/grids/testgrid/Robust' &&
+    tar -tzf \$f | grep -q '^db/testgrid_robust.sql.gz'"
 check "opensim next port gives a free port" "[ \"\$(opensim next port 9100)\" = 9100 ]"
 # The ports of an instance are a block of ten, the same on any machine: Robust
 # 8002 public and 8003 private; the first simulator 9000, 9004 for its console
