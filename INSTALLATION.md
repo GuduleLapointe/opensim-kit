@@ -151,7 +151,7 @@ opensim save mygrid sim1 oar --region Welcome --noassets     # a region, or all 
 opensim load mygrid sim1 oar --region Welcome --merge        # the newest archive of that region
 ```
 
-Without a file name, an archive is made in `<data of the grid>/backups/iar` or `oar` and named after what it is, the special modes in suffixes so that nobody restores a `noassets` archive by mistake: `gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar` and `gridnick-sim[-region]-stamp[-noassets][-perm<P>][-publish].oar` (no region in the name of a multi-region archive, `--all`), the stamp being `YYYYMMDD-HHMMSS`. A file name without a folder is in those folders, a relative path is from where the command is typed. Without a file name, `load` takes the newest archive of that account or region, and says which.
+Without a file name, an archive is made in `<data of the grid>/backups/iar` or `oar` and named after what it is, the special modes in suffixes so that nobody restores a `noassets` archive by mistake: `gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar` and `gridnick-sim[-region][-noassets][-perm<P>][-publish]-stamp.oar` (no region in the name of a multi-region archive, `--all`), the stamp being `YYYYMMDD-HHMMSS`. A file name without a folder is in those folders, a relative path is from where the command is typed. Without a file name, `load` takes the newest archive of that account or region, and says which.
 
 ## An install that was not made by the kit
 

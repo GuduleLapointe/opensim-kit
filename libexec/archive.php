@@ -32,7 +32,7 @@ usage: opensim save [GRID [SIM]] iar [-h|--home=URL] [-v] [--noassets] [--perm=P
 The simulator is the one named, else a running one of the grid (an inventory), else the only one (a region).
 FILE: a name, kept in <data of the grid>/backups/iar or oar, or a path. Saving makes
 gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar
-gridnick-sim[-region]-stamp[-noassets][-perm<P>][-publish].oar
+gridnick-sim[-region][-noassets][-perm<P>][-publish]-stamp.oar
 when none is given, loading takes the newest such file. The password is asked when it is not given, or
 read from OPENSIM_IAR_PASSWORD.
 

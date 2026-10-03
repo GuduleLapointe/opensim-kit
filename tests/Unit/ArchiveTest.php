@@ -50,9 +50,9 @@ describe('the names of the archives', function () {
             ->toBe('alpha-Jane-Doe-noassets-permCMT-20261003-101500.iar')
             ->and(Archives::oarName('alpha', 'sim1', 'Welcome', [], $stamp))->toBe('alpha-sim1-Welcome-20261003-101500.oar')
             ->and(Archives::oarName('alpha', 'sim1', 'Welcome', ['all' => true, 'noassets' => true], $stamp))
-            ->toBe('alpha-sim1-20261003-101500-noassets.oar')
+            ->toBe('alpha-sim1-noassets-20261003-101500.oar')
             ->and(Archives::oarName('alpha', 'sim1', 'Welcome', ['perm' => 'CT', 'publish' => true], $stamp))
-            ->toBe('alpha-sim1-Welcome-20261003-101500-permCT-publish.oar');
+            ->toBe('alpha-sim1-Welcome-permCT-publish-20261003-101500.oar');
     });
 
     test('have a stamp of year, month, day, hour, minute, second', function () {
@@ -66,12 +66,12 @@ describe('the names of the archives', function () {
     test('are found again, the newest of the inventory or the region', function () {
         $dir = sys_get_temp_dir() . '/archive-new-' . bin2hex(random_bytes(4));
         mkdir($dir);
-        foreach (['alpha-sim1-20261001-100000.oar', 'alpha-sim1-20261003-100000-noassets.oar', 'alpha-sim1-Welcome-20261009-100000.oar', 'alpha-sim10-20261009-100000.oar'] as $name) {
+        foreach (['alpha-sim1-20261001-100000.oar', 'alpha-sim1-noassets-20261003-100000.oar', 'alpha-sim1-Welcome-20261009-100000.oar', 'alpha-sim10-20261009-100000.oar'] as $name) {
             touch("$dir/$name");
         }
 
         expect(basename((string) Archives::newest($dir, Archives::oarPrefix('alpha', 'sim1', null), 'oar')))
-            ->toBe('alpha-sim1-20261003-100000-noassets.oar')
+            ->toBe('alpha-sim1-noassets-20261003-100000.oar')
             ->and(basename((string) Archives::newest($dir, Archives::oarPrefix('alpha', 'sim1', 'Welcome'), 'oar')))
             ->toBe('alpha-sim1-Welcome-20261009-100000.oar')
             ->and(Archives::newest($dir, Archives::oarPrefix('alpha', 'other', null), 'oar'))->toBeNull();
@@ -154,7 +154,7 @@ describe('opensim save and load', function () {
 
         expect($code)->toBe(0)
             ->and($file)->toStartWith("{$profile['DataRoot']}/alpha/backups/oar/alpha-sim1-Welcome-")
-            ->and($file)->toEndWith('-noassets.oar')
+            ->and($file)->toContain('-noassets-2')
             ->and(is_file($file))->toBeTrue()
             ->and($sent[0][0])->toBe('alpha_sim1')
             ->and($sent[0][1])->toStartWith("change region Welcome\nsave oar --noassets /");

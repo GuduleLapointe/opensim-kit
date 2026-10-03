@@ -116,7 +116,7 @@ opensim load [GRID [SIM]] iar [-m|--merge] FIRST LAST PATH [PASSWORD] [FILE]
 opensim save [GRID [SIM]] oar [--region NAME] [--all] [options] [FILE]
 opensim load [GRID [SIM]] oar [--region NAME] [--merge] [options] [FILE]
                         a region (or all of the simulator with --all), saved in
-                        backups/oar as gridnick-sim[-region]-stamp[-modes].oar;
+                        backups/oar as gridnick-sim[-region][-modes]-stamp.oar;
                         without FILE, load takes the newest one. The options
                         are the ones of the console of the simulator
 opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]

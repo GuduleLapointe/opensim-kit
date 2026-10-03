@@ -8,9 +8,9 @@ namespace OpenSim\Installer\Archive;
  * The inventory and region archives (IAR, OAR) the console of a simulator saves and loads: what the options of
  * `opensim save|load iar|oar` are, the console lines they make, and the names the files get by default.
  *
- * The name of a file tells what is in it, the special modes in suffixes, so that nobody restores a "no assets" archive
- * by mistake: gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar for an inventory,
- * gridnick-sim[-region]-stamp[-noassets][-perm<P>][-publish].oar for a region (the region is left out of a multi-region
+ * The name of a file tells what is in it, the special modes in suffixes before the stamp, so that nobody restores a
+ * "no assets" archive by mistake: gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar for an inventory,
+ * gridnick-sim[-region][-noassets][-perm<P>][-publish]-stamp.oar for a region (the region is left out of a multi-region
  * archive, --all). Hyphens separate the parts, the parts have none of their own.
  */
 final class Archives
@@ -205,7 +205,7 @@ final class Archives
             $parts[] = self::part($region);
         }
 
-        return implode('-', $parts) . "-$stamp" . self::modes($options, ['noassets', 'perm', 'publish']) . '.oar';
+        return implode('-', $parts) . self::modes($options, ['noassets', 'perm', 'publish']) . "-$stamp.oar";
     }
 
     /**
@@ -224,22 +224,26 @@ final class Archives
 
     /**
      * The newest archive of a folder whose name starts with the prefix (the stamps sort as the dates do), null when none.
-     * The name must be what the prefix and the stamp make: a longer region name does not borrow the archives of a shorter.
+     * Between the prefix and the stamp there are only the modes: a longer region name does not borrow the archives of a
+     * shorter one.
      */
     public static function newest(string $directory, string $prefix, string $extension): ?string
     {
         $found = [];
         foreach (glob(rtrim($directory, '/') . '/*.' . $extension) ?: [] as $file) {
             $name = basename($file);
-            if (str_starts_with($name, $prefix) && preg_match('/^\d{8}-\d{6}(-|\.)/', substr($name, strlen($prefix)))) {
-                $found[$name] = $file;
+            if (
+                str_starts_with($name, $prefix) &&
+                preg_match('/^(?:(?:noassets|skipbadassets|publish|perm[A-Za-z0-9_.]*)-)*(\d{8}-\d{6})\.' . preg_quote($extension, '/') . '$/', substr($name, strlen($prefix)), $m)
+            ) {
+                $found[$m[1] . '/' . $name] = $file;
             }
         }
         if ($found === []) {
             return null;
         }
-        // The stamp is what sorts, not the prefix (it is the same)
-        uksort($found, static fn(string $a, string $b): int => strcmp(substr($a, strlen($prefix)), substr($b, strlen($prefix))));
+        // The stamp is what sorts
+        ksort($found);
 
         return end($found);
     }
