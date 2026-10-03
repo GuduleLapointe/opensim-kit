@@ -107,3 +107,15 @@ it('answers from the table what the questions to ask would match too', function 
 
     expect($ui->secret('Password of the new account'))->toBe('hunter22')->and($inner->asked)->toBe([]);
 });
+
+it('answers a form field by field, with choices, yes or no and the fields that are there only sometimes', function () {
+    $ui = new PresetUi(askingUi([]), ['Console of' => 'screen', 'Start it' => false]);
+    $v = $ui->form([
+        ['key' => 'mode', 'label' => 'Console of the thing', 'type' => 'choice', 'options' => ['rest' => 'REST', 'screen' => 'Screen'], 'default' => 'rest'],
+        ['key' => 'port', 'label' => 'Console port', 'default' => '9004', 'when' => fn(array $v) => $v['mode'] === 'rest'],
+        ['key' => 'start', 'label' => 'Start it now', 'type' => 'confirm', 'default' => 'yes'],
+        ['key' => 'roles', 'label' => 'Roles', 'type' => 'checklist', 'options' => ['a' => 'A', 'b' => 'B'], 'default' => 'a,b'],
+    ]);
+
+    expect($v)->toBe(['mode' => 'screen', 'port' => '', 'start' => 'no', 'roles' => 'a,b']);
+});
