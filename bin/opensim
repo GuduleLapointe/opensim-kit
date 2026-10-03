@@ -103,7 +103,7 @@ opensim web [grid] snippet <caddy|nginx|apache>
                         served, what answers, and what the web server needs to
                         serve them
 opensim next <grid> location [X,Y] [COUNT] [-e X,Y]
-                        the free places nearest to X,Y (default 1000,1000) by
+                        the free places nearest to X,Y (default: the public port of the grid, twice) by
                         the rule of the grid
 
 This machine

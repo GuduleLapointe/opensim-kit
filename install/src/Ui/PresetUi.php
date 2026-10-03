@@ -20,7 +20,9 @@ namespace OpenSim\Installer\Ui;
  */
 final class PresetUi implements InstallerUi
 {
-    use AsksForms;
+    use AsksForms {
+        form as private askForm;
+    }
 
     /** @var list<array{0:string,1:string}> what was answered, the label and the answer, secrets masked */
     public array $answered = [];
@@ -38,6 +40,23 @@ final class PresetUi implements InstallerUi
 
     /** Set when something failed (the database): its settings are asked again, not answered from the table */
     private bool $retrying = false;
+
+    /**
+     * A form answers field by field, from the table, the defaults or the interface for what is asked: the summary to
+     * check is for the one who edits (prefill), not for a setup that runs on its own.
+     */
+    public function form(array $fields, string $title = ''): array
+    {
+        if ($this->prefill) {
+            return $this->askForm($fields, $title);
+        }
+        $values = [];
+        foreach ($fields as $field) {
+            $values[$field['key']] = $this->visible($field, $values) ? $this->askField($field, $field['default'] ?? '') : '';
+        }
+
+        return $values;
+    }
 
     public function intro(string $title): void
     {

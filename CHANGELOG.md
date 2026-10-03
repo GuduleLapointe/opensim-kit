@@ -2,6 +2,9 @@
 
 ### Unreleased
 
+- update the advanced setup has one screen per subject, whatever its fields (text, choice, yes/no, checklist, some shown only when they apply): the grid, its network and web side, its database, the simulator, the estate and its owner, the region, and what to do once it is written (apply, enable, start)
+- fix the database account of a second simulator is the one of the first (host, user and password), the password is no longer made up again
+- update a database that does not work shows the error and asks its settings again at once, without a question before
 - update the first region of a grid goes to its public port on both axes (8002 gives 8002,8002) instead of 1000,1000: two grids of a machine no longer start at the same place, which a teleport between them refuses
 - update the advanced setup groups the related questions on one screen like the quick one: the grid and its nick, the network (host, ports, web URL), the database, the HTTP port and public address of a simulator
 - fix the search index of a simulator carries the name of its grid (`gridname` of `[DataSnapshot]`), not OSGrid

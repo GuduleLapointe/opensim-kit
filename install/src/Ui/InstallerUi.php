@@ -60,8 +60,10 @@ interface InstallerUi
     /**
      * Several fields on one screen, to go through with Tab or Enter.
      *
-     * @param list<array{key:string,label:string,type?:string,default?:string,required?:bool,validate?:?\Closure,hint?:string}> $fields
-     *        type: text (default) or secret; required: true unless said otherwise
+     * @param list<array{key:string,label:string,type?:string,options?:array<string,string>,default?:string,required?:bool,validate?:?\Closure,hint?:string,when?:?\Closure}> $fields
+     *        type: text (default), secret, choice (options: key => label), confirm (yes or no) or checklist (options; the
+     *        keys checked, joined by commas); required: true unless said otherwise; when: given the values so far, tells
+     *        whether the field is there
      * @return array<string,string>  the value of each field, by key
      */
     public function form(array $fields, string $title = ''): array;

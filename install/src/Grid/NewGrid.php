@@ -108,17 +108,42 @@ final class NewGrid
 
         if (!$accepted) {
             $this->showPlan($plan);
-            if (!$this->ui->confirm(sprintf(_("Apply this configuration to grid '%s'?"), $plan->gridNick), true)) {
-                $this->ui->note(_('Aborted — nothing changed.'));
-
-                return null;
-            }
         }
+        // What to do once written is asked here, while the user is at the keyboard (writing may be done by another
+        // process), with the confirmation of the plan
+        $v = $this->ui->form(
+            [
+                [
+                    'key' => 'apply',
+                    'label' => sprintf(_("Apply this configuration to grid '%s'?"), $plan->gridNick),
+                    'type' => 'confirm',
+                    'default' => 'yes',
+                    'when' => static fn(array $v): bool => !$accepted,
+                ],
+                [
+                    'key' => 'enable',
+                    'label' => _('Enable grid (link into robust.d)'),
+                    'type' => 'confirm',
+                    'default' => 'yes',
+                    'when' => static fn(array $v): bool => ($v['apply'] ?? 'yes') === 'yes',
+                ],
+                [
+                    'key' => 'start',
+                    'label' => _('Start grid now'),
+                    'type' => 'confirm',
+                    'default' => 'yes',
+                    'when' => static fn(array $v): bool => ($v['apply'] ?? 'yes') === 'yes' && $v['enable'] === 'yes',
+                ],
+            ],
+            _('Apply'),
+        );
+        if (($v['apply'] ?? 'yes') === 'no') {
+            $this->ui->note(_('Aborted — nothing changed.'));
 
-        // What to do once written is asked here, while the user is at the
-        // keyboard: writing may be done by another process
-        $plan->enable = $this->ui->confirm(sprintf(_("Enable grid '%s' (link into robust.d)?"), $plan->gridNick), true);
-        $plan->start = $plan->enable && $this->ui->confirm(sprintf(_("Start grid '%s' now?"), $plan->gridNick), true);
+            return null;
+        }
+        $plan->enable = $v['enable'] === 'yes';
+        $plan->start = $plan->enable && $v['start'] === 'yes';
 
         $this->write($plan, $profile);
 
@@ -385,31 +410,70 @@ final class NewGrid
 
         $etcRoot = $profile['EtcRoot'];
 
+        // The core to run the grid (multi-version aware)
+        $coreRoot = $profile['CoreRoot'] ?? '';
+        $cores = Cores::list($coreRoot);
+        if ($cores === []) {
+            $this->ui->error(sprintf(_("No OpenSim core found under %s."), $coreRoot));
+
+            return null;
+        }
+
         // Identify the grid and load its existing config, if any.
+        $existing = null;
+        $current = [];
+        $nick = $modifyNick;
+        $defaultName = $modifyNick === null ? self::defaultName() : '';
         if ($modifyNick !== null) {
-            $nick = $modifyNick;
-            $gridDir = "$etcRoot/grids/$nick";
-            $existing = $this->findExisting($gridDir);
+            $existing = $this->findExisting("$etcRoot/grids/$nick");
             $current = $existing !== null ? $this->parseExisting($existing) : [];
-            $name = $this->ui->text(_('Grid name'), $current['gridName'] ?? ucfirst($nick), $required);
-        } else {
-            $defaultName = self::defaultName();
-            $v = $this->ui->form([
-                ['key' => 'name', 'label' => _('Grid name'), 'default' => $defaultName, 'validate' => $required],
+        }
+        $identity = function (array $current, ?string $existing, string $nick = '') use ($required, $cores, $profile, $defaultName, $modifyNick): array {
+            $name = $current['gridName'] ?? ($modifyNick !== null ? ucfirst($nick) : $defaultName);
+
+            return $this->ui->form(
                 [
-                    'key' => 'nick',
-                    'label' => _('Grid nick (snake_case)'),
-                    'default' => Slug::nick($defaultName),
-                    'hint' => _('Names its folder, its database and its instances'),
-                    'validate' => $required,
+                    ['key' => 'name', 'label' => _('Grid name'), 'default' => $name, 'validate' => $required],
+                    // The nick names the folder, the database and the instances: it is not changed afterwards
+                    [
+                        'key' => 'nick',
+                        'label' => _('Grid nick (snake_case)'),
+                        'default' => $nick !== '' ? $nick : Slug::nick($defaultName),
+                        'hint' => _('Names its folder, its database and its instances'),
+                        'validate' => $required,
+                        'when' => static fn(array $v): bool => $modifyNick === null,
+                    ],
+                    [
+                        'key' => 'hypergrid',
+                        'label' => _('Enable Hypergrid?'),
+                        'type' => 'confirm',
+                        'default' => $existing !== null ? (str_contains(basename($existing), '.HG.') ? 'yes' : 'no') : 'yes',
+                    ],
+                    [
+                        'key' => 'spacing',
+                        'label' => _('Free blocks between regions (0: side by side)'),
+                        'default' => (string) ($current['regionSpacing'] ?? 0),
+                        'validate' => static fn(string $v): ?string => ctype_digit(trim($v)) && (int) $v <= 50
+                            ? null
+                            : _('A number of blocks, 0 to 50.'),
+                    ],
+                    [
+                        'key' => 'core',
+                        'label' => _('OpenSim core to run this grid'),
+                        'type' => 'choice',
+                        'options' => $cores,
+                        'default' => (string) ($profile['CoreDirectory'] ?? ''),
+                        'when' => static fn(array $v): bool => count($cores) > 1,
+                    ],
                 ],
-            ], _('Grid'));
-            $name = $v['name'];
+                _('Grid'),
+            );
+        };
+        $v = $identity($current, $existing, (string) $nick);
+        if ($modifyNick === null) {
             // A nick left as proposed follows the name
-            $nick = $v['nick'] === Slug::nick($defaultName) ? Slug::nick($name) : $v['nick'];
-            $gridDir = "$etcRoot/grids/$nick";
-            $existing = $this->findExisting($gridDir);
-            $current = [];
+            $nick = $v['nick'] === Slug::nick($defaultName) ? Slug::nick($v['name']) : $v['nick'];
+            $existing = $this->findExisting("$etcRoot/grids/$nick");
             if ($existing !== null) {
                 $action = $this->ui->choose(
                     sprintf(_("Grid '%s' is already configured (%s)."), $nick, $existing),
@@ -424,68 +488,102 @@ final class NewGrid
                 $current = $this->parseExisting($existing);
             }
         }
+        $gridDir = "$etcRoot/grids/$nick";
 
         $plan = new GridPlan();
-        $plan->gridName = $name;
+        $plan->gridName = $v['name'];
         $plan->gridNick = $nick;
-        $plan->gridSlug = Slug::slug($name);
+        $plan->gridSlug = Slug::slug($v['name']);
         $plan->gridDir = $gridDir;
         $plan->etcDirectory = $gridDir;
         $plan->dataDirectory = "{$profile['DataRoot']}/$nick";
         $plan->cacheDirectory = "{$profile['CacheRoot']}/$nick";
         $plan->logsDirectory = $profile['LogsRoot'] ?? '';
-
-        // Hypergrid — after the existence check; default from the existing file.
-        $hgDefault = $existing !== null ? str_contains(basename($existing), '.HG.') : true;
-        $plan->enableHypergrid = $this->ui->confirm(_('Enable Hypergrid?'), $hgDefault);
-
+        $plan->enableHypergrid = $v['hypergrid'] === 'yes';
         // The rule that places the regions: free blocks between them
-        $plan->regionSpacing = (int) $this->ui->text(
-            _('Free blocks between regions (0: side by side)'),
-            '0',
-            static fn(string $v): ?string => ctype_digit(trim($v)) && (int) $v <= 50
-                ? null
-                : _('A number of blocks, 0 to 50.'),
-        );
-
-        // Core selection (multi-version aware).
-        $coreRoot = $profile['CoreRoot'] ?? '';
-        $cores = Cores::list($coreRoot);
-        if ($cores === []) {
-            $this->ui->error(sprintf(_("No OpenSim core found under %s."), $coreRoot));
-
-            return null;
-        }
-        $plan->coreDirectory = $this->ui->choose(
-            _('OpenSim core to run this grid'),
-            $cores,
-            $profile['CoreDirectory'] ?? null,
-        );
+        $plan->regionSpacing = (int) $v['spacing'];
+        $plan->coreDirectory = $v['core'] !== '' ? $v['core'] : (string) array_key_first($cores);
         $plan->binDir = $plan->coreDirectory . '/bin';
 
+        // The network, the web side and the console, on one screen
         $defaultHost = $current['baseHostname'] ?? self::defaultHost();
         $defaultPublic = (int) ($current['publicPort'] ?? self::defaultPublicPort());
         // The ports of an instance are a block of ten, the first free one (see Ports):
         // public ends with 2, private with 3, the console with 4
-        $defaultPrivate = (int) ($current['privatePort'] ??
-            ($defaultPublic % 10 === 2 ? $defaultPublic + 1 : Ports::next($defaultPublic + 1)));
+        $privateFor = static fn(int $public): int => $public % 10 === 2 ? $public + 1 : Ports::next($public + 1);
+        $consoleFor = static fn(int $public, int $private): int => $public % 10 === 2 ? $public + 2 : Ports::next($private + 1);
+        $defaultPrivate = (int) ($current['privatePort'] ?? $privateFor($defaultPublic));
+        $defaultConsole = (int) ($current['consolePort'] ?? $consoleFor($defaultPublic, $defaultPrivate));
         $defaultWeb = $current['webUrl'] ?? "https://$defaultHost";
-        $v = $this->ui->form([
-            ['key' => 'host', 'label' => _('Base hostname'), 'default' => $defaultHost, 'validate' => $required],
-            ['key' => 'public', 'label' => _('Public port'), 'default' => (string) $defaultPublic, 'validate' => $numeric],
-            ['key' => 'private', 'label' => _('Private port'), 'default' => (string) $defaultPrivate, 'validate' => $numeric],
-            ['key' => 'web', 'label' => _('Web URL'), 'default' => $defaultWeb, 'validate' => $required],
-        ], _('Network'));
+        $existingHelpers = HelpersConfig::read($gridDir);
+        $v = $this->ui->form(
+            [
+                ['key' => 'host', 'label' => _('Base hostname'), 'default' => $defaultHost, 'validate' => $required],
+                ['key' => 'public', 'label' => _('Public port'), 'default' => (string) $defaultPublic, 'validate' => $numeric],
+                ['key' => 'private', 'label' => _('Private port'), 'default' => (string) $defaultPrivate, 'validate' => $numeric],
+                [
+                    'key' => 'console',
+                    'label' => _('Console of the grid'),
+                    'type' => 'choice',
+                    'options' => [
+                        'rest' => _('Remote REST console (recommended)'),
+                        'screen' => _('Screen session (on this machine)'),
+                    ],
+                    'default' => isset($current['consoleUser']) || $current === [] ? 'rest' : 'screen',
+                ],
+                [
+                    'key' => 'console_port',
+                    'label' => _('Console port'),
+                    'default' => (string) $defaultConsole,
+                    'validate' => $numeric,
+                    'when' => static fn(array $v): bool => $v['console'] === 'rest',
+                ],
+                ['key' => 'web', 'label' => _('Web URL'), 'default' => $defaultWeb, 'validate' => $required],
+                [
+                    'key' => 'helpers',
+                    'label' => _('Serve the economy and the search of the grid with opensim-helpers?'),
+                    'type' => 'confirm',
+                    'default' => $existingHelpers !== [] || is_dir(Snippets::WEBROOT) ? 'yes' : 'no',
+                ],
+                [
+                    'key' => 'helpers_path',
+                    'label' => _('Helpers path'),
+                    'default' => $existingHelpers['Helpers']['path'] ?? HelpersConfig::DEFAULT_PATH,
+                    'hint' => _('After the Web URL: the viewers add the name of the script'),
+                    'validate' => static fn(string $v): ?string => preg_match('#^/?[A-Za-z0-9._/-]*$#', trim($v))
+                        ? null
+                        : _('A path such as /helpers.'),
+                    'when' => static fn(array $v): bool => $v['helpers'] === 'yes',
+                ],
+            ],
+            _('Network'),
+        );
         $plan->baseHostname = $v['host'];
         $plan->publicPort = (int) $v['public'];
         // What was left as proposed follows what was changed
-        $plan->privatePort = (int) $v['private'] === $defaultPrivate && (int) $v['public'] !== $defaultPublic
-            ? ($plan->publicPort % 10 === 2 ? $plan->publicPort + 1 : Ports::next($plan->publicPort + 1))
+        $plan->privatePort = (int) $v['private'] === $defaultPrivate && $plan->publicPort !== $defaultPublic
+            ? $privateFor($plan->publicPort)
             : (int) $v['private'];
         $plan->webUrl = $v['web'] === $defaultWeb && $v['host'] !== $defaultHost ? "https://{$plan->baseHostname}" : $v['web'];
-        $this->askHelpers($plan, $gridDir);
-
-        $this->askConsole($plan, $current, $numeric);
+        $plan->helpers = $v['helpers'] === 'yes';
+        if ($plan->helpers) {
+            $plan->helpersUrls = $existingHelpers['Urls'] ?? [];
+            // The URL of the web site is given, the path after it is the choice of the operator
+            $plan->helpersPath = Services::normalize($v['helpers_path']);
+            $this->ui->note(
+                sprintf(_('Helpers URL: %s (the viewers add the name of the script)'), rtrim($plan->webUrl, '/') . $plan->helpersPath),
+            );
+        }
+        $plan->consoleMode = $v['console'];
+        if ($plan->consoleMode === 'rest') {
+            $plan->consolePort = (int) ($v['console_port'] === (string) $defaultConsole && $plan->publicPort !== $defaultPublic
+                ? $consoleFor($plan->publicPort, $plan->privatePort)
+                : $v['console_port']);
+            // As the helpers make theirs: 12 lower case letters, 32 letters and digits
+            $plan->consoleHost = (string) ($current['consoleHost'] ?? $plan->baseHostname);
+            $plan->consoleUser = (string) ($current['consoleUser'] ?? $this->randomLetters(12));
+            $plan->consolePass = (string) ($current['consolePass'] ?? $this->randomPassword(32));
+        }
 
         // Database: reuse a found password, otherwise generate one (never changeme).
         $foundPass = $current['dbPass'] ?? '';
@@ -497,70 +595,6 @@ final class NewGrid
         ]);
 
         return $plan;
-    }
-
-    /**
-     * The helpers of the grid: the economy, the search and the offline messages the viewers use, served by the web
-     * site with opensim-helpers (see `opensim web`). Where they are on the web site is the operator's choice, the
-     * paths of each service too (helpers.ini).
-     */
-    private function askHelpers(GridPlan $plan, string $gridDir): void
-    {
-        $existing = HelpersConfig::read($gridDir);
-        $plan->helpers = $this->ui->confirm(
-            _('Serve the economy and the search of the grid with opensim-helpers?'),
-            $existing !== [] || is_dir(Snippets::WEBROOT),
-        );
-        if (!$plan->helpers) {
-            return;
-        }
-        $plan->helpersUrls = $existing['Urls'] ?? [];
-        // The URL of the web site is given, the path after it is the choice of the operator
-        $plan->helpersPath = Services::normalize(
-            $this->ui->text(
-                sprintf(_('Helpers path, after %s'), rtrim($plan->webUrl, '/')),
-                $existing['Helpers']['path'] ?? HelpersConfig::DEFAULT_PATH,
-                static fn(string $v): ?string => preg_match('#^/?[A-Za-z0-9._/-]*$#', trim($v))
-                    ? null
-                    : _('A path such as /helpers.'),
-            ),
-        );
-        $this->ui->note(
-            sprintf(_('Helpers URL: %s (the viewers add the name of the script)'), rtrim($plan->webUrl, '/') . $plan->helpersPath),
-        );
-    }
-
-    /**
-     * The console of the grid: remote (REST, through its port x4: reachable from
-     * another machine or a container) or a screen session to attach here. What an
-     * existing config has is kept, password included.
-     *
-     * @param array<string,string|int> $current
-     */
-    private function askConsole(GridPlan $plan, array $current, \Closure $numeric): void
-    {
-        $plan->consoleMode = $this->ui->choose(
-            _('Console of the grid'),
-            [
-                'rest' => _('Remote REST console (recommended)'),
-                'screen' => _('Screen session (on this machine)'),
-            ],
-            isset($current['consoleUser']) || $current === [] ? 'rest' : 'screen',
-        );
-        if ($plan->consoleMode !== 'rest') {
-            return;
-        }
-
-        $base = $plan->publicPort % 10 === 2 ? $plan->publicPort - 2 : 0;
-        $plan->consolePort = (int) $this->ui->text(
-            _('Console port'),
-            (string) ($current['consolePort'] ?? ($base > 0 ? $base + 4 : Ports::next($plan->privatePort + 1))),
-            $numeric,
-        );
-        // As the helpers make theirs: 12 lower case letters, 32 letters and digits
-        $plan->consoleHost = (string) ($current['consoleHost'] ?? $plan->baseHostname);
-        $plan->consoleUser = (string) ($current['consoleUser'] ?? $this->randomLetters(12));
-        $plan->consolePass = (string) ($current['consolePass'] ?? $this->randomPassword(32));
     }
 
     /**

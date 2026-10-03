@@ -17,11 +17,15 @@ final class FormPromptRenderer extends Renderer
         $cols = $prompt->terminal()->cols();
         $labels = array_map(static fn(array $f): string => $f['label'], $prompt->fields);
         $width = max(array_map('mb_strlen', $labels));
+        $width = min($width, max(12, intdiv($cols, 2) - 6));
         $valueWidth = max(10, $cols - $width - 14);
 
         $lines = [];
         foreach ($prompt->fields as $i => $field) {
-            $label = str_pad($field['label'], $width);
+            if (!$prompt->visible($i)) {
+                continue;
+            }
+            $label = str_pad($this->truncate($field['label'], $width), $width);
             $value = $prompt->shown($i, $valueWidth);
             $lines[] = $prompt->state === 'submit'
                 ? $this->dim($label) . '  ' . $this->truncate($value, $valueWidth)
@@ -35,7 +39,7 @@ final class FormPromptRenderer extends Renderer
             'error' => $this->box($title, $body, color: 'yellow')->warning($this->truncate($prompt->error, $cols - 5)),
             default => $this
                 ->box($title, $body)
-                ->hint($prompt->hint() !== '' ? $prompt->hint() : _('Tab or Enter: next field, Shift-Tab: back, Enter on the last one: continue')),
+                ->hint($prompt->hint() !== '' ? $prompt->hint() : _('Tab or Enter: next field, Shift-Tab: back, Left, Right, Space: choose, Enter on the last one: continue')),
         };
     }
 }
