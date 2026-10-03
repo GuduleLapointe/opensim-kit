@@ -89,16 +89,18 @@ final class NewSim
 
         // Nothing is written before the database of the simulator works
         $check = $plan->databasePlan();
+        $attempts = 0;
         while (($result = $database->ensure($check)) !== Database::OK) {
             if ($result === Database::ABORT) {
                 $this->ui->error(_('Stopped, nothing was changed: OpenSim cannot run without its database.'));
 
                 throw new SetupFailed('database');
             }
-            if (!$this->ui->confirm(_('Try again (the database settings can be changed)?'), true)) {
-                $this->ui->note(_('Stopped, nothing was changed: OpenSim cannot run without its database.'));
+            // The error is on screen: the settings are asked again at once, they may be what is wrong
+            if (++$attempts > 10) {
+                $this->ui->error(_('Stopped, nothing was changed: OpenSim cannot run without its database.'));
 
-                return null;
+                throw new SetupFailed('database');
             }
             $this->askDatabase($plan, $grid);
             $check = $plan->databasePlan();
@@ -884,11 +886,13 @@ final class NewSim
         $this->askConsole($plan, $current);
 
         // Its own database: the account of the grid, a database of its own
+        // The account of the first simulator of the grid is the one of the next ones, and so is its password
+        $account = $this->siblingAccount($grid, $plan->slug);
         $this->askDatabase($plan, $grid, [
-            'dbHost' => $current['dbHost'] ?? $grid->dbHost,
+            'dbHost' => $current['dbHost'] ?? $account['dbHost'] ?? $grid->dbHost,
             'dbName' => $current['dbName'] ?? $plan->slug,
-            'dbUser' => $current['dbUser'] ?? $grid->dbUser,
-            'dbPass' => $current['dbPass'] ?? ($grid->dbPass !== '' ? $grid->dbPass : self::password(20)),
+            'dbUser' => $current['dbUser'] ?? $account['dbUser'] ?? $grid->dbUser,
+            'dbPass' => $current['dbPass'] ?? $account['dbPass'] ?? ($grid->dbPass !== '' ? $grid->dbPass : self::password(20)),
         ]);
 
         // The helpers of the grid, when it has some: offline messages and the search index
@@ -975,6 +979,26 @@ final class NewSim
      *
      * @param ?array{dbHost:string,dbName:string,dbUser:string,dbPass:string} $defaults
      */
+    /**
+     * The database account another simulator of the grid uses (host, user, password), when it has any.
+     *
+     * @return array{dbHost?:string,dbUser?:string,dbPass?:string}
+     */
+    private function siblingAccount(GridInfo $grid, string $slug): array
+    {
+        foreach (glob("{$grid->dir}/sims/*.ini") ?: [] as $ini) {
+            if (basename($ini, '.ini') === $slug) {
+                continue;
+            }
+            $found = GridInfo::parse($ini);
+            if (($found['dbUser'] ?? '') !== '' && ($found['dbPass'] ?? '') !== '') {
+                return array_intersect_key($found, array_flip(['dbHost', 'dbUser', 'dbPass']));
+            }
+        }
+
+        return [];
+    }
+
     private function askDatabase(SimPlan $plan, GridInfo $grid, ?array $defaults = null): void
     {
         $required = static fn(string $v): ?string => trim($v) === '' ? 'This field is required.' : null;

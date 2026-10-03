@@ -85,12 +85,12 @@ it('asks every question, with the answers of the table as the ones proposed, to 
 });
 
 it('asks the settings of the database when a failure is tried again', function () {
-    $inner = askingUi([true, 'other']);
-    $ui = new PresetUi($inner, [], ['Try again']);
+    $inner = askingUi(['other']);
+    $ui = new PresetUi($inner, []);
 
-    expect($ui->text('Database user', 'opensim'))->toBe('opensim')->and($inner->asked)->toBe([])
-        ->and($ui->confirm('Try again (the database settings can be changed)?'))->toBeTrue()
-        ->and($ui->text('Database user', 'opensim'))->toBe('other');
+    expect($ui->text('Database user', 'opensim'))->toBe('opensim')->and($inner->asked)->toBe([]);
+    $ui->error('Access denied');
+    expect($ui->text('Database user', 'opensim'))->toBe('other');
 });
 
 it('reads a login URI as host:port, with or without the scheme', function () {

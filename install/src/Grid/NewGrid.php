@@ -82,19 +82,21 @@ final class NewGrid
     public function complete(GridPlan $plan, array $profile, bool $accepted): ?string
     {
         // Nothing is written before the database is known to work. A problem of
-        // access leaves the error on screen with one line to try again (the
-        // settings can be changed); a creation that failed ends the setup.
+        // access leaves the error on screen and asks the settings again; a creation
+        // that failed ends the setup.
         $database = new Database($this->ui);
+        $attempts = 0;
         while (($result = $database->ensure($plan)) !== Database::OK) {
             if ($result === Database::ABORT) {
                 $this->ui->error(_('Stopped, nothing was changed: OpenSim cannot run without its database.'));
 
                 throw new SetupFailed('database');
             }
-            if (!$this->ui->confirm(_('Try again (the database settings can be changed)?'), true)) {
-                $this->ui->note(_('Stopped, nothing was changed: OpenSim cannot run without its database.'));
+            // The error is on screen: the settings are asked again at once, they may be what is wrong
+            if (++$attempts > 10) {
+                $this->ui->error(_('Stopped, nothing was changed: OpenSim cannot run without its database.'));
 
-                return null;
+                throw new SetupFailed('database');
             }
             $this->askDatabase($plan, [
                 'dbHost' => $plan->dbHost,

@@ -36,7 +36,7 @@ final class PresetUi implements InstallerUi
         private bool $prefill = false,
     ) {}
 
-    /** Set when a failure of the database is tried again: its settings are asked, not answered */
+    /** Set when something failed (the database): its settings are asked again, not answered from the table */
     private bool $retrying = false;
 
     public function intro(string $title): void
@@ -61,6 +61,7 @@ final class PresetUi implements InstallerUi
 
     public function error(string $message): void
     {
+        $this->retrying = true;
         $this->inner->error($message);
     }
 
@@ -107,6 +108,13 @@ final class PresetUi implements InstallerUi
 
     public function text(string $label, string $default = '', ?\Closure $validate = null, ?string $hint = null): string
     {
+        if ($this->retrying && str_starts_with($label, 'Database ')) {
+            $answer = $this->inner->text($label, $default, $validate, $hint);
+            // The last field of the credentials: the settings are the new ones
+            $this->retrying = $label !== 'Database password';
+
+            return $answer;
+        }
         $preset = $this->preset($label);
         if ($preset !== null && !is_array($preset)) {
             $value = (string) (is_bool($preset) ? ($preset ? 'true' : 'false') : $preset);
@@ -154,11 +162,7 @@ final class PresetUi implements InstallerUi
         }
 
         if ($this->asked($label) || $this->prefill) {
-            $answer = $this->inner->confirm($label, $default);
-            // The database did not work and the user tries again: its settings are asked
-            $this->retrying = $this->retrying || ($answer && str_contains($label, 'Try again'));
-
-            return $answer;
+            return $this->inner->confirm($label, $default);
         }
 
         return $default;

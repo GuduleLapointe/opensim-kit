@@ -116,11 +116,11 @@ as_root() { # grid, password
     (cd /var/lib/opensim && TEST_GRID=$1 TEST_DB_PASSWORD=$2 TEST_NO_ENABLE=1 TEST_DB_USER=${TEST_DB_USER:-} php /test/newgrid.php 2>&1)
 }
 wizard Badgrid wrong >/tmp/badgrid.out
-check "no administrator access, wrong password: can be tried again, nothing written" "grep -q 'Try again' /tmp/badgrid.out &&
+check "no administrator access, wrong password: nothing written" "
     grep -q 'cannot run without its database' /tmp/badgrid.out && [ ! -e /etc/opensim/grids/badgrid ]"
 wizard Missinggrid testpass >/tmp/missing.out
 check "no administrator access, missing database: says so, gives the commands" "grep -q 'no access to database missinggrid_robust' /tmp/missing.out &&
-    grep -q 'CREATE DATABASE' /tmp/missing.out && grep -q 'Try again' /tmp/missing.out && [ ! -e /etc/opensim/grids/missinggrid ]"
+    grep -q 'CREATE DATABASE' /tmp/missing.out && [ ! -e /etc/opensim/grids/missinggrid ]"
 
 # The password of an account, generated once, is proposed again in the same session
 TEST_REPEAT=2 wizard Repeatgrid "" >/tmp/repeat.out
@@ -139,7 +139,7 @@ pass=$(grep -a 'Database password ->' /tmp/grid2.out | head -1 | sed 's/.*-> //'
 check "missing account and database: both created, the account logs in" "MYSQL_PWD='$pass' mysql -u grid2user -e 'SELECT 1' grid2_robust >/dev/null 2>&1"
 as_root Rootgrid wrong >/tmp/rootwrong.out
 check "existing account, wrong password: not recreated, can be tried again" "grep -q 'password is rejected' /tmp/rootwrong.out &&
-    ! grep -qi 'create user' /tmp/rootwrong.out && grep -q 'Try again' /tmp/rootwrong.out"
+    ! grep -qi 'create user' /tmp/rootwrong.out"
 # An account of the caller's own that can read the server's accounts but not
 # create them: the administrator access is found, the creation fails
 useradd -m -s /bin/bash dbhelper
