@@ -2,12 +2,14 @@
 
 ## Fixes
 
+- [ ] Changelog is not a user guide, keep it as a SHORT list of changes, no explanations!
+- [ ] Architectural misconception: opensim-engine include codes referencing the class `OpenSim_Kit`, which is a nonsense: Engine is the a standalone library, the Kit consumes it, not the other way around
+- [ ] check `opensim stop` on a simulator with an NPC in it: the real users are counted from `show users`, the NPCs (`NPC Root`) are skipped, but only the format was checked on a real core, not an NPC -> does not seem to properly skip the NPCs
 - [ ] confirm on ubuntu 24.04 (ursull), with the next package and an outdated bash-tools left in composer global, that `opensim setup` no longer ends with `debug: command not found` (the scripts now load the bash-tools of the kit before the one of the `PATH`, see `libexec/load-helpers`)
 - [ ] dependencies packages must be added to the release assets in their own repositories
 - [x] opensim status "down" count should not be displayed when none of the instances are down
 - [x] a new region is named after itself without a restart of the simulator (the object of `share/ossl-scripts`, loaded through the console)
 - [ ] try to open ports if firewall is active (`opensim ports --ufw` only tells the rules)
-- [ ] check `opensim stop` on a simulator with an NPC in it: the real users are counted from `show users`, the NPCs (`NPC Root`) are skipped, but only the format was checked on a real core, not an NPC
 - [x] the simulators of a grid with helpers know where `offline.php` (`[Messaging]`) and `register.php` (`DATA_SRV_MISearch` of `[DataSnapshot]`) are
 - [x] the message of the day: `[LoginService] MessageUrl` is a URL whose text is shown at login (read by Robust when it starts, `WelcomeMessage` when it cannot be), found in the code of the core (`LLLoginService`); `motd.php` of opensim-helpers serves the `motd` of `helpers.ini`
 - [x] the destination guide is `guide.php` of the helpers, `DestinationGuide` of the Robust config points to it
@@ -41,10 +43,10 @@
 - [ ] add default Inventory package
 - [ ] add nat/port forwarding instructions or presets (with standard tools or third-party provides like ngrok, cloudflare...)
 - [ ] make most opensim-tools features installation-agnostic (support both opensim-kit and custom/standard opensim installations): `/etc/opensim/opensim.conf` becomes only a reference pointing to the user's actual core installation and configuration files location (e.g. `/opt/osgrid`, `~/diva`, `~/opensim/opensim-0.9.3.0/bin`...)
-  - [x] `opensim profile list|add|default|remove` registers an install made by hand (core, config and data directories)
-  - [ ] a grid follows the profile of its own install, the default profile is only the default of the new grids
-  - [ ] the system user to run the instances as is per profile, not only `SystemUser` of `[Defaults]`
-  - [ ] the setup offers to register an install (the core menu), and no script assumes `/etc/opensim`, `/var/lib/opensim` or `/usr/share/opensim` (review, one fix per file, with a test)
+    - [x] `opensim profile list|add|default|remove` registers an install made by hand (core, config and data directories)
+    - [ ] a grid follows the profile of its own install, the default profile is only the default of the new grids
+    - [ ] the system user to run the instances as is per profile, not only `SystemUser` of `[Defaults]`
+    - [ ] the setup offers to register an install (the core menu), and no script assumes `/etc/opensim`, `/var/lib/opensim` or `/usr/share/opensim` (review, one fix per file, with a test)
 - [ ] test the OpenSimSearch module from end to end with a parcel shown in search: the chain works up to the snapshot (the sim registers on `register.php`, `parser.php` fetches it, `query.php` answers); a new region has no searchable parcel, the flag is `ShowDirectory` = 4096 in `Flags` of the `land` table of the simulator, to set in the test then check that `query.php` finds the parcel
 - [ ] add to the README of opensim-helpers (and of the engine) a short section on how to use them with the OpenSim kit
 - [ ] install instructions in the README of `lsl-ossl-zed` (rust, clone, `zed: install dev extension`, the prebuilt LSP binaries only cover Linux x86_64 and macOS)

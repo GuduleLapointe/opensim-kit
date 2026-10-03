@@ -22,9 +22,9 @@
         "ext-json": "*",
         "ext-mbstring": "*",
         "laravel/prompts": "^0.3.18",
-        "magicoli/opensim-helpers": "dev-opensim-kit",
-        "nubs/random-name-generator": "^2.2",
         "magicoli/bash-tools": "^1.0.4",
+        "magicoli/opensim-helpers": "^3.0",
+        "nubs/random-name-generator": "^2.2",
         "symfony/yaml": "^7.4"
     },
     "require-dev": {

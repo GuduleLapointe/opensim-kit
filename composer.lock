@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "30ef0e9e3123e257647f9b2095c34182",
+    "content-hash": "cf9f29e63619e93759566270a409a5b0",
     "packages": [
         {
             "name": "laminas/laminas-escaper",
@@ -179,16 +179,16 @@
         },
         {
             "name": "magicoli/opensim-engine",
-            "version": "dev-opensim-kit",
+            "version": "3.0.0-beta.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GuduleLapointe/opensim-engine.git",
-                "reference": "e558fe40eff79d265eccbf54d9cf29c47d9bc2c1"
+                "reference": "3052f665355d69c6ff67e0d7791b8086d0c9c2fc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GuduleLapointe/opensim-engine/zipball/e558fe40eff79d265eccbf54d9cf29c47d9bc2c1",
-                "reference": "e558fe40eff79d265eccbf54d9cf29c47d9bc2c1",
+                "url": "https://api.github.com/repos/GuduleLapointe/opensim-engine/zipball/3052f665355d69c6ff67e0d7791b8086d0c9c2fc",
+                "reference": "3052f665355d69c6ff67e0d7791b8086d0c9c2fc",
                 "shasum": ""
             },
             "require": {
@@ -203,7 +203,7 @@
                 "ext-session": "*",
                 "ext-simplexml": "*",
                 "laminas/laminas-escaper": "^2.12@stable",
-                "magicoli/opensim-rest-php": "dev-opensim-kit",
+                "magicoli/opensim-rest-php": "^1.1.1",
                 "php": ">=8.2",
                 "phpxmlrpc/phpxmlrpc": "^4.11"
             },
@@ -243,22 +243,22 @@
             "description": "OpenSimulator Engine - Framework-agnostic core functionality for OpenSim grids",
             "support": {
                 "issues": "https://github.com/GuduleLapointe/opensim-engine/issues",
-                "source": "https://github.com/GuduleLapointe/opensim-engine/tree/opensim-kit"
+                "source": "https://github.com/GuduleLapointe/opensim-engine/tree/3.0.0-beta.2"
             },
-            "time": "2026-10-03T09:59:20+00:00"
+            "time": "2026-10-03T22:21:09+00:00"
         },
         {
             "name": "magicoli/opensim-helpers",
-            "version": "dev-opensim-kit",
+            "version": "3.0.0-beta.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GuduleLapointe/opensim-helpers.git",
-                "reference": "dec4048f09d2e6757134d3797eee4b5cdf1936a5"
+                "reference": "5db37d4cb91a470ceb95de9d568059e9ccc402c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GuduleLapointe/opensim-helpers/zipball/dec4048f09d2e6757134d3797eee4b5cdf1936a5",
-                "reference": "dec4048f09d2e6757134d3797eee4b5cdf1936a5",
+                "url": "https://api.github.com/repos/GuduleLapointe/opensim-helpers/zipball/5db37d4cb91a470ceb95de9d568059e9ccc402c1",
+                "reference": "5db37d4cb91a470ceb95de9d568059e9ccc402c1",
                 "shasum": ""
             },
             "require": {
@@ -272,8 +272,8 @@
                 "ext-pdo": "*",
                 "ext-session": "*",
                 "ext-simplexml": "*",
-                "magicoli/opensim-engine": "dev-opensim-kit",
-                "magicoli/opensim-rest-php": "dev-opensim-kit",
+                "magicoli/opensim-engine": "^3.0@beta",
+                "magicoli/opensim-rest-php": "^1.1",
                 "php": ">=8.2",
                 "phpxmlrpc/phpxmlrpc": "^4.11"
             },
@@ -301,7 +301,7 @@
             "description": "Helpers needed to enable common functionalties like search, currency, events in OpenSimulator grids.",
             "support": {
                 "issues": "https://github.com/GuduleLapointe/opensim-helpers/issues",
-                "source": "https://github.com/GuduleLapointe/opensim-helpers/tree/opensim-kit"
+                "source": "https://github.com/GuduleLapointe/opensim-helpers/tree/3.0.0-beta.3"
             },
             "funding": [
                 {
@@ -321,20 +321,20 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2026-10-03T09:59:22+00:00"
+            "time": "2026-10-03T22:46:47+00:00"
         },
         {
             "name": "magicoli/opensim-rest-php",
-            "version": "dev-opensim-kit",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GuduleLapointe/opensim-rest-php.git",
-                "reference": "579d249b2a556e2dd83c686c9fd3c0d0e071ff9f"
+                "reference": "8b364e03d731ca5f7bbbb46a4f00054043706759"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GuduleLapointe/opensim-rest-php/zipball/579d249b2a556e2dd83c686c9fd3c0d0e071ff9f",
-                "reference": "579d249b2a556e2dd83c686c9fd3c0d0e071ff9f",
+                "url": "https://api.github.com/repos/GuduleLapointe/opensim-rest-php/zipball/8b364e03d731ca5f7bbbb46a4f00054043706759",
+                "reference": "8b364e03d731ca5f7bbbb46a4f00054043706759",
                 "shasum": ""
             },
             "require": {
@@ -362,16 +362,16 @@
             ],
             "authors": [
                 {
-                    "name": "Olivier van Helden",
-                    "email": "olivier@van-helden.net"
+                    "name": "Gudule Lapointe",
+                    "email": "gudule@speculoos.world"
                 }
             ],
             "description": "OpenSimulator REST PHP library and command-line client",
             "support": {
                 "issues": "https://github.com/GuduleLapointe/opensim-rest-php/issues",
-                "source": "https://github.com/GuduleLapointe/opensim-rest-php/tree/opensim-kit"
+                "source": "https://github.com/GuduleLapointe/opensim-rest-php/tree/1.1.1"
             },
-            "time": "2026-10-02T18:18:14+00:00"
+            "time": "2026-10-03T21:54:32+00:00"
         },
         {
             "name": "nubs/random-name-generator",
@@ -1655,16 +1655,16 @@
         },
         {
             "name": "filp/whoops",
-            "version": "2.18.5",
+            "version": "2.18.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filp/whoops.git",
-                "reference": "baec851ad6ae00db8bd0fdd30d208afc1b71c56e"
+                "reference": "7d0a2cde892089bb09372f4366e9b960eb3001a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/baec851ad6ae00db8bd0fdd30d208afc1b71c56e",
-                "reference": "baec851ad6ae00db8bd0fdd30d208afc1b71c56e",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/7d0a2cde892089bb09372f4366e9b960eb3001a9",
+                "reference": "7d0a2cde892089bb09372f4366e9b960eb3001a9",
                 "shasum": ""
             },
             "require": {
@@ -1714,7 +1714,7 @@
             ],
             "support": {
                 "issues": "https://github.com/filp/whoops/issues",
-                "source": "https://github.com/filp/whoops/tree/2.18.5"
+                "source": "https://github.com/filp/whoops/tree/2.18.6"
             },
             "funding": [
                 {
@@ -1722,7 +1722,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-18T12:00:00+00:00"
+            "time": "2026-10-03T17:03:57+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
@@ -4968,7 +4968,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "magicoli/opensim-helpers": 20,
         "phpcompatibility/php-compatibility": 20
     },
     "prefer-stable": true,
@@ -4985,5 +4984,5 @@
     "platform-overrides": {
         "php": "8.2.0"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

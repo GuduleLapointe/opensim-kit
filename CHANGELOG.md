@@ -1,46 +1,46 @@
 ## Changelog
 
-### Unreleased
+### 3.0.0-beta.3
 
-- new `opensim save|load iar|oar` saves and loads the inventory of an account or a region through the console of a running simulator, in `<data of the grid>/backups/iar` and `oar` (the default of the core is its own `bin` folder, which nobody can write): the files are named after what they hold, `gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar` and `gridnick-sim[-region][-noassets][-perm<P>][-publish]-stamp.oar`, the newest one is loaded when no file is given, and the end of the command is read from the log of the simulator
-- new `opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]` makes what it takes to install a grid again as it is: configuration, persistent data and a dump of each database, one archive per grid or for one simulator
-- update the advanced setup has one screen per subject, whatever its fields (text, choice, yes/no, checklist, some shown only when they apply): the grid, its network and web side, its database, the simulator, the estate and its owner, the region, and what to do once it is written (apply, enable, start)
-- fix the database account of a second simulator is the one of the first (host, user and password), the password is no longer made up again
-- update a database that does not work shows the error and asks its settings again at once, without a question before
-- update the first region of a grid goes to its public port on both axes (8002 gives 8002,8002) instead of 1000,1000: two grids of a machine no longer start at the same place, which a teleport between them refuses
-- update the advanced setup groups the related questions on one screen like the quick one: the grid and its nick, the network (host, ports, web URL), the database, the HTTP port and public address of a simulator
-- fix the search index of a simulator carries the name of its grid (`gridname` of `[DataSnapshot]`), not OSGrid
-- update `opensim import [grid] FILE [--grid] [--simulator] [--users]` is the one command that brings a file into the install, and tells what the file is: the config of a grid (a Robust ini) or of a simulator (an OpenSim ini) that was not made by the kit, a setup file (JSON or YAML: the grid, its simulators and regions, its accounts), or a list of accounts (CSV, JSON or YAML); everything the file holds, or only what `--grid`, `--simulator` or `--users` ask for; nothing is made without `--apply`; it replaces `opensim import robust|sim`, `opensim users import` and `opensim setup --file`
-- update the quick setup shows one plan for the grid and its first simulator, and makes nothing until it is accepted (Continue), or edited (Edit config)
-- update the commands have one structure: `opensim <command> <instance> [action] [options]`, the instance (a grid or a simulator) right after the command: `opensim web <grid> [show|check|snippet <server>]`, `opensim next <grid> location [X,Y]`, as `start`, `console`, `command` and `enable` already are; the old order of those still works, the help and the completion show the new one, and the help groups the commands (instances, grids, this machine)
-- update the quick setup is a single screen with the name of the grid, its login URI (host:port), the owner, the password and the optional email, to go through with Tab or Enter; the plan with every setting the setup chose is shown to continue or edit the config (every question again, with the settings as the answers proposed); the database user and password are the defaults, and asked only when the database cannot be made by the setup; the options are short (Quick setup, Advanced setup, Finish setup, Continue setup)
-- new the setup writes the configuration of the web server for the grid, `<grid>.caddyfile`, `<grid>-nginx.conf` and `<grid>-apache.conf`, in its folder (`/etc/opensim/grids/<grid>/web/`), and says where they are
-- new accounts can be given with their password hashed, as Robust keeps it (`password_hash` and `password_salt`, in a list for `opensim users import` or in a setup file), and are written as they are; the setup file the setup keeps for a grid has the password of the owner hashed, not in clear (the password of the database has to stay in clear)
-- new quick setup: `Add grid` proposes it first, one form (name of the grid, owner with password and optional email, database user and password) instead of a screen for each, then the plan with the default settings to accept (the advanced setup, with every question, is one answer away); once the grid and its first region are made, the setup says so, with the login URI, and proposes to finish
-- new `opensim setup --file FILE` makes a setup described in a JSON or YAML file (grid, owner, simulators and regions, accounts in the format of the bulk import), `--check` only reads it, and `opensim users import` takes the accounts of the same file; the setup of a grid is kept in `setup.json` in its folder, to make it again (example: `share/examples/setup.yaml`)
+- new: `opensim save|load iar|oar`
+- new: `opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]`
+- new: quick setup - a single screen with the name of the grid, its login URI (host:port), the owner, the password and the optional email, other settings set by default, with a choice to accept or edit the config
+- new: `opensim setup --file FILE`, taking full config from a JSON or YAML file
+- new: pre-configuration for web server, `<grid>.caddyfile`, `<grid>-nginx.conf` and `<grid>-apache.conf`, in `/etc/opensim/grids/<grid>/web/`
+- new `opensim oar pack|info|check|unpack` from sources in `share/ossl-scripts/fix-parcel-name-src`
+
+- update: `opensim import [grid] FILE [--grid] [--simulator] [--users]` single command for both quick setup, full install and bulk import
+- refactor: shared structure between commands have: `opensim <command> <instance> [action] [options]`
+- feat: add most common terminal shortcuts in setup, Escape, Ctrl-Q, Ctrl-U, Ctrl-K, Ctrl-W, Alt-D, Ctrl-Y, Ctrl-A, Ctrl-E, Ctrl-B, Ctrl-F, Alt-B, Alt-F, Ctrl-Left, Ctrl-Right, Ctrl-D, Ctrl-T
+- feat: import accounts can be given with their password hash and salt
+- update(setup): password read from config if db user matches one already known
+- update(setup): advanced setup groups related questions
+- fix: name slugs as snake_case do avoid possible conflicts
+- fix: hypergrid teleport conflicts when hosting two grids or more, default location set to public port on both axes (8002 gives 8002,8002) to avoid same map positions
+- fix: the database account of a second simulator: use same password if same db user already if config
+- fix: the search index of a simulator carries the name of its grid (`gridname` of `[DataSnapshot]`), not OSGrid
 - fix the account of the owner is made when it has no email: the console asks for the email, which the setup did not answer
-- update the economy told to the viewers is the path of the helpers (they add `currency.php`), the search is the `SearchURL` of the login service (`query.php`), the setup shows the URL of the web site before the path of the helpers, which stays the operator's choice, and no `message` URL is written: `offline.php` is not the message of the day
-- new the shortcuts of a terminal in the setup: Escape gives up the screen and goes back to the menu it came from, Ctrl-Q leaves the setup from anywhere, the editing keys of readline work in the texts and passwords (Ctrl-U, Ctrl-K, Ctrl-W, Alt-D cut and Ctrl-Y pastes, Ctrl-A, Ctrl-E, Ctrl-B, Ctrl-F, Alt-B, Alt-F, Ctrl-Left, Ctrl-Right, Ctrl-D, Ctrl-T)
-- update the email of the first account is optional (OpenSimulator does not need one), the setup shows the URL of the helpers instead of asking for their path, and says where the configuration for the web server is when the grid is made
-- update the nick of a grid and the names of the instances are snake_case, the words kept apart (`the_rapist`, not `therapist`): names that only differ by their spaces no longer give the same instance
-- new `opensim oar pack|info|check|unpack` works with OpenSimulator archives, with the `OpenSim_Oar` class of the engine; the archive of the naming object is made from its sources (`share/ossl-scripts/fix-parcel-name-src`) when the package is built, or by the setup when it runs from a checkout, so it is no longer kept in the repository (the package has the archive and its sources, to change the script and pack it again) (and no longer depends on the tar of the machine: the one of macOS makes archives OpenSimulator does not read)
+- fix: economy url passed to the viewer (pass base path, not currency.php)
+- fix: disable query.php API endpoint was passed for search URL instead of proper search url
+- fix: disable offline.php was passed as message of the day url
+- fix: first account is optional (OpenSimulator does not require one)
 - fix a region added to a simulator no longer asks for its restart: the console takes it, and the parcel is no longer renamed by a restart (the object of `share/ossl-scripts` does it)
 - fix `opensim stop` counts down to the shutdown (`Stopping sim in 120s`), not to the next warning to the users
-- update `opensim stop` does not wait when no real user is in the regions of the simulator (NPCs and child agents are not counted), and says so; with a remote console it counts the real users, with a screen console it tells when no region has anyone (the NPCs are not told apart there), else it waits as before
-- new OSSL is in the standard config: each grid has its own `osslDefaultEnable.ini` and `osslEnable.ini` (the defaults of the core, functions on, the permissions of the defaults, which let the owner and the managers of the estate use `osSetParcelDetails`), included by its simulators; the script of the object (`share/ossl-scripts/fix-parcel-name-src/assets/…_script.lsl`, the one in the archive) is a region initialization script to customize, which names the parcel after the region by itself; its object (`fix-parcel-name.oar`) is loaded in each new region by the setup, through the console of the simulator
-- new `opensim profile list|add|default|remove`: registers an install made by hand (`add NAME --core DIR [--etc DIR] [--data DIR]`, the config and data directories being the core one in an install by the book) so the tools follow its own directories; the default profile is only the default of new grids
-- new the setup is translatable: its messages are in English and go through gettext (domain `opensim-kit`), the language is the one of the environment (`LC_ALL`, `LANGUAGE`); the catalogue is `locales/opensim-kit.pot`, `locales/update-pot` refreshes it and the `.po` files, `packaging/build` compiles them; the bash scripts are not translated yet
-- new `opensim import robust FILE` and `opensim import sim FILE --grid NICK` port the configuration of a grid or a simulator that was not made by the kit, without changing its files: what the setup asks is detected (name, ports, database, console, estate...) and goes through the generators of the kit, a standard config valid for the core chosen, then the other settings of the original that differ from the defaults of the core are injected into it (those the core does not know are flagged), the places of the data stay where they are, the regions of a simulator are copied with their UUID; a report is written beside the config; without `--apply` it only tells, and nothing is enabled or started
-- new `opensim users import FILE [--grid NICK] [--apply]` makes the accounts of a list (CSV, with or without a header line, or JSON) directly in the database of a grid, as Robust does for `create user` (the account, its password, its home, its inventory and default outfit), in one transaction per account and without the console; without `--apply` it checks the list and tells what would be made, a name that exists is skipped, an account without a password gets one, in a result file (mode 600) and never on the screen
-- new packages `opensim-helpers` (the helpers of a grid, a webroot whose settings are read from the kit) and `opensim-web` (a placeholder site: the name of the grid, how to connect, where its services are); `opensim-kit` recommends `opensim-web`
-- new the web side of a grid: the setup asks whether its economy, search and offline messages are served by opensim-helpers, and where (`/helpers` by default, the operator's choice), writes the `helpers.ini` of the grid (what the helpers need, so the web server does not read the Robust config; the path, the paths of each service such as `/search` or `/guide`, other databases are the operator's and kept) and tells the viewers in the grid info; `opensim web` shows where the services are, `opensim web check` asks them, `opensim web snippet caddy|nginx|apache` writes what the web server needs, aliases of the custom paths included
-- fix the owner of the first estate gets the default region as home: Robust sets the home of an account from its default region when it makes it, and that region did not exist yet for the account made by the setup, so its first login ended with an error until it set its home from the viewer
-- update the package `opensim-manfredaabye-helpers` is gone: the web helpers are the operator's choice, `opensim-helpers` (the library of this project, made for the kit) or the solution of another project (w4os, the fork of Kevin Cozens, wiredux), which all follow the protocols of OpenSimulator and its viewers
-- update the detailed installation (packages, git) is in `INSTALLATION.md`, the README keeps the short version; the wizard screens, the first simulator and its default region, the restarts offered when quitting are described
-- update the bash completion of `opensim` knows every command (`setup`, `enable`, `disable`, `console`, `command`, `ports`, `next`, `stop now`...) and proposes the instances: the enabled ones, or every grid and simulator for `enable` and `disable`
-- new `opensim enable <instance>` and `opensim disable <instance>` enable or disable a grid or a simulator from the command line, as the menus of the setup do
-- fix `opensim status` counts the instances down only when there are some
-- fix the scripts use the bash-tools the kit has (its own copy, then the package, the `PATH` last): an older copy found first in the `PATH` (composer global) stopped them with `debug: command not found`; a copy that is too old is refused with a message
+- update `opensim stop` does not wait when no real user is in the regions
+- add OSSL is in the standard config
+- new `opensim profile list|add|default|remove`
+- new setup supports gettext localization, domain `opensim-kit`, language from environment (`LC_ALL`, `LANGUAGE`); catalogue in `locales/opensim-kit.pot`
+- new `locales/update-pot` script to refresh translations from `.po` files
+- new `opensim import robust FILE` and `opensim import sim FILE --grid NICK` port the configuration of an existing setup
+- new `opensim users import FILE [--grid NICK] [--apply]`
+- new(build): package `opensim-helpers`
+- new(build): package `opensim-web` (minimalistic setup for helpers)
+- new `INSTALLATION.md` with detailed instructions (packages, git)
+- new `opensim enable <instance>` and `opensim disable <instance>`
+- fix: make sure the scripts use the bash-tools provided by the kit, avoid conflict with other versions that might be in the `PATH`
+- fix the owner of the first estate gets the default region as home
+- remove package `opensim-manfredaabye-helpers`
+- update `opensim` bash completion
 
 ### 3.0.0-beta.2
 
