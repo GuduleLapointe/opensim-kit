@@ -144,6 +144,17 @@ if [ -n "$SystemUser" ] && [ "$(id -un)" != "$SystemUser" ] && [ "${1:-}" != "se
 	exec sudo -H -u "$SystemUser" "$0" "${ARGV_GIVEN[@]}"
 fi
 
+# The archives of the inventories and of the regions, through the console of a simulator: as the system user
+if [ "${1:-}" = "save" ] || [ "${1:-}" = "load" ]; then
+	exec php "$BASEDIR/libexec/archive.php" "$@"
+fi
+
+# The backup of the install (configuration, databases, data), as the system user
+if [ "${1:-}" = "backup" ]; then
+	shift
+	exec php "$BASEDIR/libexec/backup.php" "$@"
+fi
+
 # Enable or disable a grid or a simulator, as the system user
 if [ "${1:-}" = "enable" ] || [ "${1:-}" = "disable" ]; then
 	exec php "$BASEDIR/libexec/toggle.php" "$@"
