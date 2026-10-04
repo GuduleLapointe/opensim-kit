@@ -2,7 +2,14 @@
 
 ## Fixes
 
+- [ ] Wrong syntax for `opensim load iar|oar` and `opensim save iar|oar`: action and save must stay together, `opensim save iar [instance]`, not `opensim save [instance] iar`
 - [ ] Changelog is not a user guide, keep it as a SHORT list of changes, no explanations!
+- [ ] Tests output is truncated, KEEP descriptions and notifications SHORT
+- [ ] (Test fail) opensim save and load → refuse a file that exists a simulator that does not run a missing password
+- [ ] (Test fail) opensim backup → holds the configuration the data and a dump of each database of a grid and nothing the users backed up
+- [ ] (Test fail) opensim backup → takes the archives of the users and the logs when asked
+- [ ] (Test fail) opensim backup → is the one of a simulator without the other ones
+- [ ] (Test fail) opensim import the config of a grid → tells the plan and the settings it keeps and writes nothing without apply
 - [ ] Architectural misconception: opensim-engine include codes referencing the class `OpenSim_Kit`, which is a nonsense: Engine is the a standalone library, the Kit consumes it, not the other way around
 - [ ] check `opensim stop` on a simulator with an NPC in it: the real users are counted from `show users`, the NPCs (`NPC Root`) are skipped, but only the format was checked on a real core, not an NPC -> does not seem to properly skip the NPCs
 - [ ] confirm on ubuntu 24.04 (ursull), with the next package and an outdated bash-tools left in composer global, that `opensim setup` no longer ends with `debug: command not found` (the scripts now load the bash-tools of the kit before the one of the `PATH`, see `libexec/load-helpers`)
