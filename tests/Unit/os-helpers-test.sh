@@ -74,6 +74,7 @@ function test_oscountrealusers_ignores_npcs_and_children() {
 	OSIM_REST_INI=x
 	osRest() {
 		cat <<'OUT'
+2026-10-03 10:00:00,000 INFO  [SCENE]: Removing root agent 11111111-2222-3333-4444-555555555999 from Sim1
 
 Root agents in region Sim1: 3 (root 3, child 1)
 Firstname        Lastname         Agent ID                              Type        Position
@@ -122,7 +123,7 @@ function test_oscountrealusers_from_a_screen_reads_the_rows_cut_at_80_columns() 
 
 	# A real user whose type was cut off counts
 	osScreenOutput() {
-		printf '\nRoot agents in region Sim1: 2 (root 2, child 0)\nAnn Averylongfirstname-and-more Lee 11111111-2222-3333-4444-555555555555\nBob              NPC              11111111-2222-3333-4444-555555555556  NPC Roo\n'
+		printf '\nRoot agents in region Sim1: 2 (root 2, child 0)\nAnn              Lee              11111111-2222-3333-4444-555555555555\nBob              NPC              11111111-2222-3333-4444-555555555556  NPC Roo\n'
 	}
 	assert_equals '1' "$(osCountRealUsers)"
 

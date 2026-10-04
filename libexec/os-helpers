@@ -297,7 +297,10 @@ osCountRealUsers() {
 	fi
 	# Each region says how many agents it has, even none: no such line, no answer
 	printf '%s\n' "$out" | grep -q '^Root agents in region ' || return 1
-	local uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' roots rows
+	# A row: two names, then the id (the log lines the console shows between them are not rows)
+	local id='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' roots rows uuid
+	uuid="^[^[:space:]\[]+[[:space:]]+[^[:space:]]+[[:space:]]+$id"
+
 	roots=$(printf '%s\n' "$out" | sed -n 's/^Root agents in region .*(root \([0-9]*\),.*/\1/p' | awk '{ n += $1 } END { print n + 0 }')
 	if [ "$roots" -eq 0 ]; then
 		echo 0

@@ -201,7 +201,7 @@ function import_run(array $arguments, string $original): array
     return [proc_close($process), $output, $errors, $root];
 }
 
-describe('opensim import, the config of a grid', function () {
+describe('import grid config', function () {
     $original = "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n[GridService]\n MaxRegionSize = 1024\n[AssetService]\n BaseDirectory = \"./fsassets/data\"\n SpoolDirectory = \"./tmp\"\n";
 
     test('tells the plan, writes nothing', function () use ($original) {
@@ -302,7 +302,7 @@ describe('The plan of an imported simulator', function () {
     });
 });
 
-describe('opensim import, the config of a simulator', function () {
+describe('import sim config', function () {
     test('writes the sim and its regions', function () {
         $robust = "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n";
         [$status, , $errors, $root] = import_run(['@OLD@/Robust.HG.ini', '--apply'], $robust);
@@ -353,7 +353,7 @@ function import_file(string $name, string $content, array $arguments = []): arra
     return [proc_close($process), $output, $errors];
 }
 
-describe('opensim import, a setup file', function () {
+describe('import setup file', function () {
     $setup = "grid: { name: My Grid, database: { user: a, password: b } }\nowner: { name: Jane Doe, password: hunter22 }\nsimulators:\n  - regions: [ { name: One }, { name: Two } ]\nusers:\n  - { first: Bob, last: Roe, password: pw123456 }\n";
 
     test('tells what it holds, makes nothing', function () use ($setup) {
