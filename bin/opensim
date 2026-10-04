@@ -87,11 +87,11 @@ Grids
     next <grid> location [X,Y] [COUNT] [-e X,Y]
 
 Archives and backups
-    save iar [GRID [SIM]] [options] FIRST LAST PATH [PASSWORD] [FILE]
+    save iar [GRID [SIM]] [options] [--keep N] FIRST LAST PATH [PASSWORD] [FILE]
     load iar [GRID [SIM]] [-m|--merge] FIRST LAST PATH [PASSWORD] [FILE]
-    save oar [GRID [REGION|SIM]] [options] [FILE]
+    save oar [GRID [REGION|SIM]] [options] [--keep N] [FILE]
     load oar [GRID [REGION|SIM]] [--merge] [options] [FILE]
-    backup [GRID [SIM]] [--logs] [--archives] [--output DIR]
+    backup [GRID [SIM]] [--logs] [--archives] [--output DIR] [--keep N]
 
 This machine
     next port [-e PORT] [MIN] [COUNT]

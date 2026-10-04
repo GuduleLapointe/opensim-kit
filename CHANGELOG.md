@@ -2,7 +2,9 @@
 
 ### Unreleased
 
+- new: `--keep N` on `opensim backup` and `opensim save iar|oar` removes the older ones
 - fix: libraries don't know the kit, the helpers `config.php` defines their constants
+- fix: nginx example hands a script that is not a file to the router
 - fix: `opensim save|load iar|oar [instance]`, the instance is a grid, a simulator or a region
 - fix: the public port sets the first center of a grid only, its regions give it afterwards
 - fix: `opensim stop` skips the NPCs on a screen console

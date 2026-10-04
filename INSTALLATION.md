@@ -133,7 +133,7 @@ The `opensim` service starts the enabled instances at boot. Package upgrades nev
 
 ## Backups and archives
 
-`opensim backup [GRID [SIM|REGION]] [--logs] [--archives] [--output DIR]` saves what it takes to install a grid again: configuration, data, one dump per database. One archive per grid (or simulator) in `<data>/backups/admin`, readable by its owner only.
+`opensim backup [GRID [SIM|REGION]] [--logs] [--archives] [--output DIR] [--keep N]` saves what it takes to install a grid again: configuration, data, one dump per database. One archive per grid (or simulator) in `<data>/backups/admin`, readable by its owner only. `--keep N` keeps the N newest backups of the same grid and kind and removes the older ones; `opensim save iar|oar` takes it too.
 
 `opensim save|load iar|oar` go through the console of a running simulator, into `<data of the grid>/backups/iar` and `oar`:
 

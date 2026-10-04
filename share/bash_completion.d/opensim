@@ -87,21 +87,21 @@ _opensim()
           if [ "$COMP_CWORD" = 2 ]; then
             COMPREPLY=( $(compgen -W "iar oar" -- "$cur") )
           elif [ "${COMP_WORDS[2]}" = iar ] && [ "${COMP_WORDS[1]}" = save ]; then
-            COMPREPLY=( $(compgen -f -W "--home --verbose --noassets --perm= --skipbadassets --creators --exclude --excludefolder $([ "$COMP_CWORD" = 3 ] && _opensim_grids)" -- "$cur") )
+            COMPREPLY=( $(compgen -f -W "--home --verbose --noassets --perm= --skipbadassets --creators --exclude --excludefolder --keep $([ "$COMP_CWORD" = 3 ] && _opensim_grids)" -- "$cur") )
           elif [ "${COMP_WORDS[2]}" = iar ]; then
             COMPREPLY=( $(compgen -f -W "--merge $([ "$COMP_CWORD" = 3 ] && _opensim_grids)" -- "$cur") )
           elif [ "${COMP_WORDS[1]}" = save ]; then
-            COMPREPLY=( $(compgen -f -W "--region --all --noassets --home --publish --perm= $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
+            COMPREPLY=( $(compgen -f -W "--region --all --noassets --home --publish --perm= --keep $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
           else
             COMPREPLY=( $(compgen -f -W "--region --merge --skip-assets --force-terrain --force-parcels --no-objects --displacement --rotation --default-user $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
           fi
           ;;
         backup)
-          # opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]
+          # opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR] [--keep N]
           if [ "${COMP_WORDS[COMP_CWORD-1]}" = --output ]; then
             COMPREPLY=( $(compgen -d -- "$cur") )
           else
-            COMPREPLY=( $(compgen -W "--logs --archives --output $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
+            COMPREPLY=( $(compgen -W "--logs --archives --output --keep $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
           fi
           ;;
         web)

@@ -29,6 +29,7 @@ final class Archives
             'creators' => ['c', false],
             'exclude' => ['e', true],
             'excludefolder' => ['f', true],
+            'keep' => ['', true],
         ],
         'load iar' => [
             'merge' => ['m', false],
@@ -40,6 +41,7 @@ final class Archives
             'perm' => ['', true],
             'all' => ['', false],
             'region' => ['', true],
+            'keep' => ['', true],
         ],
         'load oar' => [
             'merge' => ['', false],
@@ -65,7 +67,7 @@ final class Archives
     ];
 
     /** What the setup asks of the person, not of the simulator */
-    private const OURS = ['region'];
+    private const OURS = ['region', 'keep'];
 
     /**
      * Read the arguments after the verb: the kind (iar or oar), the options, and the other words, which are the instance

@@ -11,14 +11,16 @@ declare(strict_types=1);
  *   --logs        the logs too
  *   --archives    the archives of the users (iar, oar) too, they are backups already
  *   --output DIR  where the files go (default: <data>/backups/admin)
+ *   --keep N      keep the N newest backups of the same kind, remove the older ones
  */
 
 require __DIR__ . '/../vendor/autoload.php';
 
 use OpenSim\Installer\Archive\Backup;
+use OpenSim\Installer\Archive\Rotation;
 use OpenSim\Installer\Config;
 
-$usage = "usage: opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]\n";
+$usage = "usage: opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR] [--keep N]\n";
 $refs = [];
 $options = [];
 $args = array_slice($argv, 1);
@@ -37,6 +39,13 @@ while ($args !== []) {
         }
         if (!str_starts_with($options['output'], '/')) {
             $options['output'] = getcwd() . '/' . $options['output'];
+        }
+    } elseif ($arg === '--keep' || str_starts_with($arg, '--keep=')) {
+        try {
+            $options['keep'] = Rotation::count(str_contains($arg, '=') ? substr($arg, 7) : array_shift($args) ?? '');
+        } catch (InvalidArgumentException $e) {
+            fwrite(STDERR, 'backup: ' . $e->getMessage() . "\n");
+            exit(2);
         }
     } elseif (str_starts_with($arg, '-') && $arg !== '_') {
         fwrite(STDERR, "backup: unknown option $arg\n$usage");

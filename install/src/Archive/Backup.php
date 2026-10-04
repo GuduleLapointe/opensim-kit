@@ -49,7 +49,7 @@ final class Backup
      * Back up what the words name: every grid of the install (none), a grid, or one simulator.
      *
      * @param list<string> $refs
-     * @param array{output?:string,logs?:bool,archives?:bool} $options
+     * @param array{output?:string,logs?:bool,archives?:bool,keep?:int} $options keep: how many backups of each series to keep
      * @return list<string> the files made
      * @throws \RuntimeException
      */
@@ -216,6 +216,9 @@ final class Backup
             $this->remove($stage);
         }
         ($this->say)("  $file");
+        if (isset($options['keep']) && ($removed = Rotation::keep($file, $options['keep'])) !== []) {
+            ($this->say)('  removed ' . count($removed) . ' older backup' . (count($removed) > 1 ? 's' : ''));
+        }
 
         return $file;
     }

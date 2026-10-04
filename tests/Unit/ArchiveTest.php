@@ -253,6 +253,48 @@ describe('opensim save and load', function () {
             ->toStartWith("change region South\nsave oar ");
     })->depends('saves a region with a telling name');
 
+    test('removes the older archives of the series with --keep, and does not send it', function () {
+        $profile = archive_install();
+        $directory = "{$profile['DataRoot']}/alpha/backups/oar";
+        foreach (['20200101-000000', '20200102-000000'] as $stamp) {
+            touch("$directory/alpha-sim2-South-$stamp.oar");
+        }
+        touch("$directory/alpha-sim2-South-noassets-20200101-000000.oar"); // another series
+        $sent = [];
+        [$code, $file] = archive_runner($profile, $sent, 'Finished writing out OAR')->run('save', [
+            'oar',
+            'alpha',
+            'South',
+            '--keep',
+            '2',
+        ]);
+
+        expect($code)->toBe(0);
+        expect(array_values(array_diff(scandir($directory), ['.', '..'])))->toBe([
+            'alpha-sim2-South-20200102-000000.oar',
+            basename((string) $file),
+            'alpha-sim2-South-noassets-20200101-000000.oar',
+            'old.oar', // there from the start, no stamp: not of a series
+        ]);
+        expect($sent[0][1])->not->toContain('keep');
+    })->depends('saves a region with a telling name');
+
+    test('refuses --keep without a number', function () {
+        $profile = archive_install();
+        $sent = [];
+
+        expect(
+            archive_runner($profile, $sent, 'Finished writing out OAR')->run('save', [
+                'oar',
+                'alpha',
+                'South',
+                '--keep',
+                'many',
+            ])[0],
+        )->toBe(2);
+        expect($sent)->toBe([]);
+    })->depends('saves a region with a telling name');
+
     test('asks which region, or takes all', function () {
         $profile = archive_install();
         $sent = [];
@@ -452,6 +494,29 @@ describe('opensim backup', function () {
             ->not->toContain('alpha_sim2')
             ->and($list)
             ->not->toContain('Robust.HG.ini.bak');
+    })->depends('holds config, data and databases');
+
+    test('removes the older ones with --keep, series by series', function () {
+        $profile = archive_install();
+        $make = static fn(string $stamp, array $options = []): array => (new Backup(
+            $profile,
+            static function (array $db, string $file): void {
+                file_put_contents($file, 'dump');
+            },
+            static function (string $m): void {},
+            $stamp,
+        ))->run(['alpha'], $options);
+
+        $make('20261001-100000');
+        $make('20261001-110000', ['logs' => true]);
+        $make('20261002-100000');
+        $make('20261003-100000', ['keep' => 2]);
+
+        expect(array_values(array_diff(scandir("{$profile['DataRoot']}/backups/admin"), ['.', '..'])))->toBe([
+            'alpha-20261001-110000-logs.tar.gz',
+            'alpha-20261002-100000.tar.gz',
+            'alpha-20261003-100000.tar.gz',
+        ]);
     })->depends('holds config, data and databases');
 
     test('leaves nothing behind when a dump fails', function () {

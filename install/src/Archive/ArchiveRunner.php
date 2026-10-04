@@ -101,6 +101,7 @@ final class ArchiveRunner
     private function execute(array $spec): array
     {
         ['verb' => $verb, 'kind' => $kind, 'options' => $options] = $spec;
+        $keep = isset($options['keep']) ? Rotation::count($options['keep']) : null;
         [$refs, $words] = $this->takeInstance($kind, $spec['words']);
         $given = Archives::positional($verb, $kind, $words);
         foreach (Archives::required($verb, $kind) as $name) {
@@ -156,6 +157,9 @@ final class ArchiveRunner
             throw new \RuntimeException("the simulator says it is done, but there is no $file");
         }
         ($this->say)($message);
+        if ($verb === 'save' && $keep !== null && ($removed = Rotation::keep($file, $keep)) !== []) {
+            ($this->say)('removed ' . count($removed) . ' older ' . $kind . ' file' . (count($removed) > 1 ? 's' : ''));
+        }
 
         return [0, $file];
     }
