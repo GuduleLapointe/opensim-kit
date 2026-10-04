@@ -383,6 +383,14 @@ if (!defined('OPENSIM_KIT_CONFIG_CLASS_ONLY')) {
         http_response_code(503);
         die('Not properly configured');
     }
+    // helpers.ini holds the password of the database: without it the helpers would try the placeholder of the Robust config
+    $kit_ini = $kit_settings['dir'] . '/helpers.ini';
+    if (is_file($kit_ini) && !is_readable($kit_ini)) {
+        error_log("opensim-helpers: $kit_ini is not readable by the web server user (it belongs to the group of the web server, mode 640: chgrp www-data)");
+        http_response_code(503);
+        die('Not properly configured');
+    }
+    unset($kit_ini);
     OpenSimKit_HelpersConfig::define_constants($kit_settings);
     unset($kit_settings);
 
