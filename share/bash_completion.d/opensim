@@ -83,19 +83,17 @@ _opensim()
           fi
           ;;
         save|load)
-          # opensim save|load [GRID [SIM]] iar|oar [options] ...: the words before iar or oar are the instance
-          local kind= w
-          for w in "${COMP_WORDS[@]:2:COMP_CWORD-2}"; do case $w in iar|oar) kind=$w ;; esac; done
-          if [ -z "$kind" ]; then
-            COMPREPLY=( $(compgen -W "iar oar $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
-          elif [ "$kind" = iar ] && [ "${COMP_WORDS[1]}" = save ]; then
-            COMPREPLY=( $(compgen -f -W "--home --verbose --noassets --perm= --skipbadassets --creators --exclude --excludefolder" -- "$cur") )
-          elif [ "$kind" = iar ]; then
-            COMPREPLY=( $(compgen -f -W "--merge" -- "$cur") )
+          # opensim save|load iar|oar [GRID [SIM|REGION]] [options] ...
+          if [ "$COMP_CWORD" = 2 ]; then
+            COMPREPLY=( $(compgen -W "iar oar" -- "$cur") )
+          elif [ "${COMP_WORDS[2]}" = iar ] && [ "${COMP_WORDS[1]}" = save ]; then
+            COMPREPLY=( $(compgen -f -W "--home --verbose --noassets --perm= --skipbadassets --creators --exclude --excludefolder $([ "$COMP_CWORD" = 3 ] && _opensim_grids)" -- "$cur") )
+          elif [ "${COMP_WORDS[2]}" = iar ]; then
+            COMPREPLY=( $(compgen -f -W "--merge $([ "$COMP_CWORD" = 3 ] && _opensim_grids)" -- "$cur") )
           elif [ "${COMP_WORDS[1]}" = save ]; then
-            COMPREPLY=( $(compgen -f -W "--region --all --noassets --home --publish --perm=" -- "$cur") )
+            COMPREPLY=( $(compgen -f -W "--region --all --noassets --home --publish --perm= $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
           else
-            COMPREPLY=( $(compgen -f -W "--region --merge --skip-assets --force-terrain --force-parcels --no-objects --displacement --rotation --default-user" -- "$cur") )
+            COMPREPLY=( $(compgen -f -W "--region --merge --skip-assets --force-terrain --force-parcels --no-objects --displacement --rotation --default-user $(_opensim_grids) $(_opensim_instances all)" -- "$cur") )
           fi
           ;;
         backup)

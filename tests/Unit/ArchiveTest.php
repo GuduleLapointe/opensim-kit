@@ -79,28 +79,28 @@ describe('the names of the archives', function () {
 });
 
 describe('the arguments of a command on an archive', function () {
-    test('are the instance, the kind, the options and the positional arguments', function () {
-        $spec = Archives::parse('save', ['alpha', 'sim1', 'oar', '--noassets', '--perm=CMT', '--region', 'Welcome', 'copy.oar']);
+    test('are the kind, the options and the other words', function () {
+        $spec = Archives::parse('save', ['oar', 'alpha', 'sim1', '--noassets', '--perm=CMT', '--region', 'Welcome', 'copy.oar']);
 
-        expect($spec['refs'])->toBe(['alpha', 'sim1'])
-            ->and($spec['kind'])->toBe('oar')
+        expect($spec['kind'])->toBe('oar')
             ->and($spec['options'])->toBe(['noassets' => true, 'perm' => 'CMT', 'region' => 'Welcome'])
-            ->and($spec['positional'])->toBe(['file' => 'copy.oar']);
+            ->and($spec['words'])->toBe(['alpha', 'sim1', 'copy.oar']);
     });
 
-    test('have the instance left out', function () {
+    test('take a short option and its value', function () {
         $spec = Archives::parse('save', ['iar', '-h', 'https://home.example.org', '-v', 'Jane', 'Doe', '/Clothing', 'pw']);
 
-        expect($spec['refs'])->toBe([])
-            ->and($spec['options'])->toBe(['home' => 'https://home.example.org', 'verbose' => true])
-            ->and($spec['positional'])->toBe(['first' => 'Jane', 'last' => 'Doe', 'path' => '/Clothing', 'password' => 'pw']);
+        expect($spec['options'])->toBe(['home' => 'https://home.example.org', 'verbose' => true])
+            ->and(Archives::positional('save', 'iar', $spec['words']))
+            ->toBe(['first' => 'Jane', 'last' => 'Doe', 'path' => '/Clothing', 'password' => 'pw']);
     });
 
     test('are refused when they make no sense', function () {
         expect(fn() => Archives::parse('save', ['alpha']))->toThrow(InvalidArgumentException::class)
+            ->and(fn() => Archives::parse('save', ['alpha', 'oar']))->toThrow(InvalidArgumentException::class)
             ->and(fn() => Archives::parse('save', ['oar', '-z']))->toThrow(InvalidArgumentException::class, 'unknown option')
             ->and(fn() => Archives::parse('load', ['iar', '--merge=1']))->toThrow(InvalidArgumentException::class, 'no value')
-            ->and(fn() => Archives::parse('save', ['oar', 'a', 'b']))->toThrow(InvalidArgumentException::class, 'too many');
+            ->and(fn() => Archives::positional('save', 'oar', ['a', 'b']))->toThrow(InvalidArgumentException::class, 'too many');
     });
 
     test('make the line of the console, what is the setup\'s own left out, what has a space quoted', function () {
@@ -112,15 +112,18 @@ describe('the arguments of a command on an archive', function () {
 });
 
 describe('the instance a command names', function () {
-    test('is a grid, a grid and a simulator, or a simulator, or the only grid', function () {
+    test('is a grid, a grid and a simulator or a region, or one of them alone, or the only grid', function () {
         $profile = archive_install();
 
-        expect(Instances::resolve($profile, []))->toBe(['alpha', null])
-            ->and(Instances::resolve($profile, ['alpha']))->toBe(['alpha', null])
-            ->and(Instances::resolve($profile, ['alpha', 'sim1']))->toBe(['alpha', 'alpha_sim1'])
-            ->and(Instances::resolve($profile, ['alpha', '_sim2']))->toBe(['alpha', 'alpha_sim2'])
-            ->and(Instances::resolve($profile, ['alpha_sim2']))->toBe(['alpha', 'alpha_sim2'])
-            ->and(fn() => Instances::resolve($profile, ['alpha', 'nope']))->toThrow(InvalidArgumentException::class);
+        expect(Instances::locate($profile, []))->toBe(['alpha', null, null])
+            ->and(Instances::locate($profile, ['alpha']))->toBe(['alpha', null, null])
+            ->and(Instances::locate($profile, ['alpha', 'sim1']))->toBe(['alpha', 'alpha_sim1', null])
+            ->and(Instances::locate($profile, ['alpha', '_sim2']))->toBe(['alpha', 'alpha_sim2', null])
+            ->and(Instances::locate($profile, ['alpha_sim2']))->toBe(['alpha', 'alpha_sim2', null])
+            ->and(Instances::locate($profile, ['alpha', 'south']))->toBe(['alpha', 'alpha_sim2', 'South'])
+            ->and(Instances::locate($profile, ['Welcome']))->toBe(['alpha', 'alpha_sim1', 'Welcome'])
+            ->and(Instances::resolve($profile, ['North']))->toBe(['alpha', 'alpha_sim2'])
+            ->and(fn() => Instances::locate($profile, ['alpha', 'nope']))->toThrow(InvalidArgumentException::class);
     });
 });
 
@@ -150,7 +153,7 @@ describe('opensim save and load', function () {
     test('save a region of a simulator with one region, in the folder of the archives, with a name that says what it is', function () {
         $profile = archive_install();
         $sent = [];
-        [$code, $file] = archive_runner($profile, $sent, 'Finished writing out OAR for Welcome')->run('save', ['alpha', 'sim1', 'oar', '--noassets']);
+        [$code, $file] = archive_runner($profile, $sent, 'Finished writing out OAR for Welcome')->run('save', ['oar', 'alpha', 'sim1', '--noassets']);
 
         expect($code)->toBe(0)
             ->and($file)->toStartWith("{$profile['DataRoot']}/alpha/backups/oar/alpha-sim1-Welcome-")
@@ -160,12 +163,23 @@ describe('opensim save and load', function () {
             ->and($sent[0][1])->toStartWith("change region Welcome\nsave oar --noassets /");
     });
 
+    test('save the region that is named in place of the simulator', function () {
+        $profile = archive_install();
+        $sent = [];
+        [$code, $file] = archive_runner($profile, $sent, 'Finished writing out OAR')->run('save', ['oar', 'alpha', 'South']);
+
+        expect($code)->toBe(0)
+            ->and(basename((string) $file))->toStartWith('alpha-sim2-South-2')
+            ->and($sent[0][0])->toBe('alpha_sim2')
+            ->and($sent[0][1])->toStartWith("change region South\nsave oar ");
+    });
+
     test('ask which region of a simulator that has several, or take them all', function () {
         $profile = archive_install();
         $sent = [];
         $runner = archive_runner($profile, $sent, 'Finished writing out OAR');
-        [$code] = $runner->run('save', ['alpha', 'sim2', 'oar']);
-        [$all, $file] = $runner->run('save', ['alpha', 'sim2', 'oar', '--all']);
+        [$code] = $runner->run('save', ['oar', 'alpha', 'sim2']);
+        [$all, $file] = $runner->run('save', ['oar', 'alpha', 'sim2', '--all']);
 
         expect($code)->toBe(2)
             ->and($all)->toBe(0)
@@ -179,7 +193,7 @@ describe('opensim save and load', function () {
         touch("$dir/alpha-sim1-Welcome-20261001-100000.oar");
         touch("$dir/alpha-sim1-Welcome-20261002-100000.oar");
         $sent = [];
-        [$code, $file] = archive_runner($profile, $sent, 'Successfully loaded archive')->run('load', ['alpha', 'sim1', 'oar', '--merge']);
+        [$code, $file] = archive_runner($profile, $sent, 'Successfully loaded archive')->run('load', ['oar', 'alpha', 'sim1', '--merge']);
 
         expect($code)->toBe(0)
             ->and(basename((string) $file))->toBe('alpha-sim1-Welcome-20261002-100000.oar')
@@ -225,7 +239,7 @@ describe('opensim save and load', function () {
         $runner = archive_runner($profile, $sent, 'Finished writing out OAR');
         $existing = "{$profile['DataRoot']}/alpha/backups/oar/old.oar";
 
-        expect($runner->run('save', ['alpha', 'sim1', 'oar', 'old.oar'])[0])->toBe(1)
+        expect($runner->run('save', ['oar', 'alpha', 'sim1', 'old.oar'])[0])->toBe(1)
             ->and($existing)->toBeFile()
             ->and($sent)->toBe([]);
 

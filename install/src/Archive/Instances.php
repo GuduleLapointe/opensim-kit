@@ -5,41 +5,46 @@ declare(strict_types=1);
 namespace OpenSim\Installer\Archive;
 
 use OpenSim\Installer\Grid\GridInfo;
+use OpenSim\Installer\Grid\RegionState;
 
 /**
- * Which grid, and which simulator of it, the words of a command name: `GRID`, `GRID SIM`, `GRID _SIM`, the instance
- * `grid_sim`, or nothing when the install has one grid.
+ * Which grid, and which simulator or region of it, the words of a command name: `GRID`, `GRID SIM`, `GRID _SIM`,
+ * `GRID REGION`, the instance `grid_sim`, a region or a simulator alone, or nothing when the install has one grid.
  */
 final class Instances
 {
     /**
+     * Which grid, which simulator, which region the words name: a grid, a grid and a simulator or a region of it, the
+     * simulator or the region alone, or nothing when the install has one grid.
+     *
      * @param array<string,mixed> $profile the install profile
      * @param list<string> $refs the words, none to two
-     * @return array{0:string,1:?string} the nick of the grid, the instance of the simulator when one is named
+     * @return array{0:string,1:?string,2:?string} the nick of the grid, the instance of the simulator (the one that has the
+     *         region when a region is named), the region
      * @throws \InvalidArgumentException
      */
-    public static function resolve(array $profile, array $refs): array
+    public static function locate(array $profile, array $refs): array
     {
         $etc = $profile['EtcRoot'] ?? '';
         $nicks = self::grids($etc);
         $nick = null;
-        $simRef = null;
+        $target = null;
         if (count($refs) > 2) {
-            throw new \InvalidArgumentException('a grid and a simulator at most');
+            throw new \InvalidArgumentException('a grid, and a simulator or a region of it, at most');
         }
         if (count($refs) === 2) {
-            [$nick, $simRef] = $refs;
+            [$nick, $target] = $refs;
         } elseif (count($refs) === 1) {
             if (in_array($refs[0], $nicks, true)) {
                 $nick = $refs[0];
             } else {
-                $simRef = $refs[0];
+                $target = $refs[0];
             }
         }
         if ($nick === null) {
-            // The simulator names its grid by its own name (grid_sim), else the only grid there is
+            // The simulator or the region says its grid, else the only grid there is
             foreach ($nicks as $candidate) {
-                if ($simRef !== null && self::simulator($etc, $candidate, $simRef) !== null) {
+                if ($target !== null && self::find($etc, $candidate, $target) !== null) {
                     $nick = $candidate;
                     break;
                 }
@@ -48,16 +53,52 @@ final class Instances
         }
         if ($nick === null || !in_array($nick, $nicks, true)) {
             throw new \InvalidArgumentException(
-                $nicks === [] ? 'no grid here' : ($simRef !== null && $nick === null ? "'$simRef' is not a simulator, " : '') . 'which grid? ' . implode(', ', $nicks),
+                $nicks === [] ? 'no grid here' : ($target !== null ? "'$target' is not a simulator or a region, " : '') . 'which grid? ' . implode(', ', $nicks),
             );
         }
-        $slug = null;
-        if ($simRef !== null) {
-            $slug = self::simulator($etc, $nick, $simRef)
-                ?? throw new \InvalidArgumentException("'$simRef' is not a simulator of the grid '$nick'");
+        if ($target === null) {
+            return [$nick, null, null];
         }
+        $found = self::find($etc, $nick, $target)
+            ?? throw new \InvalidArgumentException("'$target' is not a simulator or a region of the grid '$nick'");
+
+        return [$nick, ...$found];
+    }
+
+    /**
+     * Which grid, and which simulator of it, the words name (a region names the simulator that has it).
+     *
+     * @param list<string> $refs
+     * @return array{0:string,1:?string}
+     */
+    public static function resolve(array $profile, array $refs): array
+    {
+        [$nick, $slug] = self::locate($profile, $refs);
 
         return [$nick, $slug];
+    }
+
+    /**
+     * A simulator, else a region, of a grid, by the name given.
+     *
+     * @return ?array{0:string,1:?string} the simulator, the region when it is one that was named
+     */
+    private static function find(string $etc, string $nick, string $ref): ?array
+    {
+        $slug = self::simulator($etc, $nick, $ref);
+        if ($slug !== null) {
+            return [$slug, null];
+        }
+        foreach (glob("$etc/grids/$nick/sims/*.ini") ?: [] as $ini) {
+            $sim = basename($ini, '.ini');
+            foreach (array_keys(RegionState::list("$etc/grids/$nick/sims/$sim/regions")) as $region) {
+                if (strcasecmp($region, $ref) === 0) {
+                    return [$sim, $region];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

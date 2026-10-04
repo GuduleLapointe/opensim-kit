@@ -70,8 +70,7 @@ final class ArchiveRunner
     public function run(string $verb, array $args): array
     {
         try {
-            $spec = Archives::parse($verb, $args);
-            return $this->execute($spec);
+            return $this->execute(Archives::parse($verb, $args));
         } catch (\InvalidArgumentException $e) {
             ($this->say)("$verb: " . $e->getMessage());
 
@@ -84,19 +83,25 @@ final class ArchiveRunner
     }
 
     /**
-     * @param array{verb:string,refs:list<string>,kind:string,options:array<string,string|true>,positional:array<string,string>} $spec
+     * @param array{verb:string,kind:string,options:array<string,string|true>,words:list<string>} $spec
      * @return array{0:int,1:?string}
      */
     private function execute(array $spec): array
     {
-        ['verb' => $verb, 'kind' => $kind, 'options' => $options, 'positional' => $given] = $spec;
+        ['verb' => $verb, 'kind' => $kind, 'options' => $options] = $spec;
+        [$refs, $words] = $this->takeInstance($kind, $spec['words']);
+        $given = Archives::positional($verb, $kind, $words);
         foreach (Archives::required($verb, $kind) as $name) {
             if (!isset($given[$name])) {
                 throw new \InvalidArgumentException("missing argument <$name>");
             }
         }
 
-        [$grid, $slug] = $this->instance($spec['refs']);
+        [$nick, $slug, $named] = Instances::locate($this->profile, $refs);
+        $grid = GridInfo::load($this->profile, $nick) ?? throw new \RuntimeException("grid '$nick' is not known here");
+        if ($named !== null && !isset($options['region'])) {
+            $options['region'] = $named;
+        }
         $slug ??= $this->pickSimulator($grid, $kind === 'oar');
         $directory = rtrim($grid->dataDirectory, '/') . "/backups/$kind";
 
@@ -140,17 +145,44 @@ final class ArchiveRunner
     }
 
     /**
-     * The grid, and the simulator when one is named.
+     * The instance words at the start of the others: for an inventory a grid, for a region a grid and a simulator or a
+     * region of it, or one of these alone. What is not one is for the command: a name, a file, a password.
      *
-     * @param list<string> $refs
-     * @return array{0:GridInfo,1:?string}
+     * @param list<string> $words
+     * @return array{0:list<string>,1:list<string>} the instance words, the other ones
      */
-    private function instance(array $refs): array
+    private function takeInstance(string $kind, array $words): array
     {
-        [$nick, $slug] = Instances::resolve($this->profile, $refs);
-        $grid = GridInfo::load($this->profile, $nick) ?? throw new \RuntimeException("grid '$nick' is not known here");
+        $refs = [];
+        $grids = Instances::grids($this->profile['EtcRoot'] ?? '');
+        if ($words === []) {
+            return [[], []];
+        }
+        // The names of an account follow an inventory: the first word is taken for the instance only when it is a grid
+        if ($kind === 'iar' && !in_array($words[0], $grids, true)) {
+            return [[], $words];
+        }
+        if ($this->names([$words[0]])) {
+            $first = array_shift($words);
+            $refs[] = $first;
+            if (in_array($first, $grids, true) && $words !== [] && $this->names([$first, $words[0]])) {
+                $refs[] = array_shift($words);
+            }
+        }
 
-        return [$grid, $slug];
+        return [$refs, $words];
+    }
+
+    /** Whether the words name an instance of the install */
+    private function names(array $refs): bool
+    {
+        try {
+            Instances::locate($this->profile, $refs);
+
+            return true;
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
     }
 
     /** A simulator of the grid that runs: any for a command that is the grid's (an inventory), the only one for a region */

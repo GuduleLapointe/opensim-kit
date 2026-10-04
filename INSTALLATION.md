@@ -140,15 +140,15 @@ The `opensim` service starts the enabled instances at boot. Package upgrades nev
 
 There are two levels. The administrator backs up the install, the users have their own archives.
 
-`opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]` makes what it takes to install a grid again as it is, on another machine or after a crash: its configuration (the folder of the grid, the links that enable it, `opensim.conf`), its persistent data, and a dump of each of its databases (Robust and the simulators). One archive per grid, `gridnick-stamp.tar.gz`, or `gridnick-sim-stamp.tar.gz` for one simulator (`opensim backup mygrid sim1` or `opensim backup mygrid _sim1`), in `<data>/backups/admin` unless `--output` says otherwise. The logs are left out unless asked, so are the archives of the users, which are backups already. The archive holds the passwords of the databases: it is readable by its owner only.
+`opensim backup [GRID [SIM|REGION]] [--logs] [--archives] [--output DIR]` makes what it takes to install a grid again as it is, on another machine or after a crash: its configuration (the folder of the grid, the links that enable it, `opensim.conf`), its persistent data, and a dump of each of its databases (Robust and the simulators). One archive per grid, `gridnick-stamp.tar.gz`, or `gridnick-sim-stamp.tar.gz` for one simulator (`opensim backup mygrid sim1` or `opensim backup mygrid _sim1`), in `<data>/backups/admin` unless `--output` says otherwise. The logs are left out unless asked, so are the archives of the users, which are backups already. The archive holds the passwords of the databases: it is readable by its owner only.
 
-The users' archives are made through the console of a running simulator, so the files are written where the simulator can write (its own `bin` folder is not): `opensim save|load iar|oar`, with the options of the console of the simulator. The instance comes before `iar` or `oar`, it is left out when there is only one grid (and one running simulator, for a region).
+The users' archives are made through the console of a running simulator, so the files are written where the simulator can write (its own `bin` folder is not): `opensim save|load iar|oar`, with the options of the console of the simulator. The instance (a grid, and a simulator or a region of it) comes after `iar` or `oar`, it is left out when there is only one grid (and one running simulator, for a region).
 
 ```bash
-opensim save mygrid iar Jane Doe / secret --noassets        # the inventory of an account, the password is asked when left out
-opensim load mygrid iar --merge Jane Doe / secret           # the newest archive of that inventory
-opensim save mygrid sim1 oar --region Welcome --noassets     # a region, or all the regions of the simulator with --all
-opensim load mygrid sim1 oar --region Welcome --merge        # the newest archive of that region
+opensim save iar mygrid Jane Doe / secret --noassets        # the inventory of an account, the password is asked when left out
+opensim load iar mygrid --merge Jane Doe / secret           # the newest archive of that inventory
+opensim save oar mygrid Welcome --noassets     # a region (or a simulator, with --region when it has several, or --all)
+opensim load oar mygrid Welcome --merge        # the newest archive of that region
 ```
 
 Without a file name, an archive is made in `<data of the grid>/backups/iar` or `oar` and named after what it is, the special modes in suffixes so that nobody restores a `noassets` archive by mistake: `gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar` and `gridnick-sim[-region][-noassets][-perm<P>][-publish]-stamp.oar` (no region in the name of a multi-region archive, `--all`), the stamp being `YYYYMMDD-HHMMSS`. A file name without a folder is in those folders, a relative path is from where the command is typed. Without a file name, `load` takes the newest archive of that account or region, and says which.

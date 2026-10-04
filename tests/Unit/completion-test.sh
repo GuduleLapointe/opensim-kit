@@ -65,9 +65,10 @@ function test_the_grid_comes_first_in_the_commands_that_have_actions() {
 
 function test_the_archives_are_completed_by_kind() {
 	assert_equals "iar" "$(complete_words opensim save i)"
-	assert_contains "alpha" "$(complete_words opensim load a)"
-	assert_equals "--noassets" "$(complete_words opensim save alpha iar --noa)"
-	assert_equals "--merge" "$(complete_words opensim load alpha iar --m)"
-	assert_equals "--region" "$(complete_words opensim save alpha sim1 oar --re)"
+	assert_contains "alpha" "$(complete_words opensim load oar a)"
+	assert_equals "alpha" "$(complete_words opensim save iar al)"
+	assert_equals "--noassets" "$(complete_words opensim save iar --noa)"
+	assert_equals "--merge" "$(complete_words opensim load iar --m)"
+	assert_equals "--region" "$(complete_words opensim save oar alpha --re)"
 	assert_equals "--logs" "$(complete_words opensim backup alpha --l)"
 }

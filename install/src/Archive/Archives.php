@@ -68,26 +68,19 @@ final class Archives
     private const OURS = ['region'];
 
     /**
-     * Read the arguments after the verb: the instance words (a grid, a simulator), the kind (iar or oar), the options and
-     * the positional arguments.
+     * Read the arguments after the verb: the kind (iar or oar), the options, and the other words, which are the instance
+     * (a grid, a simulator or a region, see Instances) and the positional arguments (see positional()).
      *
      * @param list<string> $args what follows `save` or `load`
-     * @return array{verb:string,refs:list<string>,kind:string,options:array<string,string|true>,positional:array<string,string>}
+     * @return array{verb:string,kind:string,options:array<string,string|true>,words:list<string>}
      * @throws \InvalidArgumentException
      */
     public static function parse(string $verb, array $args): array
     {
-        $refs = [];
-        while ($args !== [] && !in_array($args[0], ['iar', 'oar'], true)) {
-            if (str_starts_with($args[0], '-') || count($refs) >= 2) {
-                throw new \InvalidArgumentException("expected iar or oar after the instance, not '{$args[0]}'");
-            }
-            $refs[] = array_shift($args);
-        }
-        if ($args === []) {
-            throw new \InvalidArgumentException('iar or oar?');
-        }
         $kind = array_shift($args);
+        if (!in_array($kind, ['iar', 'oar'], true)) {
+            throw new \InvalidArgumentException("iar or oar, not '" . ($kind ?? '') . "'");
+        }
         $command = "$verb $kind";
         $known = self::OPTIONS[$command];
         $shorts = [];
@@ -138,16 +131,28 @@ final class Archives
             }
         }
 
-        $positional = [];
-        $names = self::POSITIONAL[$command];
+        return ['verb' => $verb, 'kind' => $kind, 'options' => $options, 'words' => $words];
+    }
+
+    /**
+     * The words left once the instance is taken out, by the name of the argument they are.
+     *
+     * @param list<string> $words
+     * @return array<string,string>
+     * @throws \InvalidArgumentException
+     */
+    public static function positional(string $verb, string $kind, array $words): array
+    {
+        $names = self::POSITIONAL["$verb $kind"];
         if (count($words) > count($names)) {
             throw new \InvalidArgumentException("too many arguments, '{$words[count($names)]}'");
         }
+        $positional = [];
         foreach ($words as $i => $word) {
             $positional[$names[$i]] = $word;
         }
 
-        return ['verb' => $verb, 'refs' => $refs, 'kind' => $kind, 'options' => $options, 'positional' => $positional];
+        return $positional;
     }
 
     /** The positional arguments a command needs, those it can do without (the password is asked, the file defaulted) left out */
