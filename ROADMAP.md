@@ -29,9 +29,9 @@
 - [x] the simulators of a grid with helpers know where `offline.php` (`[Messaging]`) and `register.php` (`DATA_SRV_MISearch` of `[DataSnapshot]`) are
 - [x] the message of the day: `[LoginService] MessageUrl` is a URL whose text is shown at login (read by Robust when it starts, `WelcomeMessage` when it cannot be), found in the code of the core (`LLLoginService`); `motd.php` of opensim-helpers serves the `motd` of `helpers.ini`
 - [x] the destination guide is `guide.php` of the helpers, `DestinationGuide` of the Robust config points to it
-- [ ] the search page of the web site: not in opensim-helpers (no branch has a page, only the backend behind `query.php`), it is probably in the WordPress plugin; find out where it reads from, so that it finds what `parser.php` indexes, and write the `search` URL of `[GridInfoService]` when it exists
+- [ ] the search page of the web site: not in opensim-helpers (no branch has a page, only the backend behind `query.php`), it is probably in the WordPress plugin; find out where it reads from, so that it finds what `parser.php` indexes, and write the `search` URL of `[GridInfoService]` when it exists (found: the `web-search` block of w4os has no source of its own, it asks `query.php` of the helpers: `dir_places_query` over XML-RPC with `websearch`, `gk` and the flags)
 - [ ] run again the packaging scenario beyond the upgrade step (the development build, removal, purge) and with the real `apt-package`: only the packages built by hand with nfpm were tested; run it with docker as well as podman
-- [ ] try the web server examples written by the setup (`<grid>.caddyfile`, `<grid>-nginx.conf`, `<grid>-apache.conf`) on a real Caddy, nginx and Apache
+- [x] try the web server examples written by the setup (`<grid>.caddyfile`, `<grid>-nginx.conf`, `<grid>-apache.conf`) on a real Caddy, nginx and Apache (`tests/Packaging/web-scenario.sh`; nginx needed a fix)
 
 ## Critical improvements
 
