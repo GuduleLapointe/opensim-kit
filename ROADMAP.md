@@ -2,25 +2,25 @@
 
 ## Fixes
 
-- [ ] Separation of concern is not respected in child libraries. Each library must remain strictly independent and never rely on data, classes or concept defined in the apps/projects/libraries consuming it.
-- [ ] The port-based location must only be used to set the initial center of the grild. Once it has been set, it is not overridable by the rule.
-- [ ] Wrong syntax for `opensim load iar|oar` and `opensim save iar|oar`: action and save must stay together, `opensim save iar [instance]`, not `opensim save [instance] iar`
-- [ ] Could not get load/save oar/iar to work
-- [ ] Could not get helpers to work (web returns 500)
-- [ ] setup: working from grid/sims was a design flaw:
+- [x] Separation of concern is not respected in child libraries. Each library must remain strictly independent and never rely on data, classes or concept defined in the apps/projects/libraries consuming it.
+- [x] The port-based location must only be used to set the initial center of the grild. Once it has been set, it is not overridable by the rule.
+- [x] Wrong syntax for `opensim load iar|oar` and `opensim save iar|oar`: action and save must stay together, `opensim save iar [instance]`, not `opensim save [instance] iar`
+- [x] Could not get load/save oar/iar to work
+- [ ] Could not get helpers to work (web returns 500) (the helpers answer with the new `config.php` on a test grid, and say when `helpers.ini` is unreadable by the web user instead of a 500; to confirm on the real site: what does the error log say?)
+- [ ] setup: working from grid/sims was a design flaw: (done: the grid screen lists regions, "Add region" asks the simulator of the pool, `opensim save|load oar` and `opensim backup` take a sim or a region; to do: the other commands)
     - from user's point of view, there is a grid, with regions
     - and simulators are just a pool of servers providing the regions
     - setup must propose to create regions first, with the choice to create a new simulator or add them to use one from the sims pool.
     - command-line tools must allow both sims and regions as second argument
 - [ ] Changelog is not a user guide, keep it as a SHORT list of changes, no explanations!
-- [ ] Tests output is truncated, KEEP descriptions and notifications SHORT
-- [ ] (Test fail) opensim save and load → refuse a file that exists a simulator that does not run a missing password
-- [ ] (Test fail) opensim backup → holds the configuration the data and a dump of each database of a grid and nothing the users backed up
-- [ ] (Test fail) opensim backup → takes the archives of the users and the logs when asked
-- [ ] (Test fail) opensim backup → is the one of a simulator without the other ones
-- [ ] (Test fail) opensim import the config of a grid → tells the plan and the settings it keeps and writes nothing without apply
-- [ ] Architectural misconception: opensim-engine include codes referencing the class `OpenSim_Kit`, which is a nonsense: Engine is the a standalone library, the Kit consumes it, not the other way around
-- [ ] check `opensim stop` on a simulator with an NPC in it: the real users are counted from `show users`, the NPCs (`NPC Root`) are skipped, but only the format was checked on a real core, not an NPC -> does not seem to properly skip the NPCs
+- [x] Tests output is truncated, KEEP descriptions and notifications SHORT
+- [x] (Test fail) opensim save and load → refuse a file that exists a simulator that does not run a missing password
+- [x] (Test fail) opensim backup → holds the configuration the data and a dump of each database of a grid and nothing the users backed up
+- [x] (Test fail) opensim backup → takes the archives of the users and the logs when asked
+- [x] (Test fail) opensim backup → is the one of a simulator without the other ones
+- [x] (Test fail) opensim import the config of a grid → tells the plan and the settings it keeps and writes nothing without apply
+- [x] Architectural misconception: opensim-engine include codes referencing the class `OpenSim_Kit`, which is a nonsense: Engine is the a standalone library, the Kit consumes it, not the other way around
+- [ ] check `opensim stop` on a simulator with an NPC in it: the real users are counted from `show users`, the NPCs (`NPC Root`) are skipped, but only the format was checked on a real core, not an NPC -> does not seem to properly skip the NPCs (the rows of `show users` are now read on a screen console too, the NPCs are left out; still to confirm with a real NPC)
 - [ ] confirm on ubuntu 24.04 (ursull), with the next package and an outdated bash-tools left in composer global, that `opensim setup` no longer ends with `debug: command not found` (the scripts now load the bash-tools of the kit before the one of the `PATH`, see `libexec/load-helpers`)
 - [ ] dependencies packages must be added to the release assets in their own repositories
 - [x] opensim status "down" count should not be displayed when none of the instances are down
