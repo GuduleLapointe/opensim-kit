@@ -12,7 +12,7 @@
     - and simulators are just a pool of servers providing the regions
     - setup must propose to create regions first, with the choice to create a new simulator or add them to use one from the sims pool.
     - command-line tools must allow both sims and regions as second argument
-- [ ] Changelog is not a user guide, keep it as a SHORT list of changes, no explanations!
+- [x] Changelog is not a user guide, keep it as a SHORT list of changes, no explanations!
 - [x] Tests output is truncated, KEEP descriptions and notifications SHORT
 - [x] (Test fail) opensim save and load → refuse a file that exists a simulator that does not run a missing password
 - [x] (Test fail) opensim backup → holds the configuration the data and a dump of each database of a grid and nothing the users backed up
