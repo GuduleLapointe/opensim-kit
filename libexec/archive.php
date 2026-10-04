@@ -29,12 +29,8 @@ usage: opensim save iar [GRID [SIM]] [-h|--home=URL] [-v] [--noassets] [--perm=P
                         [--perm=PERMISSIONS] [FILE]
        opensim load oar [GRID [SIM|REGION]] [--region NAME] [--merge] [--skip-assets] [FILE]
 
-The simulator is the one named, else a running one of the grid (an inventory), else the only one (a region).
-FILE: a name, kept in <data of the grid>/backups/iar or oar, or a path. Saving makes
-gridnick-first-last[-noassets][-perm<P>][-skipbadassets]-stamp.iar
-gridnick-sim[-region][-noassets][-perm<P>][-publish]-stamp.oar
-when none is given, loading takes the newest such file. The password is asked when it is not given, or
-read from OPENSIM_IAR_PASSWORD.
+FILE: a name (kept in <data of the grid>/backups/iar or oar) or a path; load takes the newest when none is given.
+The password is asked when left out, or read from OPENSIM_IAR_PASSWORD.
 
 USAGE;
     exit($asked ? 0 : 2);
