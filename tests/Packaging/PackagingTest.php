@@ -24,12 +24,19 @@ if (!getenv('PACKAGING')) {
  * Runs a script of this directory and gives its exit status and the end of its output.
  *
  * @param array $command Script and arguments.
+ * @param array $env What to add to the environment of the script.
  * @return array Exit status, output.
  */
-function packaging_run(array $command)
+function packaging_run(array $command, array $env = [])
 {
     $root = dirname(__DIR__, 2);
-    $process = proc_open($command, [1 => ['pipe', 'w'], 2 => ['redirect', 1]], $pipes, $root);
+    $process = proc_open(
+        $command,
+        [1 => ['pipe', 'w'], 2 => ['redirect', 1]],
+        $pipes,
+        $root,
+        $env === [] ? null : $env + getenv(),
+    );
     $lines = [];
     while (false !== ($line = fgets($pipes[1]))) {
         $lines[] = rtrim($line);
@@ -57,6 +64,17 @@ describe('Packaging', function () use ($root, $skip, $packages) {
             expect($status, $output)->toBe(0);
         })->skip('' !== $skip, $skip);
     }
+
+    test('web servers serve the site of a grid on Debian 12', function () use ($root) {
+        [$status, $output] = packaging_run(
+            ["$root/tests/Packaging/run", 'docker.io/library/debian:bookworm'],
+            [
+                'SCENARIO' => 'web-scenario.sh',
+            ],
+        );
+
+        expect($status, $output)->toBe(0);
+    })->skip('' !== $skip || !$packages, $skip ?: 'no package in dist/, build them with apt-package');
 
     test('container image', function () use ($root) {
         [$status, $output] = packaging_run(["$root/tests/Packaging/container-image"]);
