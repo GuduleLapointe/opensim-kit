@@ -1255,7 +1255,7 @@ final class NewSim
         $default = $first && $name($plan->simName) === null ? $plan->simName : RandomName::make($name);
         $known = (new GridRegistry($database))->locations($grid);
         // The place proposed is the first free one from the first place of a grid, not always the same
-        $place = implode(',', $this->freePlace($grid, $known, ...LocationFinder::first($grid->publicPort)));
+        $place = implode(',', $this->freePlace($grid, $known, ...LocationFinder::center($known, $grid->publicPort)));
         $roles = $this->roleOptions($grid);
         $there = static fn(array $v): bool => !$optional || ($v['create'] ?? 'yes') === 'yes';
         $fields = [];
@@ -1322,7 +1322,7 @@ final class NewSim
         if ($ignored !== null) {
             unset($known[$ignored]);
         }
-        [$x, $y] = LocationFinder::parse($asked) ?? LocationFinder::first($grid->publicPort);
+        [$x, $y] = LocationFinder::parse($asked) ?? LocationFinder::center($known, $grid->publicPort);
         while (true) {
             [$freeX, $freeY] = $this->freePlace($grid, $known, $x, $y, $ignored);
             if ($freeX === $x && $freeY === $y) {

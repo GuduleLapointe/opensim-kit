@@ -229,11 +229,21 @@ final class Backup
         if ($paths === []) {
             return;
         }
-        $command = ['-rf', $tar, '--transform', 's,^,' . $under . '/,S', '--ignore-failed-read'];
+        // GNU tar renames what it adds with --transform, the tar of macOS and the BSDs (libarchive) with -s
+        $command = self::gnuTar()
+            ? ['-rf', $tar, '--transform', 's,^,' . $under . '/,S', '--ignore-failed-read']
+            : ['-rf', $tar, '-s', ',^,' . $under . '/,'];
         foreach ($excludes as $exclude) {
             $command[] = '--exclude=' . $exclude;
         }
         $this->tar([...$command, '-C', $root, ...$paths]);
+    }
+
+    private static function gnuTar(): bool
+    {
+        static $gnu = null;
+
+        return $gnu ??= str_contains((string) shell_exec('tar --version 2>/dev/null'), 'GNU tar');
     }
 
     private function tar(array $arguments): void

@@ -48,6 +48,18 @@ final class ArchiveRunner
                 fwrite(STDERR, $message . "\n");
             },
             $timeout,
+            static function (string $first, string $last): string {
+                if (!function_exists('posix_isatty') || !posix_isatty(STDIN)) {
+                    return '';
+                }
+                fwrite(STDERR, "Password of $first $last: ");
+                system('stty -echo');
+                $password = trim((string) fgets(STDIN));
+                system('stty echo');
+                fwrite(STDERR, "\n");
+
+                return $password;
+            },
         );
     }
 
@@ -204,17 +216,11 @@ final class ArchiveRunner
         if ($env !== false && $env !== '') {
             return $env;
         }
-        if ($this->ask !== null) {
-            return ($this->ask)();
-        }
-        if (!function_exists('posix_isatty') || !posix_isatty(STDIN)) {
+        // Asked only by who has a way to ask (the command line, on a terminal)
+        $password = $this->ask !== null ? ($this->ask)($given['first'], $given['last']) : '';
+        if ($password === '') {
             throw new \InvalidArgumentException('missing argument <password> (or OPENSIM_IAR_PASSWORD)');
         }
-        fwrite(STDERR, "Password of {$given['first']} {$given['last']}: ");
-        system('stty -echo');
-        $password = trim((string) fgets(STDIN));
-        system('stty echo');
-        fwrite(STDERR, "\n");
 
         return $password;
     }
