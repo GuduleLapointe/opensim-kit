@@ -140,7 +140,7 @@ function hub_run(array $script)
 }
 
 describe('Hub home', function () {
-    test('lists the core, each grid with its state, add grid and quit', function () {
+    test('lists core, grids, add and quit', function () {
         [$ui] = hub_run(['quit']);
 
         expect($ui->screens[0]['keys'])->toBe(['core', 'grid:alpha', 'grid:beta', 'add', 'quit']);
@@ -156,7 +156,7 @@ describe('Hub home', function () {
 });
 
 describe('Hub grid', function () {
-    test('lists its regions, add region, simulators, configure, disable this grid, back and quit', function () {
+    test('lists regions and actions', function () {
         [$ui] = hub_run(['grid:alpha', 'back', 'quit']);
 
         expect($ui->screens[1]['label'])->toBe('Grid: alpha');
@@ -206,7 +206,7 @@ describe('Hub grid', function () {
 });
 
 describe('Hub simulator and region', function () {
-    test('a simulator lists its regions, add region, configure sim, disable this simulator, back and quit', function () {
+    test('a simulator lists its regions', function () {
         [$ui] = hub_run(['grid:alpha', 'sims', 'sim:alpha_sim1', 'back', 'back', 'back', 'quit']);
 
         expect($ui->screens[3]['label'])->toBe('Simulator: Sim One');
@@ -286,7 +286,7 @@ describe('RegionState', function () {
 });
 
 describe('GridRegistry region names', function () {
-    test('are the ones of every simulator of the grid, disabled regions included, without the case', function () {
+    test('are all the regions, without the case', function () {
         [, $etc] = hub_tree();
 
         expect(array_keys(\OpenSim\Installer\Grid\GridRegistry::fileNames("$etc/grids/alpha")))->toBe([

@@ -49,7 +49,7 @@ describe('TextFile', function () {
     });
 });
 
-describe('Robust config from a distribution with Windows line endings', function () {
+describe('Robust config with CRLF', function () {
     test('has none left', function () {
         $bin = textfile_dir();
         file_put_contents(

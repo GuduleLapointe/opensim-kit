@@ -9,7 +9,7 @@ function oarCommand(string $args): array
     return [implode("\n", $out), $code];
 }
 
-it('makes an archive of the sources of the naming object, which checks out', function () {
+it('makes an archive that checks out', function () {
     $oar = sys_get_temp_dir() . '/oar-cmd-' . uniqid() . '.oar';
     $src = escapeshellarg(dirname(__DIR__, 2) . '/share/ossl-scripts/fix-parcel-name-src');
 

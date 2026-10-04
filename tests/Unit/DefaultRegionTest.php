@@ -41,7 +41,7 @@ describe('RegionName', function () {
         expect(RegionName::problem('Bad"name'))->not->toBeNull();
     });
 
-    test('is the key of the flags with the spaces replaced by underscores, and back', function () {
+    test('is the key of the flags', function () {
         expect(RegionName::configKey('Welcome'))->toBe('Region_Welcome');
         expect(RegionName::configKey(' Welcome Area '))->toBe('Region_Welcome_Area');
         expect(RegionName::fromConfigKey('Region_Welcome_Area'))->toBe('Welcome Area');
@@ -95,7 +95,7 @@ describe('Grid setup', function () {
 });
 
 describe('Roles of a region', function () {
-    test('are the default region, the one of Hypergrid visitors on a grid that has it, and the fallback', function () {
+    test('are default, default HG and fallback', function () {
         expect(RegionFlags::roles(true))->toBe(['DefaultRegion', 'DefaultHGRegion', 'FallbackRegion']);
         expect(RegionFlags::roles(false))->toBe(['DefaultRegion', 'FallbackRegion']);
     });
@@ -107,7 +107,7 @@ describe('Roles of a region', function () {
         expect(RegionFlags::found("[GridService]\n    ; Region_Welcome_Area = \"DefaultRegion\"\n"))->toBe([]);
     });
 
-    test('are written under the key Robust looks for, in place of the example of the config', function () {
+    test('are written under the key of Robust', function () {
         $file = robust_file(robust_example());
         RegionFlags::give($file, 'Welcome Home', ['DefaultRegion', 'DefaultHGRegion']);
         $lines = explode("\n", (string) file_get_contents($file));
@@ -118,7 +118,7 @@ describe('Roles of a region', function () {
         expect($lines[$at - 1])->toContain('; Region_Welcome_Area');
     });
 
-    test('are written before the comments of the next section when the config has no example', function () {
+    test('are written before the next section', function () {
         $file = robust_file(str_replace('    ;; Region_Welcome_Area = "DefaultRegion, DefaultHGRegion"' . "\n", '', robust_example()));
         RegionFlags::give($file, 'Welcome', ['DefaultRegion']);
         $text = (string) file_get_contents($file);
@@ -149,7 +149,7 @@ describe('Roles of a region', function () {
 });
 
 describe('The landing region of a grid', function () {
-    test('is needed on a grid run from this machine until a region has the default roles', function () {
+    test('is needed until a region is default', function () {
         $grid = new GridInfo();
 
         expect($grid->needsLandingRegion())->toBeTrue();
@@ -164,7 +164,7 @@ describe('The landing region of a grid', function () {
         expect($grid->missingRoles())->toBe(['FallbackRegion']);
     });
 
-    test('does not ask the Hypergrid role on a grid without Hypergrid', function () {
+    test('skips the HG role without Hypergrid', function () {
         $grid = new GridInfo();
         $grid->hypergrid = false;
 
@@ -183,7 +183,7 @@ describe('The landing region of a grid', function () {
 });
 
 describe('A name to propose', function () {
-    test('is an adjective and a noun that begin the same, and a name the caller accepts', function () {
+    test('is an alliteration the caller accepts', function () {
         $name = OpenSim\Installer\Grid\RandomName::make(static fn(string $v): ?string => RegionName::problem($v));
 
         expect($name)->toMatch('/^(\S+) (\S+)$/');
@@ -191,7 +191,7 @@ describe('A name to propose', function () {
         expect(strtolower($name[0]))->toBe(strtolower(explode(' ', $name)[1][0]));
     });
 
-    test('is transliterated, so an accent is not a reason to refuse it', function () {
+    test('is transliterated', function () {
         expect(OpenSim\Installer\Grid\Slug::ascii('Joyeux Noël'))->toBe('Joyeux Noel');
 
         $name = OpenSim\Installer\Grid\RandomName::make(static fn(string $v): ?string => null);

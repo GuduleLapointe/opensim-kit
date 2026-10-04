@@ -56,7 +56,7 @@ describe('LocationFinder nearest free place', function () {
         expect(LocationFinder::nearestFree(taken([[10, 10]]), 10, 10, 1))->toBe([12, 10]);
     });
 
-    test('keeps its distance from every place taken with a large gap', function () {
+    test('keeps its distance with a large gap', function () {
         $used = taken([[10, 10], [11, 10], [10, 11]]);
         $place = LocationFinder::nearestFree($used, 10, 10, 8);
 

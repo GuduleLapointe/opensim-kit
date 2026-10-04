@@ -74,7 +74,7 @@ it('does not ask the plan of a setup from a file', function () {
     expect($ui->confirm("Apply this configuration to grid 'x'?", false))->toBeTrue()->and($inner->asked)->toBe([]);
 });
 
-it('asks every question, with the answers of the table as the ones proposed, to edit a setup', function () {
+it('asks every question to edit a setup', function () {
     $inner = askingUi([null, null]);
     $ui = new PresetUi($inner, ['Grid name' => 'Vonda'], [], true);
 
@@ -84,7 +84,7 @@ it('asks every question, with the answers of the table as the ones proposed, to 
         ->and($inner->asked[1])->toBe(['Region name', 'Welcome']);
 });
 
-it('asks the settings of the database when a failure is tried again', function () {
+it('asks the database again after a failure', function () {
     $inner = askingUi(['other']);
     $ui = new PresetUi($inner, []);
 
@@ -100,7 +100,7 @@ it('reads a login URI as host:port, with or without the scheme', function () {
         ->and(QuickSetup::login('host:99999'))->toBeNull();
 });
 
-it('answers from the table what the questions to ask would match too', function () {
+it('answers what is also to be asked', function () {
     // "Password of " asks the password of a database administrator; the password of the new account is not that
     $inner = askingUi([]);
     $ui = new PresetUi($inner, ['Password of the new account' => 'hunter22'], ['Password of ']);
@@ -108,7 +108,7 @@ it('answers from the table what the questions to ask would match too', function 
     expect($ui->secret('Password of the new account'))->toBe('hunter22')->and($inner->asked)->toBe([]);
 });
 
-it('answers a form field by field, with choices, yes or no and the fields that are there only sometimes', function () {
+it('answers a form field by field', function () {
     $ui = new PresetUi(askingUi([]), ['Console of' => 'screen', 'Start it' => false]);
     $v = $ui->form([
         ['key' => 'mode', 'label' => 'Console of the thing', 'type' => 'choice', 'options' => ['rest' => 'REST', 'screen' => 'Screen'], 'default' => 'rest'],

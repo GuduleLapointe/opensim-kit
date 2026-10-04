@@ -49,7 +49,7 @@ it('requires no email', function () {
         ->and(isset($data['owner']['email']))->toBeFalse();
 });
 
-it('gives the answers to the questions of the grid, the default ones for the rest', function () {
+it('gives the answers of the grid', function () {
     $answers = SetupFile::gridAnswers(SetupFile::parse(SETUP_YAML));
 
     expect($answers['Grid name'])->toBe('Test Grid')
@@ -60,7 +60,7 @@ it('gives the answers to the questions of the grid, the default ones for the res
         ->and(isset($answers['Web URL']))->toBeFalse();
 });
 
-it('gives the answers of a simulator, its first region and its owner', function () {
+it('gives the answers of a simulator', function () {
     $data = SetupFile::parse(SETUP_YAML);
     $answers = SetupFile::simAnswers($data, 0);
 

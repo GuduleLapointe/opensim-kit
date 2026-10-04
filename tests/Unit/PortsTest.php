@@ -38,7 +38,7 @@ describe('Ports of a simulator block', function () {
         expect(Ports::simulatorBlock(19003))->toBeNull();
     });
 
-    test('give the regions x1 to x3 then x5 to x9, the console x4 left alone', function () {
+    test('give the regions their ports', function () {
         $taken = [19000];
         $ports = [];
         for ($i = 0; $i < 8; $i++) {

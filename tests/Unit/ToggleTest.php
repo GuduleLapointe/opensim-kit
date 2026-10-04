@@ -69,7 +69,7 @@ describe('opensim disable and enable', function () {
         expect(readlink("$etc/opensim.d/alpha_sim1.ini"))->toBe("$etc/grids/Alpha/sims/alpha_sim1.ini");
     });
 
-    test('enable a simulator that was disabled, and a grid by its nick, whatever the case', function () {
+    test('enable a simulator or a grid', function () {
         [$home, $etc] = toggle_tree();
 
         [$status] = toggle_run(['enable', 'Alpha_Sim2'], $home);
@@ -89,7 +89,7 @@ describe('opensim disable and enable', function () {
         expect($output)->toBe('grid alpha is already enabled');
     });
 
-    test('refuse a name that is none of the instances, and go on with the others', function () {
+    test('refuse an unknown name, go on', function () {
         [$home, $etc] = toggle_tree();
 
         [$status, , $errors] = toggle_run(['disable', 'nowhere', 'alpha_sim1'], $home);

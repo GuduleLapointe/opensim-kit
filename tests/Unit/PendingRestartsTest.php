@@ -41,7 +41,7 @@ describe('Pending restarts', function () {
         expect(PendingRestarts::read([]))->toBe([]);
     });
 
-    test('are left by a region disabled, which the simulator takes into account when it restarts', function () {
+    test('are left by a disabled region', function () {
         $profile = pending_profile();
         $file = "{$profile['EtcRoot']}/Far.ini";
         file_put_contents($file, "[Far]\n");

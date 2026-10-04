@@ -47,7 +47,7 @@ function helpers_config_tree(string $helpers = ''): array
 }
 
 describe('the config of the helpers', function () {
-    test('reads an ini the way OpenSimulator writes it, constants expanded', function () {
+    test('reads an ini, constants expanded', function () {
         [, $grid] = helpers_config_tree();
 
         $ini = OpenSimKit_HelpersConfig::read_ini("$grid/Robust.HG.ini");
@@ -69,7 +69,7 @@ describe('the config of the helpers', function () {
         expect(OpenSimKit_HelpersConfig::grid_nick('Beta', $conf))->toBeNull();
     });
 
-    test('takes the settings of the helpers from the Robust config of the grid', function () {
+    test('takes the settings from Robust', function () {
         [$conf] = helpers_config_tree();
 
         $settings = OpenSimKit_HelpersConfig::settings(null, $conf);
@@ -88,7 +88,7 @@ describe('the config of the helpers', function () {
         expect($settings['databases']['search_db'])->toBe($settings['databases']['robust_db']);
     });
 
-    test('lets helpers.ini give another database, other urls and other options', function () {
+    test('lets helpers.ini override', function () {
         [$conf] = helpers_config_tree(<<<'INI'
         [Helpers]
         path = "/helper"
@@ -122,7 +122,7 @@ describe('the config of the helpers', function () {
         expect(OpenSimKit_HelpersConfig::constants(OpenSimKit_HelpersConfig::settings(null, $conf))['OPENSIM_MOTD'])->toBe('Hello\\nthere');
     });
 
-    test('does not need the Robust config when helpers.ini has what the helpers need', function () {
+    test('does without Robust when helpers.ini is full', function () {
         [$conf, $grid] = helpers_config_tree(<<<'INI'
         [Helpers]
         grid_name = "Alpha"
@@ -166,7 +166,7 @@ describe('the config of the helpers', function () {
         expect($constants['CURRENCY_HELPER_URL'])->toBe('https://play.example.org/helpers/currency.php');
     });
 
-    test('finds nothing for a grid that does not exist, or when there are several without a choice', function () {
+    test('finds no grid, or none chosen', function () {
         [$conf, $grid] = helpers_config_tree();
         expect(OpenSimKit_HelpersConfig::settings('Nowhere', $conf))->toBeNull();
 

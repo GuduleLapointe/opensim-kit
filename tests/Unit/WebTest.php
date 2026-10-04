@@ -8,7 +8,7 @@ use OpenSim\Installer\Web\Services;
 use OpenSim\Installer\Web\Snippets;
 
 describe('Services', function () {
-    test('are under /helpers by default, as the documentation of opensim-helpers has them', function () {
+    test('are under /helpers by default', function () {
         $services = new Services();
 
         expect($services->path('search'))->toBe('/helpers/query.php');
@@ -17,7 +17,7 @@ describe('Services', function () {
         expect($services->aliases())->toBe([]);
     });
 
-    test('follow the path the operator chose, and the paths he gives to some services', function () {
+    test('follow the path chosen', function () {
         $services = new Services('helper/', ['search' => '/search', 'guide' => 'guide']);
 
         expect($services->path('currency'))->toBe('/helper/currency.php');
@@ -26,13 +26,13 @@ describe('Services', function () {
         expect($services->aliases())->toBe(['search' => '/search', 'guide' => '/guide']);
     });
 
-    test('keep a path of the service that is the default one out of the aliases', function () {
+    test('keep the default path out of aliases', function () {
         expect((new Services('/helper', ['currency' => '/helper/currency.php']))->aliases())->toBe([]);
     });
 });
 
 describe('helpers.ini', function () {
-    test('is written with what the setup knows, and the template for the rest', function () {
+    test('is written with what the setup knows', function () {
         $text = HelpersConfig::render('', [
             'gridName' => 'Alpha World',
             'loginUri' => 'http://play.example.org:8002',
@@ -92,7 +92,7 @@ describe('helpers.ini', function () {
 });
 
 describe('Snippets for the web server', function () {
-    test('serve the helpers under their path, deny what is not for the web, name the grid', function () {
+    test('serve the helpers, deny the rest', function () {
         foreach (Snippets::SERVERS as $server) {
             $text = Snippets::render($server, 'alpha', new Services('/helpers'));
 
@@ -104,7 +104,7 @@ describe('Snippets for the web server', function () {
         }
     });
 
-    test('have the grid in the environment of PHP, whatever the server', function () {
+    test('have the grid in the PHP environment', function () {
         $services = new Services();
 
         expect(Snippets::render('caddy', 'alpha', $services))->toContain('env OPENSIM_GRID alpha');

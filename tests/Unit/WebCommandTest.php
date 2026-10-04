@@ -77,7 +77,7 @@ describe('opensim web', function () {
         expect($output)->not->toContain('/helpers/');
     });
 
-    test('writes the snippet of the web server with the aliases the grid needs', function () {
+    test('writes the web server snippet', function () {
         [$status, $output] = web_run(
             ['snippet', 'caddy'],
             web_home(['alpha'], "[Helpers]\npath = \"/helper\"\n[Urls]\nguide = \"/guide\"\n"),
@@ -89,7 +89,7 @@ describe('opensim web', function () {
         expect($output)->toContain('env OPENSIM_GRID alpha');
     });
 
-    test('asks which grid when there are several, and refuses a server it does not write', function () {
+    test('asks which grid, refuses a server', function () {
         $home = web_home(['alpha', 'beta']);
 
         [$status, , $errors] = web_run(['show'], $home);
@@ -156,7 +156,7 @@ describe('Robust config with the helpers', function () {
 });
 
 describe('opensim web, the grid first', function () {
-    test('takes the grid as the first word, as the instance is in the other commands', function () {
+    test('takes the grid first', function () {
         $home = web_home(['alpha', 'beta']);
 
         [, $output] = web_run(['beta'], $home);

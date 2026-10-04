@@ -26,7 +26,7 @@ function accounts_writer(): AccountWriter
 }
 
 describe('A list of accounts', function () {
-    test('is read from a CSV with or without its header line, whatever the delimiter', function () {
+    test('reads a CSV, with or without header', function () {
         $with = AccountList::parse("First Name;Last Name;E-mail;Password\nJane;Doe;jane@example.org;pw1\nJohn;Roe;;\n");
         $without = AccountList::parse("Jane,Doe,jane@example.org,pw1\n\"John\",Roe\n");
 
@@ -44,7 +44,7 @@ describe('A list of accounts', function () {
         expect(array_column($without['accounts'], 'last'))->toBe(['Doe', 'Roe']);
     });
 
-    test('is read from JSON, a list or an object holding it, with the usual names of the keys', function () {
+    test('reads JSON, a list or an object', function () {
         $list = AccountList::parse('[{"firstname":"Jane","lastname":"Doe","mail":"jane@example.org"}]');
         $object = AccountList::parse('{"accounts":[{"first":"John","last":"Roe","password":"x"}]}');
 
@@ -62,7 +62,7 @@ describe('A list of accounts', function () {
         expect($list['errors'][2])->toContain('twice');
     });
 
-    test('ignores the mark a spreadsheet puts at the start of a file', function () {
+    test('ignores the BOM of a spreadsheet', function () {
         $list = AccountList::parse("\xEF\xBB\xBFfirst,last\nJane,Doe\n");
 
         expect($list['accounts'][0]['first'])->toBe('Jane');
@@ -83,7 +83,7 @@ describe('The statements of an account', function () {
         expect($made['sql'])->toContain("'607c44e9-3d01-45eb-a07e-937dc72dbadb', '<128,128,0>'");
     });
 
-    test('keep the password as Robust does, MD5 of the MD5 and the salt', function () {
+    test('keeps the password as Robust does', function () {
         $salt = str_repeat('ab', 16);
         $made = accounts_writer()->statements('Jane', 'Doe', '', 'secret');
 
@@ -92,7 +92,7 @@ describe('The statements of an account', function () {
         expect($made['sql'])->not->toContain("'secret'");
     });
 
-    test('make the inventory: a root, the system folders, the default outfit and its links', function () {
+    test('makes the inventory', function () {
         $made = accounts_writer()->statements('Jane', 'Doe', '', 'secret');
 
         expect(substr_count($made['sql'], 'INSERT INTO inventoryfolders'))->toBe(1 + 18 + 2);
@@ -145,7 +145,7 @@ describe('The import', function () {
         return AccountList::parse("Jane,Doe,,pw1\nJohn,Roe\nAnn,Poe,,\n")['accounts'];
     }
 
-    test('tells what it would make, and writes nothing, without --apply', function () {
+    test('writes nothing without --apply', function () {
         $log = [];
         $grid = new GridInfo();
 
@@ -155,7 +155,7 @@ describe('The import', function () {
         expect(array_column($done['results'], 'status'))->toBe(['exists', 'would create', 'would create']);
     });
 
-    test('writes each account in one go, and gives a password to the ones that have none', function () {
+    test('writes each account, makes missing passwords', function () {
         $log = [];
 
         $done = accounts_importer([], false, $log)->run(new GridInfo(), accounts_to_make(), true);
@@ -168,7 +168,7 @@ describe('The import', function () {
         expect($log[1])->toContain(md5(md5($done['results'][1]['password']) . ':' . str_repeat('ab', 16)));
     });
 
-    test('stops at the first account that fails, unless told to go on', function () {
+    test('stops at the first failure', function () {
         $log = [];
         $stopped = accounts_importer([], true, $log)->run(new GridInfo(), accounts_to_make(), true);
         $log = [];
@@ -178,7 +178,7 @@ describe('The import', function () {
         expect(array_column($going['results'], 'status'))->toBe(['failed', 'failed', 'failed']);
     });
 
-    test('gives the passwords it made, and only those, in the result for whoever sent the list', function () {
+    test('gives only the passwords it made', function () {
         $log = [];
         $done = accounts_importer([], false, $log)->run(new GridInfo(), accounts_to_make(), true);
 

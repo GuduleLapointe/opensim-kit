@@ -91,7 +91,7 @@ describe('opensim next port, what takes a port', function () {
         expect(array_map('intval', explode("\n", $output)))->toBe([19000, 19001, 19002]);
     });
 
-    test('is a simulator of the grid, whatever the port it announces', function () {
+    test('is a simulator of the grid', function () {
         $home = next_home();
         file_put_contents(
             dirname($home) . '/etc/grids/alpha/sims/alpha_sim1.ini',
@@ -109,7 +109,7 @@ describe('opensim next port, what takes a port', function () {
 });
 
 describe('opensim next location', function () {
-    test('gives the free place nearest to the one asked, turning from the east', function () {
+    test('gives the nearest free place', function () {
         [$status, $output] = next_run(['location', 'alpha', '1000,1000'], next_home());
 
         expect($status)->toBe(0);
@@ -149,7 +149,7 @@ describe('opensim next location default', function () {
 });
 
 describe('the center of a grid', function () {
-    test('is set by its port while it has no region, then by the regions it has', function () {
+    test('is set by the port, then by regions', function () {
         expect(OpenSim\Installer\Grid\LocationFinder::center([], 8012))->toBe([8012, 8012])
             ->and(OpenSim\Installer\Grid\LocationFinder::center(['1000,1000' => true, '1002,1000' => true], 8012))->toBe([1001, 1000])
             ->and(OpenSim\Installer\Grid\LocationFinder::center(['1000,1000' => true], 8012))->toBe([1000, 1000]);

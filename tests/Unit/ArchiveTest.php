@@ -63,7 +63,7 @@ describe('the names of the archives', function () {
         expect(Archives::part('Old-Grid name'))->toBe('Old_Grid_name');
     });
 
-    test('are found again, the newest of the inventory or the region', function () {
+    test('finds the newest archive', function () {
         $dir = sys_get_temp_dir() . '/archive-new-' . bin2hex(random_bytes(4));
         mkdir($dir);
         foreach (['alpha-sim1-20261001-100000.oar', 'alpha-sim1-noassets-20261003-100000.oar', 'alpha-sim1-Welcome-20261009-100000.oar', 'alpha-sim10-20261009-100000.oar'] as $name) {
@@ -103,7 +103,7 @@ describe('the arguments of a command on an archive', function () {
             ->and(fn() => Archives::positional('save', 'oar', ['a', 'b']))->toThrow(InvalidArgumentException::class, 'too many');
     });
 
-    test('make the line of the console, what is the setup\'s own left out, what has a space quoted', function () {
+    test('makes the console line', function () {
         expect(Archives::line('save', 'oar', ['noassets' => true, 'region' => 'Welcome', 'perm' => 'CMT'], ['/tmp/a b.oar']))
             ->toBe('save oar --noassets --perm=CMT "/tmp/a b.oar"')
             ->and(Archives::line('load', 'iar', ['merge' => true], ['Jane', 'Doe', '/My Stuff', 'pw', '/tmp/x.iar']))
@@ -112,7 +112,7 @@ describe('the arguments of a command on an archive', function () {
 });
 
 describe('the instance a command names', function () {
-    test('is a grid, a grid and a simulator or a region, or one of them alone, or the only grid', function () {
+    test('is a grid, a simulator or a region', function () {
         $profile = archive_install();
 
         expect(Instances::locate($profile, []))->toBe(['alpha', null, null])
@@ -150,7 +150,7 @@ describe('opensim save and load', function () {
         );
     }
 
-    test('save a region of a simulator with one region, in the folder of the archives, with a name that says what it is', function () {
+    test('saves a region with a telling name', function () {
         $profile = archive_install();
         $sent = [];
         [$code, $file] = archive_runner($profile, $sent, 'Finished writing out OAR for Welcome')->run('save', ['oar', 'alpha', 'sim1', '--noassets']);
@@ -174,7 +174,7 @@ describe('opensim save and load', function () {
             ->and($sent[0][1])->toStartWith("change region South\nsave oar ");
     });
 
-    test('ask which region of a simulator that has several, or take them all', function () {
+    test('asks which region, or takes all', function () {
         $profile = archive_install();
         $sent = [];
         $runner = archive_runner($profile, $sent, 'Finished writing out OAR');
@@ -200,7 +200,7 @@ describe('opensim save and load', function () {
             ->and($sent[0][1])->toBe("change region Welcome\nload oar --merge $file\n");
     });
 
-    test('save an inventory through a running simulator of the grid, the password in the line', function () {
+    test('saves an inventory', function () {
         $profile = archive_install();
         $sent = [];
         [$code, $file] = archive_runner($profile, $sent, 'Saved archive with 12 items for Jane Doe')->run('save', ['iar', 'Jane', 'Doe', '/', 'pw']);
@@ -233,7 +233,7 @@ describe('opensim save and load', function () {
         expect($code)->toBe(1)->and(implode("\n", $messages))->toContain('incorrect');
     });
 
-    test('refuse a file that exists, a simulator that does not run, a missing password', function () {
+    test('refuses a file, a stopped sim, no password', function () {
         $profile = archive_install();
         $sent = [];
         $runner = archive_runner($profile, $sent, 'Finished writing out OAR');
@@ -253,7 +253,7 @@ describe('opensim save and load', function () {
 });
 
 describe('opensim backup', function () {
-    test('holds the configuration, the data and a dump of each database of a grid, and nothing the users backed up', function () {
+    test('holds config, data and databases', function () {
         $profile = archive_install();
         $dumped = [];
         $backup = new Backup(

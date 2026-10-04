@@ -54,7 +54,7 @@ function import_tree(): string
 }
 
 describe('IniReader', function () {
-    test('reads a file with the folder it names for more, references kept until they are expanded', function () {
+    test('reads a file and its folder', function () {
         $ini = IniReader::load(import_tree());
 
         expect($ini['Const']['BaseURL'])->toBe('http://${Const|BaseHostname}');
@@ -62,7 +62,7 @@ describe('IniReader', function () {
         expect(IniReader::expand($ini)['Const']['BaseURL'])->toBe('http://old.example.org');
     });
 
-    test('follows the Include-* keys from the file and from the folder above, and stops at a loop', function () {
+    test('follows Include-* and stops at a loop', function () {
         $root = sys_get_temp_dir() . '/import-inc-' . bin2hex(random_bytes(4));
         mkdir("$root/bin/config-include", 0o755, true);
         file_put_contents("$root/bin/OpenSim.ini", "[Architecture]\n    Include-Architecture = \"config-include/Grid.ini\"\n[Startup]\n    a = 1\n");
@@ -108,7 +108,7 @@ describe('The plan of an imported Robust', function () {
 });
 
 describe('The customizations of an imported Robust', function () {
-    test('are what differs from the defaults of the core and is not written by the setup', function () {
+    test('are what differs from the defaults', function () {
         $original = [
             'Const' => ['PublicPort' => '8002', 'BaseHostname' => 'old.example.org', 'Mine' => 'x'],
             'GridService' => ['MaxRegionSize' => '1024', 'ExportSupported' => 'true', 'Unknown' => 'x'],
@@ -134,7 +134,7 @@ describe('The customizations of an imported Robust', function () {
         expect($by['Unknown']['unknown'])->toBeTrue();
     });
 
-    test('keep the places of the data where they are, made absolute, default or not', function () {
+    test('keep the data places, made absolute', function () {
         $found = RobustImporter::customizations(
             ['AssetService' => ['BaseDirectory' => './fsassets/data', 'SpoolDirectory' => '${Const|CacheDirectory}/tmp', 'Name' => '../x']],
             ['AssetService' => ['BaseDirectory' => '${Const|DataDirectory}/fsassets/data']],
@@ -151,7 +151,7 @@ describe('The customizations of an imported Robust', function () {
         expect($by['Name']['value'])->toBe('../x');
     });
 
-    test('are put into the config of the kit in place, quoted unless numbers or booleans', function () {
+    test('are put into the config, quoted', function () {
         $text = "[GridService]\n    ;MaxRegionSize = 0\n[Other]\n    a = 1\n";
 
         $out = RobustImporter::inject($text, [
@@ -204,7 +204,7 @@ function import_run(array $arguments, string $original): array
 describe('opensim import, the config of a grid', function () {
     $original = "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n[GridService]\n MaxRegionSize = 1024\n[AssetService]\n BaseDirectory = \"./fsassets/data\"\n SpoolDirectory = \"./tmp\"\n";
 
-    test('tells the plan and the settings it keeps, and writes nothing without --apply', function () use ($original) {
+    test('tells the plan, writes nothing', function () use ($original) {
         [$status, $output, , $root] = import_run(['@OLD@/Robust.HG.ini'], $original);
 
         expect($status)->toBe(0);
@@ -216,7 +216,7 @@ describe('opensim import, the config of a grid', function () {
         expect(is_dir("$root/etc/grids/oldworld"))->toBeFalse();
     });
 
-    test('writes the grid of the kit with the settings of the original in it, and leaves the original alone', function () use ($original) {
+    test('writes the grid, leaves the original', function () use ($original) {
         [$status, $output, $errors, $root] = import_run(['@OLD@/Robust.HG.ini', '--apply'], $original);
 
         expect($errors)->toBe('');
@@ -267,7 +267,7 @@ describe('The plan of an imported simulator', function () {
         return "$root/sim1/bin/OpenSim.ini";
     }
 
-    test('has what the setup asks, read from the original and the files it includes', function () {
+    test('has what the setup asks', function () {
         $path = import_sim_tree();
         $grid = new GridInfo();
         $grid->nick = 'oldworld';
@@ -292,7 +292,7 @@ describe('The plan of an imported simulator', function () {
         expect(SimImporter::externalHost(SimImporter::regionFiles(IniReader::load($path), $path)))->toBe('old.example.org');
     });
 
-    test('is refused for a standalone simulator, which has services of its own', function () {
+    test('is refused for a standalone sim', function () {
         $path = import_sim_tree('config-include/StandaloneHypergrid.ini');
 
         $plan = SimImporter::plan(IniReader::load($path), $path, new GridInfo(), [], null, '/core');
@@ -303,7 +303,7 @@ describe('The plan of an imported simulator', function () {
 });
 
 describe('opensim import, the config of a simulator', function () {
-    test('writes the simulator in the grid, its regions copied with their UUID, the settings of the original in it', function () {
+    test('writes the sim and its regions', function () {
         $robust = "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n";
         [$status, , $errors, $root] = import_run(['@OLD@/Robust.HG.ini', '--apply'], $robust);
         expect($status)->toBe(0, $errors);
@@ -356,7 +356,7 @@ function import_file(string $name, string $content, array $arguments = []): arra
 describe('opensim import, a setup file', function () {
     $setup = "grid: { name: My Grid, database: { user: a, password: b } }\nowner: { name: Jane Doe, password: hunter22 }\nsimulators:\n  - regions: [ { name: One }, { name: Two } ]\nusers:\n  - { first: Bob, last: Roe, password: pw123456 }\n";
 
-    test('tells everything it holds, and makes nothing without --apply', function () use ($setup) {
+    test('tells what it holds, makes nothing', function () use ($setup) {
         [$status, $output] = import_file('setup.yaml', $setup, ['@FILE@']);
 
         expect($status)->toBe(0)
@@ -370,7 +370,7 @@ describe('opensim import, a setup file', function () {
         expect($output)->toContain('1 account(s)')->not->toContain('the grid')->not->toContain('simulator');
     });
 
-    test('is restricted to the grid and its simulators: --grid --simulator', function () use ($setup) {
+    test('is restricted by --grid, --simulator', function () use ($setup) {
         [, $output] = import_file('setup.yaml', $setup, ['@FILE@', '--grid', '--simulator']);
 
         expect($output)->toContain('the grid My Grid')->toContain('simulator(s)')->not->toContain('account(s)');

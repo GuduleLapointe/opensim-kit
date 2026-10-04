@@ -6,7 +6,7 @@
 use OpenSim\Installer\Grid\RobustGrid;
 
 describe('RobustGrid answers', function () {
-    test('give the place of each region, in blocks of 256 m, and what it takes', function () {
+    test('give the place of each region', function () {
         $xml =
             '<?xml version="1.0"?><ServerResponse>' .
             '<region0 type="List"><uuid>a</uuid><locX>256000</locX><locY>256000</locY><sizeX>256</sizeX><sizeY>256</sizeY><regionName>Sim1</regionName></region0>' .

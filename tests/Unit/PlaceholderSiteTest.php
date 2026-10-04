@@ -41,7 +41,7 @@ function placeholder_page(string $gridName, bool $configured = true): string
 }
 
 describe('The placeholder site', function () {
-    test('shows the name of the grid, how to connect and where the services are', function () {
+    test('shows the grid and its services', function () {
         $page = placeholder_page('Alpha World');
 
         expect($page)->toContain('<title>Alpha World</title>');

@@ -10,7 +10,7 @@ use OpenSim\Installer\Grid\GridInfo;
 use OpenSim\Installer\Ui\QuietUi;
 
 describe('The home of an account', function () {
-    test('is a row of GridUser with the names Robust creates, updated when there is one', function () {
+    test('is a row of GridUser', function () {
         $sql = GridAccounts::homeSql('11111111-2222-3333-4444-555555555555', '607c44e9-3d01-45eb-a07e-937dc72dbadb');
 
         expect($sql)->toStartWith('INSERT INTO GridUser (UserID, HomeRegionID, HomePosition, HomeLookAt) VALUES (');
@@ -19,7 +19,7 @@ describe('The home of an account', function () {
         expect($sql)->toContain('ON DUPLICATE KEY UPDATE HomeRegionID = VALUES(HomeRegionID)');
     });
 
-    test('is not written for a name that is not a person, nor a region that is not an id', function () {
+    test('is not written for a wrong name', function () {
         $accounts = new GridAccounts(new Database(new QuietUi()), new QuietUi());
         $grid = new GridInfo();
 
