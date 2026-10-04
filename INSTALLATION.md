@@ -94,7 +94,19 @@ opensim web <grid> check          # which ones answer
 opensim web <grid> snippet caddy  # for the web server: caddy, nginx or apache
 ```
 
-The setup writes the configuration of each server in `/etc/opensim/grids/<grid>/web/` (`<grid>.caddyfile`, `<grid>-nginx.conf`, `<grid>-apache.conf`): the root, `index.php` for what is not a file, PHP, the grid.
+The setup writes a complete file for each server in `/etc/opensim/grids/<grid>/web/` (`<grid>.caddyfile`, `<grid>-nginx.conf`, `<grid>-apache.conf`), for the site of the web URL of the grid: include it from the config of the server, or use it alone. Certificates are yours to add (Caddy gets its own).
+
+## Firewall
+
+The setup does not touch the firewall: `opensim ports --ufw` tells which rules the enabled instances need, you apply them.
+
+```bash
+opensim ports --ufw    # allow rules for the public ports, the others as comments
+```
+
+- Open to everyone: the login port of Robust (8002), the HTTP port of each simulator and its regions (UDP: the viewers send to them), and 80 and 443 for the web site.
+- Keep closed from the outside: the private port of Robust (8003, no protection of its own) and the consoles (x4 of each block, they give every right on the instance), and the database. Open one to a machine that needs it with `ufw allow from <address> to any port <port> proto tcp`.
+- A container or a machine behind a router: forward the same public ports (`opensim ports --publish` gives the `-p` options of a container).
 
 ## Importing, and accounts in bulk
 

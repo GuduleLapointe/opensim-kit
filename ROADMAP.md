@@ -25,7 +25,7 @@
 - [ ] dependencies packages must be added to the release assets in their own repositories
 - [x] opensim status "down" count should not be displayed when none of the instances are down
 - [x] a new region is named after itself without a restart of the simulator (the object of `share/ossl-scripts`, loaded through the console)
-- [ ] try to open ports if firewall is active (`opensim ports --ufw` only tells the rules)
+- [x] firewall: `opensim ports --ufw` tells the rules, `INSTALLATION.md` has a Firewall section, the setup does not apply them
 - [x] the simulators of a grid with helpers know where `offline.php` (`[Messaging]`) and `register.php` (`DATA_SRV_MISearch` of `[DataSnapshot]`) are
 - [x] the message of the day: `[LoginService] MessageUrl` is a URL whose text is shown at login (read by Robust when it starts, `WelcomeMessage` when it cannot be), found in the code of the core (`LLLoginService`); `motd.php` of opensim-helpers serves the `motd` of `helpers.ini`
 - [x] the destination guide is `guide.php` of the helpers, `DestinationGuide` of the Robust config points to it
