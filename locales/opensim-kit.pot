@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: opensim-kit\n"
 "Report-Msgid-Bugs-To: gudule@speculoos.world\n"
-"POT-Creation-Date: 2026-10-02 20:36+0000\n"
+"POT-Creation-Date: 2026-10-04 12:46-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,16 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: install/src/Config.php:150
+#, php-format
+msgid "Invalid profile name: %s"
+msgstr ""
+
+#: install/src/Config.php:184
+#, php-format
+msgid "%s is the default profile, make another one the default first"
+msgstr ""
 
 #: install/src/Distribution.php:21
 #, php-format
@@ -73,7 +83,7 @@ msgstr ""
 msgid "Cannot use database %s: %s"
 msgstr ""
 
-#: install/src/Grid/Database.php:157
+#: install/src/Grid/Database.php:158
 #, php-format
 msgid ""
 "Login refused for user %s: the password is wrong, or the account does not "
@@ -81,753 +91,893 @@ msgid ""
 "available (%s).%s"
 msgstr ""
 
-#: install/src/Grid/Database.php:170
+#: install/src/Grid/Database.php:173
 #, php-format
 msgid ""
 "User '%s'@'%s' exists but the password is rejected: give the right password."
 msgstr ""
 
-#: install/src/Grid/Database.php:178
+#: install/src/Grid/Database.php:184
 #, php-format
 msgid "User %s does not exist on %s."
 msgstr ""
 
-#: install/src/Grid/Database.php:179
+#: install/src/Grid/Database.php:186
 #, php-format
 msgid "User %s exists for %s, not for '%s' (the host it connects from)."
 msgstr ""
 
-#: install/src/Grid/Database.php:181
+#: install/src/Grid/Database.php:193
 #, php-format
 msgid "Create user '%s'@'%s' on %s?"
 msgstr ""
 
-#: install/src/Grid/Database.php:196
+#: install/src/Grid/Database.php:209
 #, php-format
 msgid "The user was created but still cannot log in: %s"
 msgstr ""
 
-#: install/src/Grid/Database.php:209
+#: install/src/Grid/Database.php:224
 #, php-format
 msgid ""
 "User %s can connect to %s, but has no access to database %s: it does not "
 "exist, or the user has no rights on it."
 msgstr ""
 
-#: install/src/Grid/Database.php:215
+#: install/src/Grid/Database.php:236
 #, php-format
 msgid ""
 "The administrator access to the server, to check or create it, is not "
 "available (%s).%s"
 msgstr ""
 
-#: install/src/Grid/Database.php:243
+#: install/src/Grid/Database.php:267
 #, php-format
 msgid "Still cannot use database %s: %s"
 msgstr ""
 
-#: install/src/Grid/Database.php:247
+#: install/src/Grid/Database.php:271
 #, php-format
 msgid "Database %s ready on %s."
 msgstr ""
 
-#: install/src/Grid/Database.php:261
+#: install/src/Grid/Database.php:285
 #, php-format
 msgid "Could not %s: %s"
 msgstr ""
 
-#: install/src/Grid/Database.php:280
+#: install/src/Grid/Database.php:304
 msgid ""
 "From an account with administrator rights on the database server, run what "
 "is missing:"
 msgstr ""
 
-#: install/src/Grid/Database.php:456
+#: install/src/Grid/Database.php:484
 #, php-format
 msgid ""
 "Creating what is missing needs an administrator account of the database "
 "server %s, one that may create users and databases."
 msgstr ""
 
-#: install/src/Grid/Database.php:458
+#: install/src/Grid/Database.php:489
 msgid ""
 "Its password is used for this setup only, kept in memory, never written."
 msgstr ""
 
-#: install/src/Grid/Database.php:460
+#: install/src/Grid/Database.php:493
 #, php-format
 msgid "Enter the credentials of an administrator account of %s?"
 msgstr ""
 
-#: install/src/Grid/Database.php:466
+#: install/src/Grid/Database.php:502
 msgid "Administrator user"
 msgstr ""
 
-#: install/src/Grid/Database.php:470
+#: install/src/Grid/Database.php:510
 #, php-format
 msgid "Password of %s"
 msgstr ""
 
-#: install/src/Grid/Database.php:477
+#: install/src/Grid/Database.php:519
 #, php-format
 msgid "Login refused for %s on %s: %s"
 msgstr ""
 
-#: install/src/Grid/Database.php:478
+#: install/src/Grid/Database.php:521
 msgid "Try again with other credentials?"
 msgstr ""
 
-#: install/src/Grid/GridAccounts.php:114
+#: install/src/Grid/GridAccounts.php:119
 #, php-format
 msgid "Starting the grid '%s' to create the account."
 msgstr ""
 
-#: install/src/Grid/GridAccounts.php:117
+#: install/src/Grid/GridAccounts.php:123
 #, php-format
 msgid "Could not reach the console of the grid '%s' to create the account."
 msgstr ""
 
-#: install/src/Grid/GridAccounts.php:130
+#: install/src/Grid/GridAccounts.php:142
 #, php-format
 msgid "The account %s was not created: see the console of the grid."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:34 install/src/Grid/NewSim.php:44
+#: install/src/Grid/NewGrid.php:35 install/src/Grid/NewGrid.php:58
+#: install/src/Grid/NewSim.php:45
 msgid "No installed framework found. Install an OpenSim core first."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:50 install/src/Grid/NewGrid.php:55
-#: install/src/Grid/NewSim.php:64 install/src/Grid/NewSim.php:69
+#: install/src/Grid/NewGrid.php:91 install/src/Grid/NewGrid.php:97
+#: install/src/Grid/NewSim.php:95 install/src/Grid/NewSim.php:101
 msgid "Stopped, nothing was changed: OpenSim cannot run without its database."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:54 install/src/Grid/NewSim.php:68
-msgid "Try again (the database settings can be changed)?"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:68
+#: install/src/Grid/NewGrid.php:118
 #, php-format
 msgid "Apply this configuration to grid '%s'?"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:69 install/src/Grid/NewSim.php:79
-#: install/src/Grid/NewSim.php:141 install/src/Grid/NewSim.php:221
-#: install/src/Grid/NewSim.php:937 install/src/Installer.php:107
+#: install/src/Grid/NewGrid.php:125
+msgid "Enable grid (link into robust.d)"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:132
+msgid "Start grid now"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:138 install/src/Grid/NewSim.php:149
+#: install/src/Grid/NewSim.php:254 install/src/Grid/NewSim.php:327
+msgid "Apply"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:141 install/src/Grid/NewSim.php:152
+#: install/src/Grid/NewSim.php:257 install/src/Grid/NewSim.php:330
+#: install/src/Grid/NewSim.php:423 install/src/Installer.php:107
 msgid "Aborted — nothing changed."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:76
-#, php-format
-msgid "Enable grid '%s' (link into robust.d)?"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:77
-#, php-format
-msgid "Start grid '%s' now?"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:114 install/src/Grid/NewGrid.php:121
-#: install/src/Grid/NewGrid.php:238 install/src/Grid/NewGrid.php:274
-#: install/src/Grid/NewSim.php:239 install/src/Grid/NewSim.php:280
-#: install/src/Grid/NewSim.php:282 install/src/Grid/NewSim.php:287
-#: install/src/Grid/NewSim.php:324
+#: install/src/Grid/NewGrid.php:183 install/src/Grid/NewGrid.php:190
+#: install/src/Grid/NewGrid.php:330 install/src/Grid/NewGrid.php:373
+#: install/src/Grid/NewSim.php:454 install/src/Grid/NewSim.php:496
+#: install/src/Grid/NewSim.php:498 install/src/Grid/NewSim.php:503
+#: install/src/Grid/NewSim.php:542
 #, php-format
 msgid "Wrote %s"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:130 install/src/Grid/NewSim.php:302
+#: install/src/Grid/NewGrid.php:202 install/src/Grid/NewSim.php:520
 #, php-format
 msgid "Enabled: %s"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:135
+#: install/src/Grid/NewGrid.php:207
 msgid "Could not enable the grid (Robust config missing)."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:139
+#: install/src/Grid/NewGrid.php:211
 #, php-format
 msgid "Grid '%s' configured."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:184
+#: install/src/Grid/NewGrid.php:216
+#, php-format
+msgid ""
+"Web site: the helpers are in %s, the placeholder site in /usr/share/opensim-"
+"web/html (when the opensim-web package is installed). The configuration for "
+"your web server is in %s/web: %s.caddyfile, %s-nginx.conf, %s-apache.conf, "
+"to include in the site of the grid (opensim web %s snippet <caddy|nginx|"
+"apache> writes it again)."
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:271
 #, php-format
 msgid "Grid '%s' is running."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:191
+#: install/src/Grid/NewGrid.php:279
 #, php-format
 msgid ""
 "Grid '%s' is configured but was not ready after two minutes. Try: %s -v "
 "start %s"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:192
+#: install/src/Grid/NewGrid.php:284
 #, php-format
 msgid "Grid '%s' is configured but did not start. Try: %s -v start %s"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:196 install/src/Grid/NewSim.php:470
+#: install/src/Grid/NewGrid.php:288 install/src/Grid/NewSim.php:818
 msgid "Recent log:"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:272
+#: install/src/Grid/NewGrid.php:367
 #, php-format
 msgid ""
 "%s holds the database password and is readable by every user of this "
 "machine: give it to the group of your web server (chgrp, then chmod 640)."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:305
+#: install/src/Grid/NewGrid.php:389
+#, php-format
+msgid "Wrote the web server files in %s"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:420
 msgid "Copied config-include defaults."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:311 install/src/Grid/NewSim.php:207
-#: install/src/Grid/NewSim.php:573 install/src/Grid/NewSim.php:664
-#: install/src/Grid/NewSim.php:822 install/src/Grid/NewSim.php:1008
+#: install/src/Grid/NewGrid.php:426 install/src/Grid/NewSim.php:396
+#: install/src/Grid/NewSim.php:921 install/src/Grid/NewSim.php:1055
+#: install/src/Grid/NewSim.php:1520
 msgid "Enter a port number."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:321 install/src/Grid/NewGrid.php:323
-#: install/src/Grid/NewSim.php:590
-msgid "Grid name"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:324 install/src/Grid/NewSim.php:595
-msgid "Grid nick (alphanumeric)"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:330
-#, php-format
-msgid "Grid '%s' is already configured (%s)."
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:331 install/src/Grid/NewSim.php:720
-msgid "Abandon, keep it unchanged"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:331
-msgid "Modify its settings"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:335 install/src/Grid/NewSim.php:725
-msgid "Left unchanged."
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:355
-msgid "Enable Hypergrid?"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:359
-msgid "Free blocks between regions (0: side by side)"
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:363
-msgid "A number of blocks, 0 to 50."
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:370
+#: install/src/Grid/NewGrid.php:434
 #, php-format
 msgid "No OpenSim core found under %s."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:375
+#: install/src/Grid/NewGrid.php:459 install/src/Grid/NewSim.php:934
+#: install/src/Setup/QuickSetup.php:35
+msgid "Grid name"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:463 install/src/Grid/NewSim.php:940
+msgid "Grid nick (snake_case)"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:465
+msgid "Names its folder, its database and its instances"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:471
+msgid "Enable Hypergrid?"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:478
+msgid "Free blocks between regions (0: side by side)"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:482
+msgid "A number of blocks, 0 to 50."
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:486
 msgid "OpenSim core to run this grid"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:382
+#: install/src/Grid/NewGrid.php:493
+msgid "Grid"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:503
+#, php-format
+msgid "Grid '%s' is already configured (%s)."
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:504 install/src/Grid/NewSim.php:1198
+msgid "Abandon, keep it unchanged"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:504
+msgid "Modify its settings"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:508 install/src/Grid/NewSim.php:1203
+msgid "Left unchanged."
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:550
 msgid "Base hostname"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:387
+#: install/src/Grid/NewGrid.php:553
 msgid "Public port"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:392
+#: install/src/Grid/NewGrid.php:559
 msgid "Private port"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:397
-msgid "Web URL"
+#: install/src/Grid/NewGrid.php:565
+msgid "Center of the grid (x,y)"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:423
-msgid ""
-"Serve the economy, search and offline messages of the grid with opensim-"
-"helpers?"
+#: install/src/Grid/NewGrid.php:567
+msgid "Where new regions are searched from, kept"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:432
-msgid "Path of the helpers on the web site"
+#: install/src/Grid/NewGrid.php:569 install/src/Grid/NewSim.php:404
+#: install/src/Grid/NewSim.php:1569
+msgid "Use x,y (e.g. 8002,8002)."
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:436
-msgid "A path such as /helpers."
-msgstr ""
-
-#: install/src/Grid/NewGrid.php:451
+#: install/src/Grid/NewGrid.php:574
 msgid "Console of the grid"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:453 install/src/Grid/NewSim.php:809
+#: install/src/Grid/NewGrid.php:577 install/src/Grid/NewSim.php:1149
 msgid "Remote REST console (recommended)"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:454 install/src/Grid/NewSim.php:810
+#: install/src/Grid/NewGrid.php:578 install/src/Grid/NewSim.php:1150
 msgid "Screen session (on this machine)"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:464 install/src/Grid/NewSim.php:820
+#: install/src/Grid/NewGrid.php:584 install/src/Grid/NewSim.php:1156
 msgid "Console port"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:483 install/src/Grid/NewSim.php:872
+#: install/src/Grid/NewGrid.php:589
+msgid "Web URL"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:592
+msgid "Serve the economy and the search of the grid with opensim-helpers?"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:598
+msgid "Helpers path"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:600
+msgid "After the Web URL: the viewers add the name of the script"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:603
+msgid "A path such as /helpers."
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:607
+msgid "Network"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:630
+#, php-format
+msgid "Helpers URL: %s (the viewers add the name of the script)"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:675 install/src/Grid/NewSim.php:1330
 msgid "Database host"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:484 install/src/Grid/NewSim.php:873
+#: install/src/Grid/NewGrid.php:681 install/src/Grid/NewSim.php:1331
 msgid "Database name"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:485 install/src/Grid/NewSim.php:874
+#: install/src/Grid/NewGrid.php:687 install/src/Grid/NewSim.php:1332
 msgid "Database user"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:489 install/src/Grid/NewSim.php:877
+#: install/src/Grid/NewGrid.php:691 install/src/Grid/NewSim.php:1333
 msgid "Database password"
 msgstr ""
 
-#: install/src/Grid/NewGrid.php:565
+#: install/src/Grid/NewGrid.php:693 install/src/Grid/NewSim.php:1335
+msgid "Database"
+msgstr ""
+
+#: install/src/Grid/NewGrid.php:790
 msgid "Grid plan:"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:78
+#: install/src/Grid/NewSim.php:122
 #, php-format
 msgid "Apply this configuration to simulator '%s'?"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:86
-#, php-format
-msgid "Enable simulator '%s' (link into opensim.d)?"
+#: install/src/Grid/NewSim.php:129
+msgid "Enable simulator (link into opensim.d)"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:87
-#, php-format
-msgid "Start simulator '%s' now?"
+#: install/src/Grid/NewSim.php:136
+msgid "Start simulator now"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:93
+#: install/src/Grid/NewSim.php:143
 msgid ""
 "The simulator is running: warn its users and wait two minutes before "
 "restarting it?"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:133
-#, php-format
-msgid "A region is already described in %s."
-msgstr ""
-
-#: install/src/Grid/NewSim.php:138
+#: install/src/Grid/NewSim.php:231 install/src/Grid/NewSim.php:304
 #, php-format
 msgid "Region %s at %s, port %s, for simulator '%s'."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:140
+#: install/src/Grid/NewSim.php:242 install/src/Grid/NewSim.php:315
 #, php-format
 msgid "Add region '%s'?"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:145
+#: install/src/Grid/NewSim.php:248 install/src/Grid/NewSim.php:321
 msgid "Load it now (starting the simulator when it is not running)?"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:163
+#: install/src/Grid/NewSim.php:298
+#, php-format
+msgid "A region is already described in %s."
+msgstr ""
+
+#: install/src/Grid/NewSim.php:352
 #, php-format
 msgid "Simulator '%s' is not configured."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:194
+#: install/src/Grid/NewSim.php:383
 #, php-format
 msgid "Region '%s' is disabled or unknown: enable it first."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:210 install/src/Grid/NewSim.php:1022
+#: install/src/Grid/NewSim.php:401 install/src/Grid/NewSim.php:1566
+#: install/src/Grid/NewSim.php:1658
+msgid "Region location (x,y)"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:409 install/src/Grid/NewSim.php:1585
 msgid "Region port"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:217
+#: install/src/Grid/NewSim.php:415
 #, php-format
-msgid "Change region '%s' to %s, port %s?"
+msgid "Change region '%s'?"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:226
+#: install/src/Grid/NewSim.php:420
+#, php-format
+msgid "Region '%s'"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:437
 #, php-format
 msgid ""
 "The simulator '%s' restarts to apply it when you quit the setup, or now: "
 "opensim restart %s"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:243
+#: install/src/Grid/NewSim.php:458
 #, php-format
 msgid "Grid '%s' not found."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:260
+#: install/src/Grid/NewSim.php:476
 #, php-format
 msgid "Account %s created in the grid '%s'."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:288 install/src/Grid/NewSim.php:325
+#: install/src/Grid/NewSim.php:504 install/src/Grid/NewSim.php:543
 #, php-format
 msgid "Region %s already described, left as it is."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:307
+#: install/src/Grid/NewSim.php:525
 msgid "Could not enable the simulator (config missing)."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:311
+#: install/src/Grid/NewSim.php:529
 #, php-format
 msgid "Simulator '%s' configured."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:351
+#: install/src/Grid/NewSim.php:571
 #, php-format
 msgid ""
 "The simulator '%s' did not take the region %s through its console. It is "
 "described, and loaded the next time the simulator starts: opensim restart %s"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:355
+#: install/src/Grid/NewSim.php:582
 #, php-format
 msgid "Region %s did not register in the grid '%s'."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:359
+#: install/src/Grid/NewSim.php:587
 #, php-format
 msgid "Region %s is online."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:370
+#: install/src/Grid/NewSim.php:639
+#, php-format
+msgid "The simulator did not take the initialization of region %s."
+msgstr ""
+
+#: install/src/Grid/NewSim.php:658
+#, php-format
+msgid "Parcel of region %s is named %s."
+msgstr ""
+
+#: install/src/Grid/NewSim.php:667
+#, php-format
+msgid ""
+"The parcel of region %s is not named yet: its initialization object may "
+"still be starting."
+msgstr ""
+
+#: install/src/Grid/NewSim.php:681
 #, php-format
 msgid "Updated %s: %s is %s."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:389
+#: install/src/Grid/NewSim.php:705
 #, php-format
 msgid ""
 "Could not set the home of %s: set it from the viewer, or the first login "
 "ends with an error."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:399
+#: install/src/Grid/NewSim.php:720
 #, php-format
 msgid "The grid '%s' did not restart: try %s -v restart now %s"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:426
+#: install/src/Grid/NewSim.php:754
 #, php-format
 msgid ""
 "The grid '%s' is not running, and a simulator cannot start without it. "
 "Enable and start it first: %s -v start %s"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:439
+#: install/src/Grid/NewSim.php:773
 #, php-format
 msgid ""
 "Simulator '%s' runs, but the region %s did not register in the grid '%s'."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:448
+#: install/src/Grid/NewSim.php:786
 #, php-format
 msgid "Simulator '%s' is running."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:450
+#: install/src/Grid/NewSim.php:790
 #, php-format
 msgid ""
 "Simulator '%s' is running, region %s started: see the grid, on its map, for "
 "its registration."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:451
+#: install/src/Grid/NewSim.php:796
 #, php-format
 msgid "Simulator '%s' is running, region %s is online."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:551
+#: install/src/Grid/NewSim.php:899
 msgid "Grid of the simulator"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:559
+#: install/src/Grid/NewSim.php:907
 #, php-format
 msgid "Grid '%s' is not known here."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:577
+#: install/src/Grid/NewSim.php:926
 msgid ""
 "The simulator joins a grid whose Robust server runs on another machine (or "
 "in another container): it needs its address and its ports."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:579
+#: install/src/Grid/NewSim.php:931
 msgid "Address of the grid (host:port)"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:587
+#: install/src/Grid/NewSim.php:936 install/src/Grid/NewSim.php:942
+msgid "Empty: the grid tells it"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:946
+msgid ""
+"Private port of the grid (only for its simulators, and this machine is one)"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:948
+msgid "Empty: the public port plus one"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:953
+msgid "Does the grid use Hypergrid?"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:958
+msgid "Remote grid"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:970
 #, php-format
 msgid ""
 "The grid did not answer at http://%s:%s/get_grid_info: check its address and "
 "its public port, or go on with what you know of it."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:603
+#: install/src/Grid/NewSim.php:991
 #, php-format
 msgid ""
 "A grid of this machine already has the nick '%s': it is its own Robust, not "
 "another one."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:609
+#: install/src/Grid/NewSim.php:999
 #, php-format
 msgid "Grid '%s' is already known here, its description is kept."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:615
-msgid ""
-"Private port of the grid (only for its simulators, and this machine is one)"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:619
-msgid "Does the grid use Hypergrid?"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:686
+#: install/src/Grid/NewSim.php:1077
 msgid "Letters, digits, spaces, _ and - only."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:695
+#: install/src/Grid/NewSim.php:1084
+msgid "No OpenSim core found."
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1119
 msgid "Simulator name"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:717
+#: install/src/Grid/NewSim.php:1126
+msgid "OpenSim core to run this simulator"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1134
+msgid "Simulator HTTP port"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1140
+msgid "Public address of this machine"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1142
+msgid ""
+"What the regions announce to the viewers (SYSTEMIP: the first interface)"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1146
+msgid "Console of the simulator"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1162 install/src/Grid/NewSim.php:1576
+msgid "Simulator"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1195
 #, php-format
 msgid "Simulator '%s' is already configured (%s)."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:719
+#: install/src/Grid/NewSim.php:1197
 msgid "Modify its settings (its regions are kept)"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:737
-msgid "No OpenSim core found."
-msgstr ""
-
-#: install/src/Grid/NewSim.php:742
-msgid "OpenSim core to run this simulator"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:754
-msgid "Simulator HTTP port"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:766
-msgid ""
-"Public address of this machine, for the regions (SYSTEMIP: its first "
-"interface)"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:783
-msgid "Estate name"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:790
-msgid "Create the first region of this simulator?"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:807
-msgid "Console of the simulator"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:890
+#: install/src/Grid/NewSim.php:1353 install/src/Setup/QuickSetup.php:51
 msgid "First and last name, e.g. Jane Doe."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:895
+#: install/src/Grid/NewSim.php:1360
+msgid "Estate name"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1372
 #, php-format
 msgid ""
 "The estate is owned by an account of the grid '%s', which has to exist "
 "already (its administrator makes it on its Robust)."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:897 install/src/Grid/NewSim.php:906
-msgid "Estate owner (an account of the grid)"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:904
+#: install/src/Grid/NewSim.php:1377
 #, php-format
 msgid ""
 "The accounts of the grid '%s' cannot be read: the owner must be an existing "
 "account."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:915
+#: install/src/Grid/NewSim.php:1383
+msgid "Estate owner (an account of the grid)"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1391
+msgid "Create a new account in the grid"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1394
 msgid "Estate owner"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:926
+#: install/src/Grid/NewSim.php:1406
 #, php-format
 msgid ""
 "The grid '%s' has no account yet: the owner of the estate is the first one "
 "to create."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:930
+#: install/src/Grid/NewSim.php:1413
 msgid "Name of the new account (First Last)"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:933
-#, php-format
-msgid "Account %s does not exist yet, create it in the grid '%s'?"
-msgstr ""
-
-#: install/src/Grid/NewSim.php:943
+#: install/src/Grid/NewSim.php:1419
 msgid "Password of the new account"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:946
+#: install/src/Grid/NewSim.php:1423 install/src/Setup/QuickSetup.php:59
 msgid "At least 6 characters, without double quote."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:950
-msgid "Email of the new account"
+#: install/src/Grid/NewSim.php:1428
+msgid "Email of the new account (optional)"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:954
-msgid "An email address."
+#: install/src/Grid/NewSim.php:1434 install/src/Setup/QuickSetup.php:71
+msgid "An email address, or nothing."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:984
-msgid "Role of this region in the grid"
+#: install/src/Grid/NewSim.php:1439
+msgid "Estate"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:1017
+#: install/src/Grid/NewSim.php:1543
+msgid "Create the first region of this simulator?"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1550
 msgid "Region name"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:1052
-msgid "Region location (x,y)"
+#: install/src/Grid/NewSim.php:1578
+msgid "Auto (add new)"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:1062
+#: install/src/Grid/NewSim.php:1591
+msgid "Region"
+msgstr ""
+
+#: install/src/Grid/NewSim.php:1651
 #, php-format
 msgid "The place %s,%s is %s: the nearest free one is %s,%s."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:1063
+#: install/src/Grid/NewSim.php:1653
 #, php-format
 msgid "Use %s,%s?"
 msgstr ""
 
-#: install/src/Grid/NewSim.php:1081
+#: install/src/Grid/NewSim.php:1682
 #, php-format
 msgid ""
 "The grid does not answer at %s:%s: its regions are not known here, ask its "
 "owner which place is free."
 msgstr ""
 
-#: install/src/Grid/NewSim.php:1128
+#: install/src/Grid/NewSim.php:1738
 msgid "Simulator plan:"
 msgstr ""
 
-#: install/src/Hub.php:50
+#: install/src/Hub.php:55
 msgid "Add grid"
 msgstr ""
 
-#: install/src/Hub.php:51 install/src/Hub.php:134 install/src/Hub.php:160
-#: install/src/Hub.php:200 install/src/Hub.php:254 install/src/Hub.php:304
+#: install/src/Hub.php:56 install/src/Hub.php:171 install/src/Hub.php:198
+#: install/src/Hub.php:298 install/src/Hub.php:355 install/src/Hub.php:397
+#: install/src/Hub.php:447
 msgid "Quit"
 msgstr ""
 
-#: install/src/Hub.php:54
+#: install/src/Hub.php:59
 msgid "OpenSim — setup"
 msgstr ""
 
-#: install/src/Hub.php:59
+#: install/src/Hub.php:65
 msgid "Install an OpenSim core first."
 msgstr ""
 
-#: install/src/Hub.php:87
+#: install/src/Hub.php:96
+msgid "Abandoned."
+msgstr ""
+
+#: install/src/Hub.php:118
 msgid "To take these changes into account, restart:"
 msgstr ""
 
-#: install/src/Hub.php:88
+#: install/src/Hub.php:119
 msgid "Restart them now?"
 msgstr ""
 
-#: install/src/Hub.php:89
+#: install/src/Hub.php:122
 #, php-format
 msgid "They stay listed in %s: the setup offers them again next time."
 msgstr ""
 
-#: install/src/Hub.php:94
+#: install/src/Hub.php:131
 msgid "Warn the users of the simulators first (it takes two minutes)?"
 msgstr ""
 
-#: install/src/Hub.php:96
+#: install/src/Hub.php:133
 msgid "Some instances did not restart: see above, they stay listed."
 msgstr ""
 
-#: install/src/Hub.php:132
+#: install/src/Hub.php:169
 msgid "Install a new version"
 msgstr ""
 
-#: install/src/Hub.php:133 install/src/Hub.php:159 install/src/Hub.php:199
-#: install/src/Hub.php:253 install/src/Hub.php:303 install/src/Installer.php:41
+#: install/src/Hub.php:170 install/src/Hub.php:197 install/src/Hub.php:297
+#: install/src/Hub.php:354 install/src/Hub.php:396 install/src/Hub.php:446
+#: install/src/Installer.php:41
 msgid "Back"
 msgstr ""
 
-#: install/src/Hub.php:136
+#: install/src/Hub.php:173
 msgid "OpenSim core"
 msgstr ""
 
-#: install/src/Hub.php:155
+#: install/src/Hub.php:192
 msgid "Add a grid"
 msgstr ""
 
-#: install/src/Hub.php:157
-msgid "Create grid on this machine"
+#: install/src/Hub.php:194 install/src/Setup/QuickSetup.php:74
+msgid "Quick setup"
 msgstr ""
 
-#: install/src/Hub.php:158
-msgid "Connect to an external grid"
-msgstr ""
-
-#: install/src/Hub.php:194
-msgid "Add simulator"
+#: install/src/Hub.php:195
+msgid "Advanced setup"
 msgstr ""
 
 #: install/src/Hub.php:196
-msgid "Configure grid"
+msgid "Connect to an external grid"
 msgstr ""
 
-#: install/src/Hub.php:250
+#: install/src/Hub.php:256
+#, php-format
+msgid "Your grid %s is ready, nothing more is needed."
+msgstr ""
+
+#: install/src/Hub.php:260
+#, php-format
+msgid "Login URI: %s"
+msgstr ""
+
+#: install/src/Hub.php:263
+msgid ""
+"You can finish now, or continue to add regions and simulators and change "
+"settings."
+msgstr ""
+
+#: install/src/Hub.php:265
+msgid "Continue setup"
+msgstr ""
+
+#: install/src/Hub.php:265
+msgid "Finish setup"
+msgstr ""
+
+#: install/src/Hub.php:265
+msgid "Setup"
+msgstr ""
+
+#: install/src/Hub.php:291 install/src/Hub.php:393
 msgid "Add region"
 msgstr ""
 
-#: install/src/Hub.php:251
+#: install/src/Hub.php:292
+msgid "Simulators"
+msgstr ""
+
+#: install/src/Hub.php:294
+msgid "Configure grid"
+msgstr ""
+
+#: install/src/Hub.php:353
+msgid "Add simulator"
+msgstr ""
+
+#: install/src/Hub.php:394
 msgid "Configure sim"
 msgstr ""
 
-#: install/src/Hub.php:301
+#: install/src/Hub.php:444
 msgid "Reconfigure"
 msgstr ""
 
-#: install/src/Hub.php:323
+#: install/src/Hub.php:468
 #, php-format
 msgid "Disabled %s: the simulator takes it into account when it restarts."
 msgstr ""
 
-#: install/src/Hub.php:324
+#: install/src/Hub.php:469
 #, php-format
 msgid "Enabled %s: the simulator takes it into account when it restarts."
 msgstr ""
@@ -1003,4 +1153,140 @@ msgstr ""
 #: install/src/Runtime.php:157
 #, php-format
 msgid "mono ready: %s"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:30
+msgid ""
+"A grid and its first region, with the usual settings: you see them before "
+"anything is written, and can edit them."
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:38
+msgid "Login URI"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:40
+msgid "host:port, the address the viewers log in to"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:43
+msgid "host:port, e.g. play.example.org:8002."
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:47
+msgid "Grid owner"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:48
+msgid "First Last: the first account, owner of the first estate"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:55
+msgid "Owner password"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:63
+msgid "Owner email"
+msgstr ""
+
+#: install/src/Setup/QuickSetup.php:65
+msgid "Optional"
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:61
+msgid "Apply this configuration?"
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:62 install/src/Ui/AsksForms.php:40
+msgid "Continue"
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:62
+msgid "Edit config"
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:91
+#, php-format
+msgid "The grid '%s' exists already: this setup makes new ones."
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:104
+msgid ""
+"This setup has no grid, and there is not exactly one on this machine to use."
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:177
+msgid ""
+"The accounts of the list were not made: no grid of this machine to make them "
+"in."
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:194
+#, php-format
+msgid "Accounts: %s"
+msgstr ""
+
+#: install/src/Setup/SetupRunner.php:210
+#, php-format
+msgid "The passwords made for the accounts are in %s (only you can read it)."
+msgstr ""
+
+#: install/src/Ui/AsksForms.php:40
+msgid "Change something"
+msgstr ""
+
+#: install/src/Ui/AsksForms.php:40
+msgid "Is this right?"
+msgstr ""
+
+#: install/src/Ui/AsksForms.php:52
+msgid "Which one?"
+msgstr ""
+
+#: install/src/Ui/AsksForms.php:81 install/src/Ui/Prompts/FormPrompt.php:82
+msgid "No"
+msgstr ""
+
+#: install/src/Ui/AsksForms.php:81 install/src/Ui/Prompts/FormPrompt.php:82
+msgid "Yes"
+msgstr ""
+
+#: install/src/Ui/AsksForms.php:128
+msgid "This field is required."
+msgstr ""
+
+#: install/src/Ui/Prompts/FormPrompt.php:253
+#, php-format
+msgid "%s is required."
+msgstr ""
+
+#: install/src/Ui/Prompts/FormPromptRenderer.php:47
+msgid ""
+"Tab or Enter: next field, Shift-Tab: back, Left, Right, Space: choose, Enter "
+"on the last one: continue"
+msgstr ""
+
+#: libexec/profile.php:57
+#, php-format
+msgid "Unknown option: %s"
+msgstr ""
+
+#: libexec/profile.php:66
+#, php-format
+msgid "No such directory: %s"
+msgstr ""
+
+#: libexec/profile.php:74
+#, php-format
+msgid "Profile %s added\n"
+msgstr ""
+
+#: libexec/profile.php:80 libexec/profile.php:89
+#, php-format
+msgid "Unknown profile: %s"
+msgstr ""
+
+#: libexec/profile.php:94
+#, php-format
+msgid "Profile %s removed\n"
 msgstr ""

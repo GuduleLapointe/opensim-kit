@@ -20,21 +20,47 @@ final class Snippets
     public const DOCROOT = '/var/www/html';
     public const SOCKET = '/run/php/php-fpm.sock';
 
-    /** @throws \InvalidArgumentException for a server that is not written */
+    /**
+     * The file of a web server for the site of a grid: complete, to include from the config of the server or to use
+     * alone. The site is the one of the web URL of the grid.
+     *
+     * @throws \InvalidArgumentException for a server that is not written
+     */
     public static function render(
         string $server,
         string $nick,
         string $docroot = self::DOCROOT,
         string $socket = self::SOCKET,
+        string $webUrl = '',
     ): string {
+        $site = self::site($webUrl);
+
         return match ($server) {
-            'caddy' => self::caddy($nick, $docroot, $socket),
-            'nginx' => self::nginx($nick, $docroot, $socket),
-            'apache' => self::apache($nick, $docroot),
+            'caddy' => self::caddy($nick, $docroot, $socket, $site),
+            'nginx' => self::nginx($nick, $docroot, $socket, $site),
+            'apache' => self::apache($nick, $docroot, $site),
             default => throw new \InvalidArgumentException(
-                "No snippet for $server (" . implode(', ', self::SERVERS) . ').',
+                "No file for $server (" . implode(', ', self::SERVERS) . ').',
             ),
         };
+    }
+
+    /**
+     * Where the site answers, from its web URL: the host (none: any), the port when it is not the usual one of its scheme.
+     *
+     * @return array{host:string,scheme:string,port:?int}
+     */
+    private static function site(string $webUrl): array
+    {
+        $parts = parse_url(trim($webUrl)) ?: [];
+        $scheme = strtolower((string) ($parts['scheme'] ?? 'https'));
+        $port = isset($parts['port']) ? (int) $parts['port'] : null;
+
+        return [
+            'host' => (string) ($parts['host'] ?? ''),
+            'scheme' => $scheme === 'http' ? 'http' : 'https',
+            'port' => $port === ($scheme === 'http' ? 80 : 443) ? null : $port,
+        ];
     }
 
     private static function header(string $server, string $nick, string $how): string
@@ -43,31 +69,50 @@ final class Snippets
             "# What is not a file of the root goes to its index.php, the router of the helpers.\n";
     }
 
-    private static function caddy(string $nick, string $docroot, string $socket): string
+    private static function caddy(string $nick, string $docroot, string $socket, array $site): string
     {
-        return self::header('caddy', $nick, 'Put it in the site block of the web site.') .
-            "\nroot * $docroot\nphp_fastcgi unix/$socket {\n\ttry_files {path} /index.php\n\tenv OPENSIM_GRID $nick\n}\nfile_server\n";
+        $address = match (true) {
+            $site['host'] === '' => ':' . ($site['port'] ?? 80),
+            $site['scheme'] === 'http' => 'http://' .
+                $site['host'] .
+                ($site['port'] !== null ? ':' . $site['port'] : ''),
+            default => $site['host'] . ($site['port'] !== null ? ':' . $site['port'] : ''),
+        };
+
+        return self::header(
+            'caddy',
+            $nick,
+            'A complete site: `import` it from your Caddyfile, or use it as the Caddyfile.',
+        ) .
+            "\n$address {\n\troot * $docroot\n\tphp_fastcgi unix/$socket {\n\t\ttry_files {path} /index.php\n\t\tenv OPENSIM_GRID $nick\n\t}\n\tfile_server\n}\n";
     }
 
-    private static function nginx(string $nick, string $docroot, string $socket): string
+    private static function nginx(string $nick, string $docroot, string $socket, array $site): string
     {
-        return self::header(
-            'nginx',
-            $nick,
-            'Put it in the server block of the web site. Adjust the socket of PHP-FPM to your version.',
-        ) .
-            "\nroot $docroot;\nindex index.php index.html;\n\nlocation / {\n\ttry_files \$uri \$uri/ /index.php?\$query_string;\n}\n\n" .
-            "location ~ \\.php\$ {\n\t# A script that is not a file of the root is the business of the router\n\ttry_files \$uri /index.php?\$query_string;\n\tinclude fastcgi_params;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\tfastcgi_param OPENSIM_GRID $nick;\n\tfastcgi_pass unix:$socket;\n}\n";
+        $port = $site['scheme'] === 'http' ? $site['port'] ?? 80 : 80;
+        $how =
+            'A complete server: put it in /etc/nginx/conf.d/ or include it in the http block.' .
+            ($site['scheme'] === 'https' ? "\n# Certificate: add it as usual (certbot --nginx)." : '');
+
+        return self::header('nginx', $nick, $how) .
+            "\nserver {\n\tlisten $port;\n\tlisten [::]:$port;\n" .
+            ($site['host'] !== '' ? "\tserver_name {$site['host']};\n" : '') .
+            "\troot $docroot;\n\tindex index.php index.html;\n\n\tlocation / {\n\t\ttry_files \$uri \$uri/ /index.php?\$query_string;\n\t}\n\n" .
+            "\tlocation ~ \\.php\$ {\n\t\t# A script that is not a file of the root is the business of the router\n\t\ttry_files \$uri /index.php?\$query_string;\n\t\tinclude fastcgi_params;\n\t\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\t\tfastcgi_param OPENSIM_GRID $nick;\n\t\tfastcgi_pass unix:$socket;\n\t}\n}\n";
     }
 
-    private static function apache(string $nick, string $docroot): string
+    private static function apache(string $nick, string $docroot, array $site): string
     {
-        return self::header(
-            'apache',
-            $nick,
-            'Put it in the virtual host of the web site (PHP through libapache2-mod-php or PHP-FPM handling .php).',
-        ) .
-            "\nDocumentRoot $docroot\n<Directory $docroot>\n\tOptions -Indexes\n\tRequire all granted\n\tDirectoryIndex index.php index.html\n" .
-            "\tFallbackResource /index.php\n\tSetEnv OPENSIM_GRID $nick\n</Directory>\n";
+        $port = $site['scheme'] === 'http' ? $site['port'] ?? 80 : 80;
+        $how =
+            "A complete virtual host: put it in /etc/apache2/sites-available/ (a2ensite) or include it.\n" .
+            '# PHP is what handles .php on your Apache, mod_php or PHP-FPM.' .
+            ($site['scheme'] === 'https' ? "\n# Certificate: add it as usual (certbot --apache)." : '');
+
+        return self::header('apache', $nick, $how) .
+            "\n<VirtualHost *:$port>\n" .
+            ($site['host'] !== '' ? "\tServerName {$site['host']}\n" : '') .
+            "\tDocumentRoot $docroot\n\t<Directory $docroot>\n\t\tOptions -Indexes\n\t\tRequire all granted\n\t\tDirectoryIndex index.php index.html\n" .
+            "\t\tFallbackResource /index.php\n\t\tSetEnv OPENSIM_GRID $nick\n\t</Directory>\n</VirtualHost>\n";
     }
 }

@@ -129,6 +129,41 @@ describe('Snippets for the web server', function () {
             ->toContain('SetEnv OPENSIM_GRID alpha');
     });
 
+    test('are complete, for the site of the web URL', function () {
+        $url = 'https://play.example.org';
+
+        expect(Snippets::render('caddy', 'alpha', webUrl: $url))
+            ->toContain("play.example.org {\n\troot * /var/www/html")
+            ->and(Snippets::render('nginx', 'alpha', webUrl: $url))
+            ->toContain("server {\n\tlisten 80;")
+            ->toContain('server_name play.example.org;')
+            ->and(Snippets::render('apache', 'alpha', webUrl: $url))
+            ->toContain("<VirtualHost *:80>\n\tServerName play.example.org")
+            ->toContain('</VirtualHost>');
+    });
+
+    test('follow the scheme and the port of the web URL', function () {
+        expect(Snippets::render('caddy', 'alpha', webUrl: 'http://play.example.org:8080'))
+            ->toContain('http://play.example.org:8080 {')
+            ->and(Snippets::render('caddy', 'alpha', webUrl: 'https://play.example.org:8443'))
+            ->toContain('play.example.org:8443 {')
+            ->and(Snippets::render('caddy', 'alpha', webUrl: 'https://play.example.org:443'))
+            ->toContain("play.example.org {\n")
+            ->and(Snippets::render('nginx', 'alpha', webUrl: 'http://play.example.org:8080'))
+            ->toContain('listen 8080;')
+            ->and(Snippets::render('apache', 'alpha', webUrl: 'http://play.example.org:8080'))
+            ->toContain('<VirtualHost *:8080>');
+    });
+
+    test('answer any host when the grid has no web URL', function () {
+        expect(Snippets::render('caddy', 'alpha'))
+            ->toContain("\n:80 {\n")
+            ->and(Snippets::render('nginx', 'alpha'))
+            ->not->toContain('server_name')
+            ->and(Snippets::render('apache', 'alpha'))
+            ->not->toContain('ServerName');
+    });
+
     test('take another root and socket', function () {
         expect(Snippets::render('nginx', 'alpha', '/srv/site', '/run/php/php8.3-fpm.sock'))
             ->toContain('root /srv/site;')

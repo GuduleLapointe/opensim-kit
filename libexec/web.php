@@ -95,7 +95,7 @@ $webUrl =
 if ($command === 'snippet') {
     $server = $words[0] ?? '';
     try {
-        echo Snippets::render($server, $nick, $options['docroot'], $options['socket']);
+        echo Snippets::render($server, $nick, $options['docroot'], $options['socket'], $webUrl);
     } catch (InvalidArgumentException $e) {
         fail($e->getMessage() . "\n" . USAGE, 2);
     }

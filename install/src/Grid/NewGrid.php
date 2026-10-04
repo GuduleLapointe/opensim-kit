@@ -383,10 +383,10 @@ final class NewGrid
         ];
         foreach (Snippets::SERVERS as $server) {
             $file = "$webDir/{$names[$server]}";
-            file_put_contents($file, Snippets::render($server, $plan->gridNick));
+            file_put_contents($file, Snippets::render($server, $plan->gridNick, webUrl: $plan->webUrl));
             chmod($file, 0o644);
         }
-        $this->ui->note(sprintf(_('Wrote the web server examples in %s'), $webDir));
+        $this->ui->note(sprintf(_('Wrote the web server files in %s'), $webDir));
     }
 
     private function copyConfigInclude(GridPlan $plan): void

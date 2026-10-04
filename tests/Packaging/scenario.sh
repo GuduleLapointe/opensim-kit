@@ -56,7 +56,7 @@ check "the setup wrote the helpers.ini of the grid, for the group of the web ser
     [ \"\$(stat -c '%G %a' /etc/opensim/grids/testgrid/helpers.ini)\" = 'www-data 640' ]"
 check "the Robust config tells the viewers where the services are" "grep -q '^ *economy = \"\${Const|WebURL}/helpers\"' /etc/opensim/grids/testgrid/Robust.HG.ini &&
     grep -q '^ *SearchURL = \"\${Const|WebURL}/helpers/query.php\"' /etc/opensim/grids/testgrid/Robust.HG.ini"
-check "the setup wrote the examples for the web server, in the folder of the grid" "grep -q 'OPENSIM_GRID' /etc/opensim/grids/testgrid/web/testgrid.caddyfile &&
+check "the setup wrote the files for the web server, in the folder of the grid" "grep -q 'OPENSIM_GRID' /etc/opensim/grids/testgrid/web/testgrid.caddyfile &&
     grep -q 'fastcgi_param OPENSIM_GRID testgrid' /etc/opensim/grids/testgrid/web/testgrid-nginx.conf && [ -s /etc/opensim/grids/testgrid/web/testgrid-apache.conf ]"
 cat >/tmp/helpers-settings.php <<'EOF'
 <?php
