@@ -105,7 +105,7 @@ function test_oscountrealusers_does_not_guess_without_a_list() {
     assert_equals '' "$(osCountRealUsers)"
 }
 
-function test_oscountrealusers_from_a_screen_only_tells_when_nobody_is_there() {
+function test_oscountrealusers_from_a_screen_reads_the_rows_cut_at_80_columns() {
 	eval "$(sed -n '/^osCountRealUsers()/,/^}/p' "$ROOT/libexec/os-helpers")"
 	unset OSIM_REST_INI
 	simName=sim
@@ -114,8 +114,20 @@ function test_oscountrealusers_from_a_screen_only_tells_when_nobody_is_there() {
 
 	assert_equals '0' "$(osCountRealUsers)"
 
-	osScreenOutput() { printf '\nRoot agents in region Sim1: 1 (root 1, child 0)\nAnn Lee 1111-truncated\n'; }
+	# Only an NPC is there (the root count includes it), the type is in the 80 columns
+	osScreenOutput() {
+		printf '\nRoot agents in region Sim1: 1 (root 1, child 0)\nBob              NPC              11111111-2222-3333-4444-555555555556  NPC Roo\nt    <1, 2, 3>\n'
+	}
+	assert_equals '0' "$(osCountRealUsers)"
 
+	# A real user whose type was cut off counts
+	osScreenOutput() {
+		printf '\nRoot agents in region Sim1: 2 (root 2, child 0)\nAnn Averylongfirstname-and-more Lee 11111111-2222-3333-4444-555555555555\nBob              NPC              11111111-2222-3333-4444-555555555556  NPC Roo\n'
+	}
+	assert_equals '1' "$(osCountRealUsers)"
+
+	# Root agents without the rows to tell who they are: no answer
+	osScreenOutput() { printf '\nRoot agents in region Sim1: 1 (root 1, child 0)\nAnn Lee 1111-truncated\n'; }
 	osCountRealUsers >/dev/null
 	assert_equals '1' "$?"
 }

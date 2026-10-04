@@ -282,29 +282,31 @@ osScreenOutput() {
 # remote console in OSIM_REST_INI or its screen session), from `show users`: NPCs and
 # child agents are not counted. Says nothing, and fails, when it cannot tell.
 #
-# A remote console gives the whole list: the real users are the Root rows (the
-# others are Child, NPC Root, NPC Child). A screen session cuts the lines at the
-# width of the terminal, so its rows cannot be trusted: it only tells when no region
-# has a root agent at all (the count each region gives, NPCs included).
+# The rows are `Firstname Lastname Agent-ID Type Home`, the type being Root, Child,
+# NPC Root or NPC Child, the 72nd column on (a screen session cuts the lines at 80
+# columns: the type is still there, up to "NPC Root", unless the names are long). A
+# row is a real user unless its type says it is not, so a type that was cut off counts.
 osCountRealUsers() {
-	local out screen=0 roots
+	local out
 	if [ -n "${OSIM_REST_INI:-}" ]; then
 		out=$(osRest --ini "$OSIM_REST_INI" -- "show users" 2>/dev/null) || return 1
 	elif [ -n "${simName:-}" ] && osScreenExists "$simName"; then
 		out=$(osScreenOutput "$simName" "show users") || return 1
-		screen=1
 	else
 		return 1
 	fi
 	# Each region says how many agents it has, even none: no such line, no answer
 	printf '%s\n' "$out" | grep -q '^Root agents in region ' || return 1
+	local uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' roots rows
 	roots=$(printf '%s\n' "$out" | sed -n 's/^Root agents in region .*(root \([0-9]*\),.*/\1/p' | awk '{ n += $1 } END { print n + 0 }')
 	if [ "$roots" -eq 0 ]; then
 		echo 0
 		return 0
 	fi
-	[ $screen -eq 0 ] || return 1
-	printf '%s\n' "$out" | grep -cE '[0-9a-f]{8}-[0-9a-f-]{27}[[:space:]]+Root([[:space:]]|$)' || true
+	rows=$(printf '%s\n' "$out" | grep -cE "$uuid") || true
+	# Root agents the rows do not show (a list that is not the one expected): no answer
+	[ "$rows" -gt 0 ] || return 1
+	printf '%s\n' "$out" | grep -E "$uuid" | grep -vcE "$uuid[[:space:]]+(NPC|Child)" || true
 }
 
 # Succeeds when the simulator is known to have no real user left
