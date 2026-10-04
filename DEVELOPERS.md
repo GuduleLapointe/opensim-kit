@@ -1,5 +1,17 @@
 # Developers
 
+## Architecture
+
+This kit is a collection of tools and services to manage OpenSim grids.
+
+It uses libraries `opensim-helpers`, `opensim-engine`, and `opensim-rest-php`. Each library has its own repository and is usable as a standalone app/web app/project. Therefore, each part can only use it's own code and dependencies, never code or concepts related to the kit.
+
+- **opensim-rest-php** uses no external dependencies. It provides a generic REST console API.
+- **opensim-engine** provides the OpenSim engine and grid low-level management logic. It uses `opensim-rest-php`.
+- **opensim-helpers** provides the web tools to communicate with the bridge from the viewer (query, currency...) or a browsser (web search, guide...). It relies on `opensim-engine` and `opensim-rest-php`.
+- **opensim-kit** provides the whole environment setup and management. It uses own code and `opensim-helpers` (and therefore `opensim-engine` and `opensim-rest-php`).
+- **w4os WordPress plugin** is another implementation to provide management and web interface, that uses `opensim-helpers`.
+
 ## Packaging
 
 The packages are built with [nfpm](https://nfpm.goreleaser.com) and published to the Magiiic apt repository with the tools of apt-repo (`git@git.magiiic.com:magic/apt-repo.git`, cloned in `/opt/apt-repo`), whose README documents the whole chain. Everything lives in `packaging/`, one definition per package:

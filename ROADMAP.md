@@ -2,7 +2,16 @@
 
 ## Fixes
 
+- [ ] Separation of concern is not respected in child libraries. Each library must remain strictly independent and never rely on data, classes or concept defined in the apps/projects/libraries consuming it.
+- [ ] The port-based location must only be used to set the initial center of the grild. Once it has been set, it is not overridable by the rule.
 - [ ] Wrong syntax for `opensim load iar|oar` and `opensim save iar|oar`: action and save must stay together, `opensim save iar [instance]`, not `opensim save [instance] iar`
+- [ ] Could not get load/save oar/iar to work
+- [ ] Could not get helpers to work (web returns 500)
+- [ ] setup: working from grid/sims was a design flaw:
+    - from user's point of view, there is a grid, with regions
+    - and simulators are just a pool of servers providing the regions
+    - setup must propose to create regions first, with the choice to create a new simulator or add them to use one from the sims pool.
+    - command-line tools must allow both sims and regions as second argument
 - [ ] Changelog is not a user guide, keep it as a SHORT list of changes, no explanations!
 - [ ] Tests output is truncated, KEEP descriptions and notifications SHORT
 - [ ] (Test fail) opensim save and load → refuse a file that exists a simulator that does not run a missing password
