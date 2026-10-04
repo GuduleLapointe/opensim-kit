@@ -6,7 +6,7 @@
 - [x] The port-based location must only be used to set the initial center of the grild. Once it has been set, it is not overridable by the rule.
 - [x] Wrong syntax for `opensim load iar|oar` and `opensim save iar|oar`: action and save must stay together, `opensim save iar [instance]`, not `opensim save [instance] iar`
 - [x] Could not get load/save oar/iar to work
-- [ ] Could not get helpers to work (web returns 500) (the helpers answer with the new `config.php` on a test grid, and say when `helpers.ini` is unreadable by the web user instead of a 500; to confirm on the real site: what does the error log say?)
+- [ ] Could not get helpers to work (web returns 500) (the helpers answer with the new `config.php` on a test grid, and say when `helpers.ini` is unreadable by the web user instead of a 500; to confirm on the real site: what does the error log say? The packaged helpers answer behind real nginx, Apache and Caddy in `web-scenario.sh`)
 - [ ] setup: working from grid/sims was a design flaw: (done: the grid screen lists regions, "Add region" asks the simulator of the pool, `opensim save|load oar` and `opensim backup` take a sim or a region; to do: the other commands)
     - from user's point of view, there is a grid, with regions
     - and simulators are just a pool of servers providing the regions
