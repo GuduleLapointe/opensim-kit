@@ -1,5 +1,14 @@
 ## Changelog
 
+### Unreleased
+
+- fix: engine and helpers don't know the kit, `config.php` of the helpers package defines their constants
+- fix: `opensim save|load iar|oar [instance]`, the instance is a grid, a simulator or a region
+- fix: the public port sets the first center of a grid only, its regions give it afterwards
+- fix: `opensim stop` skips the NPCs on a screen console
+- fix: unreadable `helpers.ini` is reported by the helpers instead of a 500
+- fix: tests run on macOS (temporary folder, tar)
+
 ### 3.0.0-beta.3
 
 - new: `opensim save|load iar|oar`
