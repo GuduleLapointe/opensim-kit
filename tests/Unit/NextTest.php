@@ -149,9 +149,12 @@ describe('opensim next location default', function () {
 });
 
 describe('the center of a grid', function () {
-    test('is set by the port, then by regions', function () {
-        expect(OpenSim\Installer\Grid\LocationFinder::center([], 8012))->toBe([8012, 8012])
-            ->and(OpenSim\Installer\Grid\LocationFinder::center(['1000,1000' => true, '1002,1000' => true], 8012))->toBe([1001, 1000])
-            ->and(OpenSim\Installer\Grid\LocationFinder::center(['1000,1000' => true], 8012))->toBe([1000, 1000]);
+    test('is the port twice, until the grid has its own', function () {
+        $grid = new OpenSim\Installer\Grid\GridInfo();
+        $grid->publicPort = 8012;
+        expect($grid->centerPlace())->toBe([8012, 8012]);
+
+        $grid->center = '1000,1020';
+        expect($grid->centerPlace())->toBe([1000, 1020]);
     });
 });

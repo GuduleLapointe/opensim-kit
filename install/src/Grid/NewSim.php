@@ -1307,9 +1307,9 @@ final class NewSim
     private function roleOptions(GridInfo $grid): array
     {
         $labels = [
-            RegionFlags::DEFAULT => 'set as Default Region',
-            RegionFlags::DEFAULT_HG => 'set as Default HG Region',
-            RegionFlags::FALLBACK => 'set as Fallback Region',
+            RegionFlags::DEFAULT => 'Default Region',
+            RegionFlags::DEFAULT_HG => 'Default HG Region',
+            RegionFlags::FALLBACK => 'Fallback Region',
         ];
         $options = [];
         foreach ($grid->missingRoles() as $role) {
@@ -1372,7 +1372,7 @@ final class NewSim
             : ($first && $plan->simName !== '' && $name($plan->simName) === null ? $plan->simName : RandomName::make($name));
         $known = (new GridRegistry($database))->locations($grid);
         // The place proposed is the first free one from the center of the grid
-        $place = implode(',', $this->freePlace($grid, $known, ...LocationFinder::center($known, $grid->publicPort)));
+        $place = implode(',', $this->freePlace($grid, $known, ...$grid->centerPlace()));
         $roles = $this->roleOptions($grid);
         $there = static fn(array $v): bool => !$optional || ($v['create'] ?? 'yes') === 'yes';
         $fields = [];
@@ -1385,13 +1385,12 @@ final class NewSim
             ];
         }
         $fields[] = ['key' => 'name', 'label' => _('Region name'), 'default' => $default, 'validate' => $name, 'when' => $there];
-        if ($roles !== []) {
+        foreach ($roles as $role => $label) {
             $fields[] = [
-                'key' => 'roles',
-                'label' => _('Role of this region in the grid'),
-                'type' => 'checklist',
-                'options' => $roles,
-                'default' => implode(',', array_diff(array_keys($roles), [RegionFlags::FALLBACK])),
+                'key' => "role_$role",
+                'label' => $label,
+                'type' => 'confirm',
+                'default' => $role === RegionFlags::FALLBACK ? 'no' : 'yes',
                 'when' => $there,
             ];
         }
@@ -1405,10 +1404,10 @@ final class NewSim
         if ($pool !== []) {
             $fields[] = [
                 'key' => 'sim',
-                'label' => _('Simulator of this region'),
+                'label' => _('Simulator'),
                 'type' => 'choice',
-                'options' => ['+' => _('A new simulator')] + $pool,
-                'default' => (string) array_key_first($pool),
+                'options' => ['+' => _('Auto (add new)')] + $pool,
+                'default' => '+',
                 'when' => $there,
             ];
         }
@@ -1421,6 +1420,7 @@ final class NewSim
             'when' => static fn(array $v): bool => $there($v) && ($v['sim'] ?? '') !== '+',
         ];
         $v = $this->ui->form($fields, _('Region'));
+        $v['roles'] = implode(',', array_keys(array_filter($roles, static fn(string $label, string $role): bool => ($v["role_$role"] ?? 'no') === 'yes', ARRAY_FILTER_USE_BOTH)));
         $v['default_port'] = $fields[array_key_last($fields)]['default'];
 
         return $v;
@@ -1458,7 +1458,7 @@ final class NewSim
         if ($ignored !== null) {
             unset($known[$ignored]);
         }
-        [$x, $y] = LocationFinder::parse($asked) ?? LocationFinder::center($known, $grid->publicPort);
+        [$x, $y] = LocationFinder::parse($asked) ?? $grid->centerPlace();
         while (true) {
             [$freeX, $freeY] = $this->freePlace($grid, $known, $x, $y, $ignored);
             if ($freeX === $x && $freeY === $y) {

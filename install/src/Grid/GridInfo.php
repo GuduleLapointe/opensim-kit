@@ -16,6 +16,8 @@ final class GridInfo
     public bool $hypergrid = true;
     /** Free blocks the regions leave between them, the rule of the grid (a grid only described here follows the default one). */
     public int $regionSpacing = 0;
+    /** The center of the grid, "x,y", empty when it has none (the one its port gives). */
+    public string $center = '';
     /** @var list<string> The roles the regions of the Robust config have (see RegionFlags); empty for a grid described only. */
     public array $regionFlags = [];
     public string $dir = '';
@@ -45,6 +47,12 @@ final class GridInfo
     /**
      * @param array<string,mixed> $profile the install profile (Config::profile())
      */
+    /** The center of the grid: the one it was given, else the one its port gives. */
+    public function centerPlace(): array
+    {
+        return LocationFinder::parse($this->center) ?? LocationFinder::first($this->publicPort);
+    }
+
     public static function load(array $profile, string $nick): ?self
     {
         $etcRoot = $profile['EtcRoot'] ?? '';
@@ -65,6 +73,7 @@ final class GridInfo
         $grid->name = $current['gridName'] ?? ($conf['GridName'] ?? ucfirst($nick));
         $grid->slug = $conf['slug'] ?? Slug::slug($grid->name);
         $grid->regionSpacing = ctype_digit($conf['RegionSpacing'] ?? '') ? (int) $conf['RegionSpacing'] : 0;
+        $grid->center = $conf['Center'] ?? '';
         $grid->regionFlags = $current['regionFlags'] ?? [];
         $grid->coreDirectory = $conf['CoreDirectory'] ?? ($profile['CoreDirectory'] ?? '');
         $grid->baseHostname = $current['baseHostname'] ?? 'localhost';
@@ -93,6 +102,7 @@ final class GridInfo
         $grid->robustIni = $plan->robustIni();
         $grid->hypergrid = $plan->enableHypergrid;
         $grid->regionSpacing = $plan->regionSpacing;
+        $grid->center = $plan->center;
         $grid->coreDirectory = $plan->coreDirectory;
         $grid->baseHostname = $plan->baseHostname;
         $grid->publicPort = $plan->publicPort;

@@ -109,7 +109,7 @@ foreach ($exclude as $place) {
     LocationFinder::take($known, $taken[0], $taken[1]);
 }
 
-$wish = $wish ?: LocationFinder::center($known, $grid->publicPort);
+$wish = $wish ?: $grid->centerPlace();
 $unreachable = false;
 for ($i = 0; $i < $count; $i++) {
     [$x, $y] = Places::nearestFree($grid, $known, $wish[0], $wish[1], null, $unreachable);

@@ -15,6 +15,8 @@ final class GridPlan
     public bool $enableHypergrid = true;
     /** Free blocks the regions of the grid leave between them (0: side by side). */
     public int $regionSpacing = 0;
+    /** The center of the grid, "x,y": where the search of a place for a region starts. */
+    public string $center = '';
 
     // Selected core (multi-version aware).
     public string $coreDirectory = '';

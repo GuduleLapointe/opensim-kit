@@ -515,12 +515,21 @@ final class NewGrid
         $defaultPrivate = (int) ($current['privatePort'] ?? $privateFor($defaultPublic));
         $defaultConsole = (int) ($current['consolePort'] ?? $consoleFor($defaultPublic, $defaultPrivate));
         $defaultWeb = $current['webUrl'] ?? "https://$defaultHost";
+        $saved = @parse_ini_file("$gridDir/$nick.conf", true, INI_SCANNER_RAW)['Grid']['Center'] ?? '';
+        $defaultCenter = trim((string) $saved, " \t\"") !== '' ? trim((string) $saved, " \t\"") : "$defaultPublic,$defaultPublic";
         $existingHelpers = HelpersConfig::read($gridDir);
         $v = $this->ui->form(
             [
                 ['key' => 'host', 'label' => _('Base hostname'), 'default' => $defaultHost, 'validate' => $required],
                 ['key' => 'public', 'label' => _('Public port'), 'default' => (string) $defaultPublic, 'validate' => $numeric],
                 ['key' => 'private', 'label' => _('Private port'), 'default' => (string) $defaultPrivate, 'validate' => $numeric],
+                [
+                    'key' => 'center',
+                    'label' => _('Center of the grid (x,y)'),
+                    'default' => $defaultCenter,
+                    'hint' => _('Where new regions are searched from, kept'),
+                    'validate' => static fn(string $v): ?string => LocationFinder::parse($v) === null ? _('Use x,y (e.g. 8002,8002).') : null,
+                ],
                 [
                     'key' => 'console',
                     'label' => _('Console of the grid'),
@@ -564,6 +573,10 @@ final class NewGrid
         $plan->privatePort = (int) $v['private'] === $defaultPrivate && $plan->publicPort !== $defaultPublic
             ? $privateFor($plan->publicPort)
             : (int) $v['private'];
+        // The center follows the port when it was left as proposed, else it is what was confirmed
+        $plan->center = $v['center'] === $defaultCenter && $plan->publicPort !== $defaultPublic && $saved === ''
+            ? "{$plan->publicPort},{$plan->publicPort}"
+            : $v['center'];
         $plan->webUrl = $v['web'] === $defaultWeb && $v['host'] !== $defaultHost ? "https://{$plan->baseHostname}" : $v['web'];
         $plan->helpers = $v['helpers'] === 'yes';
         if ($plan->helpers) {

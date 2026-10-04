@@ -46,6 +46,7 @@ final class SetupFile
         'Helpers path' => 'grid.helpers_path',
         'Public port' => 'grid.public_port',
         'Private port' => 'grid.private_port',
+        'Center of the grid' => 'grid.center',
         'Console of the grid' => 'grid.console',
         'Console port' => 'grid.console_port',
         'Database host' => 'grid.database.host',
@@ -403,6 +404,12 @@ final class SetupFile
             $value = self::get($data, strtr($path, $places));
             if ($value !== null && $value !== '') {
                 $answers[$question] = is_bool($value) ? $value : (is_array($value) ? self::roles($value) : (string) $value);
+                if (is_array($value)) {
+                    // The roles are a yes or no each in the setup
+                    foreach (['DefaultRegion' => 'Default Region', 'DefaultHGRegion' => 'Default HG Region', 'FallbackRegion' => 'Fallback Region'] as $role => $label) {
+                        $answers[$label] = in_array($role, $answers[$question], true);
+                    }
+                }
             }
         }
 

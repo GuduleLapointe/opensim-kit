@@ -17,35 +17,15 @@ namespace OpenSim\Installer\Grid;
 final class LocationFinder
 {
     /**
-     * The first place of a grid: its public port, on both axes (8002 gives 8002,8002), so that the
-     * grids of a machine do not start at the same place, which a teleport between them refuses.
+     * The center a grid proposes at its setup: its public port on both axes (8002 gives 8002,8002), so that the
+     * grids of a machine do not start at the same place, which a teleport between them refuses. The operator
+     * confirms it, then it is kept (`Center` of the grid) and stays the place new regions are searched from.
      *
      * @return array{0:int,1:int}
      */
     public static function first(int $publicPort): array
     {
         return [$publicPort, $publicPort];
-    }
-
-    /**
-     * The center of a grid, where its next regions gather: the middle of the places it has, and only when it has none the
-     * first place by the port. What the rule of the port set at the start is not set again by it.
-     *
-     * @param array<string,true> $used
-     * @return array{0:int,1:int}
-     */
-    public static function center(array $used, int $publicPort): array
-    {
-        $sumX = $sumY = $count = 0;
-        foreach (array_keys($used) as $key) {
-            if (($place = self::parse((string) $key)) !== null) {
-                $sumX += $place[0];
-                $sumY += $place[1];
-                $count++;
-            }
-        }
-
-        return $count === 0 ? self::first($publicPort) : [intdiv($sumX + intdiv($count, 2), $count), intdiv($sumY + intdiv($count, 2), $count)];
     }
 
     /** The key of a place. */
