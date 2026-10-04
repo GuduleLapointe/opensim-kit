@@ -24,7 +24,7 @@ apt-get install -y -qq --no-install-recommends php-cli php-curl php-intl php-mbs
 php -v | head -1
 mkdir /work
 for p in $PROJECTS; do
-    tar -C /src --exclude=.git --exclude="$p/build" --exclude="$p/contrib" --exclude="$p/upstream" --exclude="$p/core" --exclude="$p/dev" -cf - "$p" | tar -C /work -xf -
+    tar -C /src --exclude=.git --exclude="$p/build" --exclude="$p/contrib" --exclude="$p/upstream" --exclude="$p/core" --exclude="$p/dev" --exclude="$p/tmp" --exclude="$p/dist" -cf - "$p" | tar -C /work -xf -
 done
 status=0
 for p in $PROJECTS; do
