@@ -6,7 +6,7 @@ declare(strict_types=1);
  * opensim web: the web side of a grid, the helpers (economy, search, offline messages) its viewers use.
  *
  *   opensim web [GRID] [show]            where the services are, and what the grid tells its viewers
- *   opensim web [GRID] snippet <caddy|nginx|apache> [--webroot DIR] [--socket PATH]
+ *   opensim web [GRID] snippet <caddy|nginx|apache> [--docroot DIR] [--socket PATH]
  *                                        what the web server needs to serve them, to include in its config
  *   opensim web [GRID] check             asks each service on the web, tells what answers
  *
@@ -25,7 +25,7 @@ use OpenSim\Installer\Web\HelpersConfig;
 use OpenSim\Installer\Web\Services;
 use OpenSim\Installer\Web\Snippets;
 
-const USAGE = "usage: opensim web [GRID] [show]\n       opensim web [GRID] snippet <caddy|nginx|apache> [--webroot DIR] [--socket PATH]\n       opensim web [GRID] check\n";
+const USAGE = "usage: opensim web [GRID] [show]\n       opensim web [GRID] snippet <caddy|nginx|apache> [--docroot DIR] [--socket PATH]\n       opensim web [GRID] check\n";
 
 /** Say what is wrong and stop. */
 function fail(string $message, int $code = 1): never
@@ -40,10 +40,10 @@ if ($args !== [] && ($args[0] === '-h' || $args[0] === '--help')) {
     exit(0);
 }
 
-$options = ['grid' => '', 'webroot' => Snippets::WEBROOT, 'socket' => Snippets::SOCKET];
+$options = ['grid' => '', 'docroot' => Snippets::DOCROOT, 'socket' => Snippets::SOCKET];
 $words = [];
 for ($i = 0; $i < count($args); $i++) {
-    if (preg_match('/^--(grid|webroot|socket)(?:=(.*))?$/', $args[$i], $m)) {
+    if (preg_match('/^--(grid|docroot|socket)(?:=(.*))?$/', $args[$i], $m)) {
         $options[$m[1]] = $m[2] ?? ($args[++$i] ?? fail("--{$m[1]} needs a value", 2));
     } else {
         $words[] = $args[$i];
@@ -94,7 +94,7 @@ $webUrl = $ini['Helpers']['web_url'] ?? (preg_match('/^\s*WebURL\s*=\s*"?([^"\r\
 if ($command === 'snippet') {
     $server = $words[0] ?? '';
     try {
-        echo Snippets::render($server, $nick, $services, $options['webroot'], $options['socket']);
+        echo Snippets::render($server, $nick, $options['docroot'], $options['socket']);
     } catch (InvalidArgumentException $e) {
         fail($e->getMessage() . "\n" . USAGE, 2);
     }
@@ -104,6 +104,9 @@ if ($command === 'snippet') {
 $rows = [];
 foreach (array_keys(Services::SCRIPTS) as $service) {
     $rows[$service] = [$services->url($webUrl, $service), Services::SCRIPTS[$service]];
+}
+foreach (array_keys(Services::PAGES) as $page) {
+    $rows[$page] = [$services->url($webUrl, $page), "@$page"];
 }
 
 if ($command === 'check') {
@@ -122,7 +125,7 @@ if ($command === 'check') {
 echo "Grid:      $nick\n";
 echo 'Web URL:   ' . ($webUrl !== '' ? $webUrl : '(none: WebURL of the Robust config)') . "\n";
 echo "Helpers:   {$services->base()}" . (is_file(HelpersConfig::path($gridDir)) ? '' : "  (no helpers.ini: run `opensim setup` for this grid)") . "\n";
-echo 'Webroot:   ' . $options['webroot'] . (is_dir($options['webroot']) ? '' : '  (not installed: apt install opensim-helpers)') . "\n\n";
+echo 'Docroot:   ' . $options['docroot'] . (is_dir(Snippets::WEBROOT) ? '' : '  (the helpers are not installed: apt install opensim-helpers)') . "\n\n";
 foreach ($rows as $service => [$url, $script]) {
     printf("  %-15s %s\n", $service, $url);
 }

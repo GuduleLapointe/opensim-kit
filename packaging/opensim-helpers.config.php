@@ -28,6 +28,8 @@ class OpenSimKit_HelpersConfig
         'currency' => 'currency.php',
         'guide' => 'guide.php',
         'motd' => 'motd.php',
+        'home' => '@home',
+        'welcome' => '@splash',
         'landtool' => 'landtool.php',
         'parser' => 'parser.php',
         'eventsparser' => 'eventsparser.php',
@@ -256,6 +258,24 @@ class OpenSimKit_HelpersConfig
     }
 
     /**
+     * The routes of the services the grid gives a path of their own to ([Urls] of helpers.ini): path => script or page.
+     *
+     * @param  array $settings what settings() gave
+     * @return array<string,string>
+     */
+    public static function routes($settings)
+    {
+        $routes = [];
+        foreach ($settings['urls'] as $service => $path) {
+            if (isset(self::SERVICES[$service]) && trim($path) !== '') {
+                $routes['/' . trim($path, '/')] = self::SERVICES[$service];
+            }
+        }
+
+        return $routes;
+    }
+
+    /**
      * The constants the helper scripts expect, as the config.php of the helpers defines them.
      *
      * @param  array $settings what settings() gave
@@ -289,6 +309,7 @@ class OpenSimKit_HelpersConfig
                     : $settings['web_url'] . self::script_path($settings, 'currency.php')),
             'OFFLINE_MESSAGE_TBL' => 'im_offline',
             'OPENSIM_MOTD' => $o['motd'] ?? null,
+            'OPENSIM_ROUTES' => self::routes($settings),
         ];
         if (!empty($o['grid_logo_url'])) {
             $constants['OPENSIM_GRID_LOGO_URL'] = $o['grid_logo_url'];

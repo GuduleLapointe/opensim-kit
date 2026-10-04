@@ -9,7 +9,8 @@ namespace OpenSim\Installer\Web;
  * each: `/helpers/<script>` unless the grid says otherwise ([Urls] of its helpers.ini), so an
  * operator who has always had `/helper`, or `/search`, keeps his URLs.
  *
- * The names and scripts are those of the engine (`OpenSim_Kit::SERVICES`).
+ * The helpers route any URL the web server sends them (see `index.php` of the helpers): the paths here are the
+ * routes of their `config.php` (OPENSIM_ROUTES).
  */
 final class Services
 {
@@ -28,8 +29,8 @@ final class Services
         'directory_info' => 'directory_info.php',
     ];
 
-    /** The folders of the helpers that are not for the web. */
-    public const PRIVATE_FOLDERS = ['addons', 'bin', 'classes', 'includes', 'locales', 'templates', 'tests', 'tools', 'vendor'];
+    /** The pages of the helpers and their default path: the home page, the splash page of the viewer. */
+    public const PAGES = ['home' => '/', 'welcome' => '/welcome'];
 
     /**
      * @param string               $base the path the helpers are served under (`/helpers`)
@@ -54,6 +55,11 @@ final class Services
     /** The public path of a service: the one of the grid, else the script under the base path. */
     public function path(string $service): string
     {
+        if (isset(self::PAGES[$service])) {
+            $own = trim($this->urls[$service] ?? '');
+
+            return $own !== '' ? self::normalize($own) : self::PAGES[$service];
+        }
         $script = self::SCRIPTS[$service] ?? $service;
         $name = array_search($script, self::SCRIPTS, true);
         $own = $name !== false ? trim($this->urls[$name] ?? '') : '';

@@ -115,8 +115,8 @@ final class HelpersConfig
             ;; currency_use_moneyserver = false
 
             [Urls]
-            ;; The public path of a service, when it is not <path>/<script>.php: the web server answers it with
-            ;; the script of the helpers (opensim web snippet writes the aliases).
+            ;; The URL of a service or a page, when it is not <path>/<script>.php: the helpers route it.
+            ;; welcome = "/welcome"
             ;; search = "/search"
             ;; guide = "/guide"
             ;; motd = "/motd"

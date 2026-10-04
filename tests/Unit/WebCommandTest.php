@@ -84,8 +84,7 @@ describe('opensim web', function () {
         );
 
         expect($status)->toBe(0);
-        expect($output)->toContain('handle /helper/* {');
-        expect($output)->toContain("handle /guide {\n\troot * /usr/share/opensim-helpers\n\trewrite * /guide.php");
+        expect($output)->toContain('root * /var/www/html');
         expect($output)->toContain('env OPENSIM_GRID alpha');
     });
 

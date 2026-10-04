@@ -361,12 +361,11 @@ final class NewGrid
         // The configuration of the web server for this grid, one file for each server, to include in its site
         $webDir = "{$plan->gridDir}/web";
         is_dir($webDir) || mkdir($webDir, 0o755, true);
-        $services = new Services($plan->helpersPath, $plan->helpersUrls);
         // Named for the grid and the server, with the extension the editors know
         $names = ['caddy' => "{$plan->gridNick}.caddyfile", 'nginx' => "{$plan->gridNick}-nginx.conf", 'apache' => "{$plan->gridNick}-apache.conf"];
         foreach (Snippets::SERVERS as $server) {
             $file = "$webDir/{$names[$server]}";
-            file_put_contents($file, Snippets::render($server, $plan->gridNick, $services));
+            file_put_contents($file, Snippets::render($server, $plan->gridNick));
             chmod($file, 0o644);
         }
         $this->ui->note(sprintf(_('Wrote the web server examples in %s'), $webDir));

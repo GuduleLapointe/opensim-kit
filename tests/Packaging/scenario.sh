@@ -71,12 +71,12 @@ ts dotnet
 opensim install-dotnet -y 2>&1 | tail -1
 check ".NET runtime" "runuser -u opensim -- dotnet --list-runtimes | grep -q NETCore.App"
 
-# The web side of a grid: the helpers and the placeholder site, installed before the grid so that its setup
+# The web side of a grid: the helpers and the default site, installed before the grid so that its setup
 # writes its helpers.ini (the user of the instances joins the group of the web server)
 ts "web packages"
 apt_q install "$(deb opensim-helpers)" "$(deb opensim-web)"
-check "the helpers and the placeholder site are installed" "[ -f /usr/share/opensim-helpers/query.php ] &&
-    [ -f /usr/share/opensim-helpers/includes/config.php ] && [ -f /usr/share/opensim-web/html/index.php ]"
+check "the helpers and the default site are installed" "[ -f /usr/share/opensim-helpers/query.php ] &&
+    [ -f /usr/share/opensim-helpers/includes/config.php ] && [ -f /var/www/html/index.php ]"
 
 ts "grid from the wizard"
 systemctl start mariadb
@@ -92,16 +92,17 @@ check "the setup wrote the examples for the web server, in the folder of the gri
     grep -q 'fastcgi_param OPENSIM_GRID testgrid' /etc/opensim/grids/testgrid/web/testgrid-nginx.conf && [ -s /etc/opensim/grids/testgrid/web/testgrid-apache.conf ]"
 cat >/tmp/helpers-settings.php <<'EOF'
 <?php
-define('OPENSIM_ENGINE', true);
-require '/usr/share/opensim-helpers/vendor/autoload.php';
-echo OpenSim_Kit::settings()['grid_name'] ?? 'no settings';
+chdir('/usr/share/opensim-helpers');
+require 'includes/config.php';
+echo OPENSIM_GRID_NAME;
 EOF
 check "the helpers read the settings of the grid as the user of the web server" "[ \"\$(OPENSIM_GRID=testgrid runuser -u www-data -- php /tmp/helpers-settings.php)\" = Testgrid ]"
 check "opensim web tells where the services are, and writes what the web server needs" "opensim web | grep -q '/helpers/query.php' &&
     opensim web snippet caddy | grep -q 'env OPENSIM_GRID testgrid' && opensim web snippet nginx | grep -q 'fastcgi_param OPENSIM_GRID testgrid;'"
-(cd /usr/share/opensim-web/html && OPENSIM_GRID=testgrid nohup php -S 127.0.0.1:8090 >/tmp/php-web.log 2>&1 &)
+(cd /var/www/html && OPENSIM_GRID=testgrid nohup php -S 127.0.0.1:8090 index.php >/tmp/php-web.log 2>&1 &)
 sleep 2
-check "the placeholder site shows the grid" "curl -s http://127.0.0.1:8090/ | grep -q Testgrid"
+check "the default site shows the grid, the splash page too, the helpers answer under their prefix" "curl -s http://127.0.0.1:8090/ | grep -q Testgrid &&
+    curl -s http://127.0.0.1:8090/welcome | grep -q Testgrid && [ \"\$(curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8090/helpers/motd.php)\" = 200 ]"
 pkill -f 'php -S 127.0.0.1:8090'
 check "no file of the grid has Windows line endings, which the files of the core have" "[ -z \"\$(grep -rlI \"\$(printf '\\r')\" /etc/opensim/grids/testgrid)\" ]"
 

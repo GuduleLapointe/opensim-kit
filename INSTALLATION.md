@@ -84,22 +84,17 @@ A setup can be described in a file, JSON or YAML (the example is `share/examples
 
 ## The web side of a grid
 
-The setup asks whether the economy and the search of the grid are served by opensim-helpers, and asks for their path after the web URL (`/helpers` by default): the URL of the helpers is `{web URL}{path}` (the viewers add the name of the script). What the Robust config then tells the viewers:
+The `opensim-web` package is the default site, its root is `/var/www/html`: what the web server has no file for is routed to the helpers (`opensim-helpers`), which serve their pages (`/` the home, `/welcome` the splash page of the viewer) and their services, at the URL the grid chooses for each (`[Urls]` of its `helpers.ini`, `/helpers/<script>.php` by default). Put your own files next to its `index.php`.
 
-- `economy` of `[GridInfoService]`: that URL
-- `SearchURL` of `[LoginService]`: `query.php` under it, the search in-world
-- `DestinationGuide` of `[LoginService]`: `guide.php`
-- `MessageUrl` of `[LoginService]`: `motd.php`, the message of the day, with `WelcomeMessage` ("Welcome to {grid}, <USERNAME>!") when it cannot be read
-
-A path of its own for a script (`/search`, `/guide`...) is set in the `helpers.ini` of the grid, which also holds the databases and the options of the helpers (see the [README of opensim-helpers](https://github.com/GuduleLapointe/opensim-helpers)).
+The Robust config tells the viewers the URLs: `economy`, `welcome` (`[GridInfoService]`), `SearchURL`, `DestinationGuide`, `MessageUrl` (`[LoginService]`).
 
 ```bash
 opensim web <grid>                # where the services are
 opensim web <grid> check          # which ones answer
-opensim web <grid> snippet caddy  # what the web server needs: caddy, nginx or apache
+opensim web <grid> snippet caddy  # for the web server: caddy, nginx or apache
 ```
 
-The configuration of the web server is written for the grid when it is made, one file for each server, in `/etc/opensim/grids/<grid>/web/`: `<grid>.caddyfile`, `<grid>-nginx.conf` and `<grid>-apache.conf`. `opensim web <grid> snippet` writes them again after a change. Include the one of your server in the site of the grid (it names the grid to the helpers, aliases the paths you chose and denies what is not for the web); the config of your web server is not touched. The `opensim-web` package is a placeholder site, in `/usr/share/opensim-web/html`, until the grid has its own.
+The setup writes the configuration of each server in `/etc/opensim/grids/<grid>/web/` (`<grid>.caddyfile`, `<grid>-nginx.conf`, `<grid>-apache.conf`): the root, `index.php` for what is not a file, PHP, the grid.
 
 ## Importing, and accounts in bulk
 

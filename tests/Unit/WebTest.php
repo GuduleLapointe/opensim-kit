@@ -92,40 +92,36 @@ describe('helpers.ini', function () {
 });
 
 describe('Snippets for the web server', function () {
-    test('serve the helpers, deny the rest', function () {
-        foreach (Snippets::SERVERS as $server) {
-            $text = Snippets::render($server, 'alpha', new Services('/helpers'));
+    test('send what is not a file to index.php', function () {
+        $caddy = Snippets::render('caddy', 'alpha');
+        $nginx = Snippets::render('nginx', 'alpha');
+        $apache = Snippets::render('apache', 'alpha');
 
-            expect($text)->toContain('/usr/share/opensim-helpers');
-            expect($text)->toContain('/helpers');
-            expect($text)->toContain('alpha');
-            expect($text)->toContain('includes');
-            expect($text)->toContain('vendor');
-        }
+        expect($caddy)->toContain('root * /var/www/html')->and($caddy)->toContain('try_files {path} /index.php')
+            ->and($nginx)->toContain('try_files $uri $uri/ /index.php?$query_string')
+            ->and($apache)->toContain('FallbackResource /index.php');
     });
 
     test('have the grid in the PHP environment', function () {
-        $services = new Services();
-
-        expect(Snippets::render('caddy', 'alpha', $services))->toContain('env OPENSIM_GRID alpha');
-        expect(Snippets::render('nginx', 'alpha', $services))->toContain('fastcgi_param OPENSIM_GRID alpha;');
-        expect(Snippets::render('apache', 'alpha', $services))->toContain('SetEnv OPENSIM_GRID alpha');
+        expect(Snippets::render('caddy', 'alpha'))->toContain('env OPENSIM_GRID alpha')
+            ->and(Snippets::render('nginx', 'alpha'))->toContain('fastcgi_param OPENSIM_GRID alpha;')
+            ->and(Snippets::render('apache', 'alpha'))->toContain('SetEnv OPENSIM_GRID alpha');
     });
 
-    test('alias a service that has its own path to its script', function () {
-        $services = new Services('/helper', ['search' => '/search', 'guide' => '/guide']);
-
-        $caddy = Snippets::render('caddy', 'alpha', $services);
-        expect($caddy)->toContain("handle /search {\n\troot * /usr/share/opensim-helpers\n\trewrite * /query.php");
-        expect($caddy)->toContain('rewrite * /guide.php');
-        expect(Snippets::render('nginx', 'alpha', $services))->toContain(
-            "location = /search {\n\tinclude snippets/fastcgi-php.conf;\n\tfastcgi_param SCRIPT_FILENAME /usr/share/opensim-helpers/query.php;",
-        );
-        expect(Snippets::render('apache', 'alpha', $services))->toContain('AliasMatch ^/search$ /usr/share/opensim-helpers/query.php');
-        expect(Snippets::render('apache', 'alpha', $services))->toContain("Alias /helper /usr/share/opensim-helpers\n");
+    test('take another root and socket', function () {
+        expect(Snippets::render('nginx', 'alpha', '/srv/site', '/run/php/php8.3-fpm.sock'))
+            ->toContain('root /srv/site;')->toContain('unix:/run/php/php8.3-fpm.sock');
     });
 
-    test('refuse a server that is not written', function () {
-        expect(fn() => Snippets::render('lighttpd', 'alpha', new Services()))->toThrow(InvalidArgumentException::class);
+    test('refuse an unknown server', function () {
+        expect(fn() => Snippets::render('lighttpd', 'alpha'))->toThrow(InvalidArgumentException::class);
+    });
+});
+
+describe('Pages', function () {
+    test('have a path of their own, or the default one', function () {
+        expect((new Services())->path('home'))->toBe('/')
+            ->and((new Services())->path('welcome'))->toBe('/welcome')
+            ->and((new Services('/helpers', ['welcome' => 'hello']))->path('welcome'))->toBe('/hello');
     });
 });

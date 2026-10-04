@@ -1,5 +1,5 @@
-# The placeholder site of a grid: its name, how to connect, where its helpers are. Built by
-# apt-package from share/web of this repository. ${VERSION} comes from the git tag.
+# The default site of a grid: its document root, whose index.php hands every URL it has no file for to the
+# helpers. Built by apt-package from share/web of this repository. ${VERSION} comes from the git tag.
 name: opensim-web
 arch: all
 platform: linux
@@ -9,11 +9,10 @@ section: web
 priority: optional
 maintainer: Gudule Lapointe <gudule@speculoos.world>
 description: |-
-  Placeholder web site for an OpenSimulator grid
-  A page with the name of the grid, how to connect to it and where its
-  services are, read from the OpenSim kit. Installed in
-  /usr/share/opensim-web/html, to be served by a web server as the site of
-  the grid until it has its own; the helpers (opensim-helpers) do not need it.
+  Default web site for an OpenSimulator grid
+  The document root of the site, /var/www/html: what it has no file for is
+  answered by the helpers (opensim-helpers), the home and splash pages, the
+  services at the URLs of the grid. Put your own files next to its index.php.
 homepage: https://github.com/GuduleLapointe/opensim-debian
 license: AGPL-3.0-or-later
 
@@ -25,5 +24,5 @@ suggests:
 
 contents:
   - src: share/web
-    dst: /usr/share/opensim-web/html
+    dst: /var/www/html
     type: tree
