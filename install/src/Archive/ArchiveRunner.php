@@ -204,7 +204,7 @@ final class ArchiveRunner
 
     private function simName(GridInfo $grid, string $slug): string
     {
-        $prefix = GridInfo::instanceName($grid->nick . '_');
+        $prefix = GridInfo::instanceName($grid->nick) . '_';
 
         return str_starts_with($slug, $prefix) ? substr($slug, strlen($prefix)) : $slug;
     }

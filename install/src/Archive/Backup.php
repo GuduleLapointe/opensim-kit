@@ -187,7 +187,7 @@ final class Backup
     /** The name of a simulator without the grid's: the part of its instance after the nick */
     private function simName(string $nick, string $slug): string
     {
-        $prefix = GridInfo::instanceName($nick . '_');
+        $prefix = GridInfo::instanceName($nick) . '_';
 
         return Archives::part(str_starts_with($slug, $prefix) ? substr($slug, strlen($prefix)) : $slug);
     }

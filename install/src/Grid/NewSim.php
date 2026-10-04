@@ -261,7 +261,7 @@ final class NewSim
     /** The name a simulator was given, from its instance name (the grid's nick and an underscore start it) */
     private function simNameOf(GridInfo $grid, string $slug): string
     {
-        $prefix = GridInfo::instanceName($grid->nick . '_');
+        $prefix = GridInfo::instanceName($grid->nick) . '_';
 
         return str_starts_with($slug, $prefix) ? substr($slug, strlen($prefix)) : $slug;
     }
