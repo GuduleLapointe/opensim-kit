@@ -179,6 +179,94 @@ final class NewSim
     }
 
     /**
+     * Add a region to a grid: the region first, then the simulator that takes it, a new one or one of the pool of the grid.
+     *
+     * @return ?array{0:string,1:string} the grid and the instance of the simulator that has the region, null when nothing was
+     */
+    public function addRegionToGrid(string $gridNick): ?array
+    {
+        $profile = (new Config())->profile();
+        $grid = $this->grid($profile, $gridNick);
+        if ($grid === null) {
+            return null;
+        }
+        $database = new Database($this->ui);
+        $pool = [];
+        foreach (SimState::names($grid->dir) as $slug) {
+            $pool[$slug] = $this->simTitle($grid, $slug);
+        }
+
+        // The ports of a region are in the block of its simulator: the first of the pool is the one proposed
+        $probe = $pool === [] ? new SimPlan() : $this->regionPlan($grid, $this->simNameOf($grid, (string) array_key_first($pool)));
+        if ($probe === null) {
+            return null;
+        }
+        if ($pool === []) {
+            $probe->gridNick = $grid->nick;
+            $probe->gridDir = $grid->dir;
+        }
+        $values = $this->regionValues($probe, $grid, $database, false, $pool);
+
+        if (($values['sim'] ?? '+') === '+') {
+            $plan = $this->gather($grid, $profile, $database, null, $values);
+
+            return $plan === null ? null : $this->complete($plan, $grid, $profile, false);
+        }
+
+        $slug = $values['sim'];
+        $plan = $this->regionPlan($grid, $this->simNameOf($grid, $slug));
+        if ($plan === null) {
+            return null;
+        }
+        // The port proposed was the one of the first simulator of the pool
+        if ($values['port'] === $values['default_port'] && $slug !== array_key_first($pool)) {
+            $values['port'] = '';
+        }
+        $this->takeRegion($plan, $grid, $database, $values);
+        $this->ui->note(
+            sprintf(_("Region %s at %s, port %s, for simulator '%s'."), $plan->regionName, $plan->regionLocation, $plan->regionPort, $pool[$slug]),
+        );
+        $v = $this->ui->form(
+            [
+                ['key' => 'add', 'label' => sprintf(_("Add region '%s'?"), $plan->regionName), 'type' => 'confirm', 'default' => 'yes'],
+                [
+                    'key' => 'start',
+                    'label' => _('Load it now (starting the simulator when it is not running)?'),
+                    'type' => 'confirm',
+                    'default' => 'yes',
+                    'when' => static fn(array $v): bool => $v['add'] === 'yes',
+                ],
+            ],
+            _('Apply'),
+        );
+        if ($v['add'] === 'no') {
+            $this->ui->note(_('Aborted — nothing changed.'));
+
+            return null;
+        }
+        $plan->start = $v['start'] === 'yes';
+        $this->write($plan, $profile);
+
+        return [$grid->nick, $slug];
+    }
+
+    /** A simulator of the pool as the person sees it: its name and the regions it has */
+    private function simTitle(GridInfo $grid, string $slug): string
+    {
+        $regions = array_keys(RegionState::list("{$grid->dir}/sims/$slug/regions"));
+
+        return $this->simNameOf($grid, $slug) . ($regions !== [] ? ' (' . implode(', ', $regions) . ')' : '');
+    }
+
+    /** The name a simulator was given, from its instance name (the grid's nick and an underscore start it) */
+    private function simNameOf(GridInfo $grid, string $slug): string
+    {
+        $prefix = GridInfo::instanceName($grid->nick . '_');
+
+        return str_starts_with($slug, $prefix) ? substr($slug, strlen($prefix)) : $slug;
+    }
+
+    /**
      * Add a region to a simulator already configured: loaded at once when the
      * simulator runs, else the simulator is started.
      */
@@ -857,7 +945,7 @@ final class NewSim
         return $said;
     }
 
-    private function gather(GridInfo $grid, array $profile, Database $database, ?string $simName): ?SimPlan
+    private function gather(GridInfo $grid, array $profile, Database $database, ?string $simName, ?array $region = null): ?SimPlan
     {
         $required = static fn(string $v): ?string => trim($v) === '' ? 'This field is required.' : null;
         $numeric = static fn(string $v): ?string => ctype_digit(trim($v)) ? null : _('Enter a port number.');
@@ -960,7 +1048,7 @@ final class NewSim
 
         // An accent is not refused, it is transliterated (Noël becomes Noel)
         $defaultName = $simName ?? Slug::ascii(trim($firstSim
-            ? self::FIRST
+            ? ($region !== null ? $region['name'] : self::FIRST)
             : RandomName::make(
                 fn(string $v): ?string => $simNameProblem($v) ??
                     (is_file("{$grid->dir}/sims/" . GridInfo::instanceName("{$grid->nick}_$v") . '.ini') ? 'taken' : null),
@@ -1031,9 +1119,14 @@ final class NewSim
             return null;
         }
 
-        $plan->createRegion = (glob("{$plan->regionsDir()}/*.ini") ?: []) === [];
-        if ($plan->createRegion) {
-            $this->askRegion($plan, $grid, $database, true);
+        if ($region !== null) {
+            // The region was asked first, the simulator is the one that takes it
+            $this->takeRegion($plan, $grid, $database, $region);
+        } else {
+            $plan->createRegion = (glob("{$plan->regionsDir()}/*.ini") ?: []) === [];
+            if ($plan->createRegion) {
+                $this->askRegion($plan, $grid, $database, true);
+            }
         }
 
         return $plan;
@@ -1226,7 +1319,29 @@ final class NewSim
         return $options;
     }
 
+    /**
+     * The first region of a simulator, or the next ones, on one screen: its name, its roles, its place and its port. When
+     * it is optional (the first region of a simulator) the screen starts with the question whether to create it.
+     */
     private function askRegion(SimPlan $plan, GridInfo $grid, Database $database, bool $optional = false): void
+    {
+        $values = $this->regionValues($plan, $grid, $database, $optional);
+        if ($optional && $values['create'] === 'no') {
+            $plan->createRegion = false;
+
+            return;
+        }
+        $this->takeRegion($plan, $grid, $database, $values);
+    }
+
+    /**
+     * The form of a region. With a pool of simulators, it asks which one has the region (a new one, or one of the pool),
+     * and the port of the region when it is one of the pool.
+     *
+     * @param array<string,string> $pool the simulators that can take it, by instance
+     * @return array<string,string>
+     */
+    private function regionValues(SimPlan $plan, GridInfo $grid, Database $database, bool $optional = false, array $pool = [], string $defaultName = ''): array
     {
         // A region name is unique in the grid: the same name registered twice stops the simulator
         $taken = (new GridRegistry($database))->names($grid);
@@ -1252,9 +1367,11 @@ final class NewSim
         }
         // The name of the simulator is the one of its first region; the next ones are not called the same
         $first = (glob("{$plan->regionsDir()}/*.ini*") ?: []) === [];
-        $default = $first && $name($plan->simName) === null ? $plan->simName : RandomName::make($name);
+        $default = $defaultName !== '' && $name($defaultName) === null
+            ? $defaultName
+            : ($first && $plan->simName !== '' && $name($plan->simName) === null ? $plan->simName : RandomName::make($name));
         $known = (new GridRegistry($database))->locations($grid);
-        // The place proposed is the first free one from the first place of a grid, not always the same
+        // The place proposed is the first free one from the center of the grid
         $place = implode(',', $this->freePlace($grid, $known, ...LocationFinder::center($known, $grid->publicPort)));
         $roles = $this->roleOptions($grid);
         $there = static fn(array $v): bool => !$optional || ($v['create'] ?? 'yes') === 'yes';
@@ -1285,25 +1402,44 @@ final class NewSim
             'validate' => static fn(string $v): ?string => LocationFinder::parse($v) === null ? _('Use x,y (e.g. 8002,8002).') : null,
             'when' => $there,
         ];
+        if ($pool !== []) {
+            $fields[] = [
+                'key' => 'sim',
+                'label' => _('Simulator of this region'),
+                'type' => 'choice',
+                'options' => ['+' => _('A new simulator')] + $pool,
+                'default' => (string) array_key_first($pool),
+                'when' => $there,
+            ];
+        }
         $fields[] = [
             'key' => 'port',
             'label' => _('Region port'),
             'default' => (string) $this->nextRegionPort($plan, $grid, $database),
             'validate' => $numeric,
-            'when' => $there,
+            // The port of a region of a new simulator is in its block, known when the simulator is
+            'when' => static fn(array $v): bool => $there($v) && ($v['sim'] ?? '') !== '+',
         ];
         $v = $this->ui->form($fields, _('Region'));
-        if ($optional && $v['create'] === 'no') {
-            $plan->createRegion = false;
+        $v['default_port'] = $fields[array_key_last($fields)]['default'];
 
-            return;
-        }
+        return $v;
+    }
 
+    /**
+     * Give a plan the region its form describes.
+     *
+     * @param array<string,string> $v what regionValues() gave
+     */
+    private function takeRegion(SimPlan $plan, GridInfo $grid, Database $database, array $v): void
+    {
+        $known = (new GridRegistry($database))->locations($grid);
+        $plan->createRegion = true;
         $plan->regionName = Slug::ascii(trim($v['name']));
         $plan->regionRoles = array_values(array_filter(explode(',', $v['roles'] ?? '')));
         $plan->regionUuid = self::uuid();
         $plan->regionLocation = $this->settleLocation($grid, $known, $v['location']);
-        $plan->regionPort = (int) $v['port'];
+        $plan->regionPort = ($v['port'] ?? '') !== '' ? (int) $v['port'] : $this->nextRegionPort($plan, $grid, $database);
     }
 
     /**

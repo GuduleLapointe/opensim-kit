@@ -156,23 +156,27 @@ describe('Hub home', function () {
 });
 
 describe('Hub grid', function () {
-    test('lists its simulators, add simulator, configure, disable this grid, back and quit', function () {
+    test('lists its regions, add region, simulators, configure, disable this grid, back and quit', function () {
         [$ui] = hub_run(['grid:alpha', 'back', 'quit']);
 
         expect($ui->screens[1]['label'])->toBe('Grid: alpha');
         expect($ui->screens[1]['keys'])->toBe([
-            'sim:alpha_sim1',
-            'sim:alpha_sim2',
-            'addsim',
+            'region:alpha_sim1:Far',
+            'region:alpha_sim1:Sim1',
+            'region:alpha_sim1:Sim1North',
+            'addregion',
+            'sims',
             'configure',
             'toggle',
             'back',
             'quit',
         ]);
         expect($ui->screens[1]['labels'])->toBe([
-            'Sim One',
-            'sim2 [disabled]',
-            'Add simulator',
+            'Far [Sim One] [disabled]',
+            'Sim1 [Sim One]',
+            'Sim1North [Sim One]',
+            'Add region',
+            'Simulators',
             'Configure grid',
             'Disable this grid',
             'Back',
@@ -180,25 +184,33 @@ describe('Hub grid', function () {
         ]);
     });
 
-    test('a grid on another machine has its simulators only', function () {
+    test('the simulators are a pool of their own', function () {
+        [$ui] = hub_run(['grid:alpha', 'sims', 'back', 'back', 'quit']);
+
+        expect($ui->screens[2]['label'])->toBe('Simulators of alpha');
+        expect($ui->screens[2]['keys'])->toBe(['sim:alpha_sim1', 'sim:alpha_sim2', 'addsim', 'back', 'quit']);
+        expect($ui->screens[2]['labels'])->toBe(['Sim One', 'sim2 [disabled]', 'Add simulator', 'Back', 'Quit']);
+    });
+
+    test('a grid on another machine has no region of its own', function () {
         [$ui] = hub_run(['grid:beta', 'back', 'quit']);
 
-        expect($ui->screens[1]['keys'])->toBe(['addsim', 'back', 'quit']);
+        expect($ui->screens[1]['keys'])->toBe(['addregion', 'sims', 'back', 'quit']);
     });
 
     test('quit leaves the setup from any screen', function () {
-        [$ui] = hub_run(['grid:alpha', 'sim:alpha_sim1', 'region:Sim1', 'quit', 'unreachable']);
+        [$ui] = hub_run(['grid:alpha', 'sims', 'sim:alpha_sim1', 'region:Sim1', 'quit', 'unreachable']);
 
-        expect(count($ui->screens))->toBe(4);
+        expect(count($ui->screens))->toBe(5);
     });
 });
 
 describe('Hub simulator and region', function () {
     test('a simulator lists its regions, add region, configure sim, disable this simulator, back and quit', function () {
-        [$ui] = hub_run(['grid:alpha', 'sim:alpha_sim1', 'back', 'back', 'quit']);
+        [$ui] = hub_run(['grid:alpha', 'sims', 'sim:alpha_sim1', 'back', 'back', 'back', 'quit']);
 
-        expect($ui->screens[2]['label'])->toBe('Simulator: Sim One');
-        expect($ui->screens[2]['keys'])->toBe([
+        expect($ui->screens[3]['label'])->toBe('Simulator: Sim One');
+        expect($ui->screens[3]['keys'])->toBe([
             'region:Far',
             'region:Sim1',
             'region:Sim1North',
@@ -208,7 +220,7 @@ describe('Hub simulator and region', function () {
             'back',
             'quit',
         ]);
-        expect($ui->screens[2]['labels'])->toBe([
+        expect($ui->screens[3]['labels'])->toBe([
             'Far [disabled]',
             'Sim1',
             'Sim1North',
@@ -218,32 +230,30 @@ describe('Hub simulator and region', function () {
             'Back',
             'Quit',
         ]);
-        expect($ui->screens[2]['default'])->toBe('addregion');
+        expect($ui->screens[3]['default'])->toBe('addregion');
     });
 
     test('a region disabled and enabled again renames its file', function () {
         [$ui, $etc] = hub_run([
             'grid:alpha',
-            'sim:alpha_sim1',
-            'region:Sim1',
+            'region:alpha_sim1:Sim1',
             'toggle',
             'toggle',
-            'back',
             'back',
             'back',
             'quit',
         ]);
         $regions = "$etc/grids/alpha/sims/alpha_sim1/regions";
 
-        expect($ui->screens[3]['labels'])->toBe(['Reconfigure', 'Disable this region', 'Back', 'Quit']);
-        expect($ui->screens[4]['labels'])->toBe(['Reconfigure', 'Enable this region', 'Back', 'Quit']);
-        expect($ui->screens[5]['labels'])->toBe(['Reconfigure', 'Disable this region', 'Back', 'Quit']);
+        expect($ui->screens[2]['labels'])->toBe(['Reconfigure', 'Disable this region', 'Back', 'Quit']);
+        expect($ui->screens[3]['labels'])->toBe(['Reconfigure', 'Enable this region', 'Back', 'Quit']);
+        expect($ui->screens[4]['labels'])->toBe(['Reconfigure', 'Disable this region', 'Back', 'Quit']);
         expect(is_file("$regions/Sim1.ini"))->toBeTrue();
         expect(is_file("$regions/Sim1.ini.disabled"))->toBeFalse();
     });
 
     test('a simulator disabled from its screen loses its link', function () {
-        [, $etc] = hub_run(['grid:alpha', 'sim:alpha_sim1', 'toggle', 'back', 'back', 'quit']);
+        [, $etc] = hub_run(['grid:alpha', 'sims', 'sim:alpha_sim1', 'toggle', 'back', 'back', 'back', 'quit']);
 
         expect(file_exists("$etc/opensim.d/alpha_sim1.ini") || is_link("$etc/opensim.d/alpha_sim1.ini"))->toBeFalse();
     });

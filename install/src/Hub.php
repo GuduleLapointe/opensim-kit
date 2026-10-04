@@ -268,13 +268,16 @@ final class Hub
             $enabled = GridState::isEnabled($etcRoot, $nick);
             $sims = $this->sims($etcRoot, $nick);
 
+            // The grid is its regions: the simulators are the pool of servers that provide them
             $options = [];
             foreach ($sims as $slug) {
-                $options["sim:$slug"] =
-                    $this->ui->entity($this->simTitle($etcRoot, $nick, $slug)) .
-                    (SimState::isEnabled($etcRoot, $slug) ? '' : ' [disabled]');
+                foreach (RegionState::list("$etcRoot/grids/$nick/sims/$slug/regions") as $name => $region) {
+                    $options["region:$slug:$name"] =
+                        $this->ui->entity($name) . ' [' . $this->simName($nick, $slug) . ']' . ($region['enabled'] ? '' : ' [disabled]');
+                }
             }
-            $options['addsim'] = _('Add simulator');
+            $options['addregion'] = _('Add region');
+            $options['sims'] = _('Simulators');
             if (!$remote) {
                 $options['configure'] = _('Configure grid');
                 $options['toggle'] = $enabled ? 'Disable this grid' : 'Enable this grid';
@@ -285,7 +288,7 @@ final class Hub
             $choice = $this->ui->choose(
                 'Grid: ' . $this->ui->entity($nick) . ($remote ? ' (Robust on another machine)' : ''),
                 $options,
-                $sims !== [] ? "sim:{$sims[0]}" : 'addsim',
+                array_key_first($options),
             );
             if ($choice === 'back' || $choice === 'quit') {
                 return $choice === 'quit';
@@ -294,9 +297,14 @@ final class Hub
                 case $choice === 'configure':
                     $this->guard(fn() => (new NewGrid($this->ui))->run($nick));
                     break;
-                case $choice === 'addsim':
-                    $made = $this->guard(fn() => (new NewSim($this->ui))->run($nick));
+                case $choice === 'addregion':
+                    $made = $this->guard(fn() => (new NewSim($this->ui))->addRegionToGrid($nick));
                     if ($made !== null && $this->simScreen($made[0], $made[1])) {
+                        return true;
+                    }
+                    break;
+                case $choice === 'sims':
+                    if ($this->poolScreen($nick)) {
                         return true;
                     }
                     break;
@@ -306,9 +314,45 @@ final class Hub
                     }
                     break;
                 default:
-                    if ($this->simScreen($nick, substr($choice, strlen('sim:')))) {
+                    [, $slug, $name] = explode(':', $choice, 3);
+                    if ($this->regionScreen($nick, $slug, $name)) {
                         return true;
                     }
+            }
+        }
+    }
+
+    /**
+     * The simulators of a grid, the pool of servers that provide its regions.
+     *
+     * @return bool whether to quit the setup
+     */
+    private function poolScreen(string $nick): bool
+    {
+        while (true) {
+            $etcRoot = (new Config())->profile()['EtcRoot'] ?? '';
+            $sims = $this->sims($etcRoot, $nick);
+            $options = [];
+            foreach ($sims as $slug) {
+                $options["sim:$slug"] =
+                    $this->ui->entity($this->simTitle($etcRoot, $nick, $slug)) .
+                    (SimState::isEnabled($etcRoot, $slug) ? '' : ' [disabled]');
+            }
+            $options['addsim'] = _('Add simulator');
+            $options['back'] = _('Back');
+            $options['quit'] = _('Quit');
+
+            $choice = $this->ui->choose('Simulators of ' . $this->ui->entity($nick), $options, $sims !== [] ? "sim:{$sims[0]}" : 'addsim');
+            if ($choice === 'back' || $choice === 'quit') {
+                return $choice === 'quit';
+            }
+            if ($choice === 'addsim') {
+                $made = $this->guard(fn() => (new NewSim($this->ui))->run($nick));
+                if ($made !== null && $this->simScreen($made[0], $made[1])) {
+                    return true;
+                }
+            } elseif ($this->simScreen($nick, substr($choice, strlen('sim:')))) {
+                return true;
             }
         }
     }
