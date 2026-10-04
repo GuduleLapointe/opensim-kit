@@ -266,10 +266,11 @@ final class Backup
 
     private function remove(string $directory): void
     {
-        foreach (glob("$directory/{,.}*", GLOB_BRACE) ?: [] as $entry) {
-            if (in_array(basename($entry), ['.', '..'], true)) {
+        foreach (scandir($directory) ?: [] as $name) {
+            if ($name === '.' || $name === '..') {
                 continue;
             }
+            $entry = "$directory/$name";
             is_dir($entry) && !is_link($entry) ? $this->remove($entry) : @unlink($entry);
         }
         @rmdir($directory);

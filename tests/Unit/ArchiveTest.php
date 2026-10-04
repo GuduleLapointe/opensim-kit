@@ -326,7 +326,7 @@ describe('opensim backup', function () {
         }, static function (string $m): void {}, '20261003-101500');
 
         expect(fn() => $backup->run(['alpha']))->toThrow(RuntimeException::class, 'dump failed');
-        $left = glob("{$profile['DataRoot']}/backups/admin/{,.}*", GLOB_BRACE) ?: [];
-        expect(array_filter($left, static fn(string $f): bool => !in_array(basename($f), ['.', '..'], true)))->toBe([]);
+        $left = array_diff(scandir("{$profile['DataRoot']}/backups/admin") ?: [], ['.', '..']);
+        expect($left)->toBe([]);
     })->depends('holds config, data and databases');
 });
