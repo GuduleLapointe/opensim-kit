@@ -83,6 +83,8 @@ tests/Packaging/run docker.io/library/ubuntu:24.04    # Ubuntu 24.04
 
 `scenario.sh` runs in the container, its scripted answers to the wizards are in `newgrid.php` and `newsim.php` (`ScriptedUi.php`). The container is capped to 700 MB (`MEMORY=1g tests/Packaging/run` to change it): the machine of podman is shared with every other container, and one that lacks memory stops the biggest process of any of them, not the one that asked for it. With the cap, the test does not reach the containers of the other projects as long as about 800 MB are free in that machine (the script says when they are not): stop the containers you do not need first, rather than giving the machine more memory. `KEEP=1` keeps the container for inspection.
 
+`SCENARIO=web-scenario.sh tests/Packaging/run` serves the site of a grid with real nginx, Apache and Caddy, each with the example the setup writes for it; `lib.sh` has the checks the scenarios share. The helpers package follows the `composer.json` of the kit: `HELPERS_CONSTRAINT=dev-opensim-kit /opt/apt-repo/bin/apt-package opensim-helpers` builds it from the branch for a test.
+
 `tests/Packaging/distro-pest` runs the Pest suites of the kit and of its libraries with the PHP of a distribution and only the extensions the packages depend on (`tests/Packaging/distro-pest docker.io/library/ubuntu:24.04` for another one): this is what checks that the PHP minimum and the dependencies of the packages are the real ones. `tests/Packaging/container-image` checks the container image.
 
 ## References
