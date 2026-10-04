@@ -53,7 +53,7 @@ describe('helpers.ini', function () {
     });
 
     test('keeps what the operator changed when the setup runs again', function () {
-        $dir = sys_get_temp_dir() . '/helpers-ini-' . bin2hex(random_bytes(4));
+        $dir = test_tmp() . '/helpers-ini-' . bin2hex(random_bytes(4));
         mkdir($dir);
         $first = HelpersConfig::render('', [
             'gridName' => 'Alpha',

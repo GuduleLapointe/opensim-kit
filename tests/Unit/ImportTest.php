@@ -18,7 +18,7 @@ use OpenSim\Installer\Import\SimImporter;
  */
 function import_tree(): string
 {
-    $root = sys_get_temp_dir() . '/import-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/import-' . bin2hex(random_bytes(4));
     mkdir("$root/bin/robust-include", 0o755, true);
     mkdir("$root/bin/config-include", 0o755);
     file_put_contents(
@@ -63,7 +63,7 @@ describe('IniReader', function () {
     });
 
     test('follows Include-* and stops at a loop', function () {
-        $root = sys_get_temp_dir() . '/import-inc-' . bin2hex(random_bytes(4));
+        $root = test_tmp() . '/import-inc-' . bin2hex(random_bytes(4));
         mkdir("$root/bin/config-include", 0o755, true);
         file_put_contents("$root/bin/OpenSim.ini", "[Architecture]\n    Include-Architecture = \"config-include/Grid.ini\"\n[Startup]\n    a = 1\n");
         file_put_contents("$root/bin/config-include/Grid.ini", "[Modules]\n    Include-Loop = \"../OpenSim.ini\"\n    b = 2\n");
@@ -173,7 +173,7 @@ describe('The customizations of an imported Robust', function () {
  */
 function import_run(array $arguments, string $original): array
 {
-    $root = sys_get_temp_dir() . '/import-run-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/import-run-' . bin2hex(random_bytes(4));
     foreach (['home', 'etc', 'var', 'cache', 'logs', 'core/bin', 'old/bin'] as $dir) {
         mkdir("$root/$dir", 0o755, true);
     }
@@ -250,7 +250,7 @@ describe('The plan of an imported simulator', function () {
     /** The config of a simulator of the old way, with its database in an included file. */
     function import_sim_tree(string $architecture = 'config-include/GridHypergrid.ini'): string
     {
-        $root = sys_get_temp_dir() . '/import-sim-' . bin2hex(random_bytes(4));
+        $root = test_tmp() . '/import-sim-' . bin2hex(random_bytes(4));
         mkdir("$root/sim1/bin/config-include", 0o755, true);
         mkdir("$root/sim1/bin/Regions", 0o755);
         file_put_contents(
@@ -336,7 +336,7 @@ describe('opensim import, the config of a simulator', function () {
 /** Run `opensim import` with a file of the given content. */
 function import_file(string $name, string $content, array $arguments = []): array
 {
-    $dir = sys_get_temp_dir() . '/import-file-' . bin2hex(random_bytes(4));
+    $dir = test_tmp() . '/import-file-' . bin2hex(random_bytes(4));
     mkdir($dir);
     file_put_contents("$dir/$name", $content);
     $code = dirname(__DIR__, 2);

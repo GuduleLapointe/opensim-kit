@@ -13,9 +13,9 @@ $podman = trim((string) shell_exec('command -v podman'));
 $packages = glob("$root/dist/*.deb") ?: [];
 
 if (!getenv('PACKAGING')) {
-    $skip = 'slow, set PACKAGING=1 to run them (podman and the packages of dist/)';
+    $skip = 'slow, PACKAGING=1 to run';
 } elseif (!$podman) {
-    $skip = 'podman is not available on this machine, run the scripts of tests/Packaging where it is';
+    $skip = 'no podman';
 } else {
     $skip = '';
 }

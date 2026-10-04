@@ -6,7 +6,7 @@ use OpenSim\Installer\Config;
 
 function profileConf(): string
 {
-    $dir = sys_get_temp_dir() . '/profile-' . uniqid();
+    $dir = test_tmp() . '/profile-' . uniqid();
     mkdir($dir);
 
     return "$dir/opensim.conf";
@@ -54,7 +54,7 @@ it('runs from the command line', function () {
     $file = profileConf();
     $env = 'OPENSIM_CONF=' . escapeshellarg($file);
     $php = 'php ' . escapeshellarg(dirname(__DIR__, 2) . '/libexec/profile.php');
-    $core = sys_get_temp_dir();
+    $core = test_tmp();
     shell_exec("$env $php add hand --core " . escapeshellarg($core));
 
     expect(shell_exec("$env $php list"))->toContain('hand (default)');

@@ -14,7 +14,7 @@ require_once dirname(__DIR__, 2) . '/packaging/opensim-helpers.config.php';
  */
 function helpers_config_tree(string $helpers = ''): array
 {
-    $root = sys_get_temp_dir() . '/kit-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/kit-' . bin2hex(random_bytes(4));
     $grid = "$root/etc/grids/Alpha";
     mkdir($grid, 0o755, true);
     file_put_contents(
@@ -196,7 +196,7 @@ describe('the config of the helpers', function () {
  */
 function helpers_config_run(array $environment, array $names): array
 {
-    $root = sys_get_temp_dir() . '/helpers-config-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/helpers-config-' . bin2hex(random_bytes(4));
     mkdir("$root/includes", 0o755, true);
     mkdir("$root/vendor", 0o755, true);
     copy(dirname(__DIR__, 2) . '/packaging/opensim-helpers.config.php', "$root/includes/config.php");

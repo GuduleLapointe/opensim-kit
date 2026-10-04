@@ -35,7 +35,7 @@ function toggle_run(array $arguments, string $home): array
  */
 function toggle_tree(): array
 {
-    $root = sys_get_temp_dir() . '/toggle-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/toggle-' . bin2hex(random_bytes(4));
     $etc = "$root/etc";
     mkdir("$root/home", 0o755, true);
     mkdir("$etc/grids/Alpha/sims", 0o755, true);

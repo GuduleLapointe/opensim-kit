@@ -19,7 +19,7 @@ use OpenSim\Installer\Grid\RobustConfig;
  */
 function robust_generated(GridPlan $plan)
 {
-    $bin = sys_get_temp_dir() . '/default-region-' . bin2hex(random_bytes(4));
+    $bin = test_tmp() . '/default-region-' . bin2hex(random_bytes(4));
     mkdir($bin);
     file_put_contents(
         "$bin/Robust.HG.ini.example",
@@ -79,7 +79,7 @@ function robust_example()
 /** A file holding a text, to give to something that reads files. */
 function robust_file(string $text)
 {
-    $file = tempnam(sys_get_temp_dir(), 'robust');
+    $file = tempnam(test_tmp(), 'robust');
     file_put_contents($file, $text);
 
     return $file;

@@ -9,7 +9,7 @@ use OpenSim\Installer\PendingRestarts;
 /** A profile with its own data folder. */
 function pending_profile()
 {
-    $root = sys_get_temp_dir() . '/pending-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/pending-' . bin2hex(random_bytes(4));
     mkdir("$root/data", 0o755, true);
     mkdir("$root/etc/opensim.d", 0o755, true);
 

@@ -14,7 +14,7 @@ use OpenSim\Installer\Archive\Instances;
  */
 function archive_install(): array
 {
-    $root = sys_get_temp_dir() . '/archive-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/archive-' . bin2hex(random_bytes(4));
     $etc = "$root/etc";
     $grid = "$etc/grids/alpha";
     mkdir("$grid/sims/alpha_sim1/regions", 0o755, true);
@@ -64,7 +64,7 @@ describe('the names of the archives', function () {
     });
 
     test('finds the newest archive', function () {
-        $dir = sys_get_temp_dir() . '/archive-new-' . bin2hex(random_bytes(4));
+        $dir = test_tmp() . '/archive-new-' . bin2hex(random_bytes(4));
         mkdir($dir);
         foreach (['alpha-sim1-20261001-100000.oar', 'alpha-sim1-noassets-20261003-100000.oar', 'alpha-sim1-Welcome-20261009-100000.oar', 'alpha-sim10-20261009-100000.oar'] as $name) {
             touch("$dir/$name");
@@ -172,7 +172,7 @@ describe('opensim save and load', function () {
             ->and(basename((string) $file))->toStartWith('alpha-sim2-South-2')
             ->and($sent[0][0])->toBe('alpha_sim2')
             ->and($sent[0][1])->toStartWith("change region South\nsave oar ");
-    });
+    })->depends('saves a region with a telling name');
 
     test('asks which region, or takes all', function () {
         $profile = archive_install();
@@ -185,7 +185,7 @@ describe('opensim save and load', function () {
             ->and($all)->toBe(0)
             ->and(basename((string) $file))->toStartWith('alpha-sim2-2')
             ->and($sent[0][1])->toStartWith("change region root\nsave oar --all ");
-    });
+    })->depends('saves a region with a telling name');
 
     test('load the newest archive of a region when no file is given', function () {
         $profile = archive_install();
@@ -198,7 +198,7 @@ describe('opensim save and load', function () {
         expect($code)->toBe(0)
             ->and(basename((string) $file))->toBe('alpha-sim1-Welcome-20261002-100000.oar')
             ->and($sent[0][1])->toBe("change region Welcome\nload oar --merge $file\n");
-    });
+    })->depends('saves a region with a telling name');
 
     test('saves an inventory', function () {
         $profile = archive_install();
@@ -209,7 +209,7 @@ describe('opensim save and load', function () {
             ->and(basename((string) $file))->toStartWith('alpha-Jane-Doe-2')
             ->and($sent[0][0])->toBe('alpha_sim1')
             ->and($sent[0][1])->toStartWith('save iar Jane Doe / pw /');
-    });
+    })->depends('saves a region with a telling name');
 
     test('report what the simulator says went wrong', function () {
         $profile = archive_install();
@@ -231,7 +231,7 @@ describe('opensim save and load', function () {
         [$code] = $runner->run('save', ['iar', 'Jane', 'Doe', '/', 'wrong']);
 
         expect($code)->toBe(1)->and(implode("\n", $messages))->toContain('incorrect');
-    });
+    })->depends('saves a region with a telling name');
 
     test('refuses a file, a stopped sim, no password', function () {
         $profile = archive_install();
@@ -249,7 +249,7 @@ describe('opensim save and load', function () {
         putenv('OPENSIM_IAR_PASSWORD');
         $noPassword = archive_runner($profile, $sent, 'x');
         expect($noPassword->run('save', ['iar', 'Jane', 'Doe', '/'])[0])->toBe(2);
-    });
+    })->depends('saves a region with a telling name');
 });
 
 describe('opensim backup', function () {
@@ -294,7 +294,7 @@ describe('opensim backup', function () {
         expect($files[0])->toBe("{$profile['root']}/out/alpha-20261003-101500-logs-archives.tar.gz")
             ->and($list)->toContain('var/alpha/backups/oar/old.oar')
             ->and($list)->toContain('logs/alpha_sim1.log');
-    });
+    })->depends('holds config, data and databases');
 
     test('is the one of a simulator, without the other ones', function () {
         $profile = archive_install();
@@ -317,7 +317,7 @@ describe('opensim backup', function () {
             ->and($list)->toContain('etc/grids/alpha/alpha.conf')
             ->and($list)->not->toContain('alpha_sim2')
             ->and($list)->not->toContain('Robust.HG.ini.bak');
-    });
+    })->depends('holds config, data and databases');
 
     test('leaves nothing behind when a dump fails', function () {
         $profile = archive_install();
@@ -328,5 +328,5 @@ describe('opensim backup', function () {
         expect(fn() => $backup->run(['alpha']))->toThrow(RuntimeException::class, 'dump failed');
         $left = glob("{$profile['DataRoot']}/backups/admin/{,.}*", GLOB_BRACE) ?: [];
         expect(array_filter($left, static fn(string $f): bool => !in_array(basename($f), ['.', '..'], true)))->toBe([]);
-    });
+    })->depends('holds config, data and databases');
 });

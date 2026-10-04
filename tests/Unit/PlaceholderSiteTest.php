@@ -13,7 +13,7 @@
 function placeholder_page(string $gridName, bool $configured = true): string
 {
     $root = dirname(__DIR__, 2);
-    $tree = sys_get_temp_dir() . '/placeholder-' . bin2hex(random_bytes(4));
+    $tree = test_tmp() . '/placeholder-' . bin2hex(random_bytes(4));
     mkdir("$tree/helpers/vendor", 0o755, true);
     file_put_contents("$tree/helpers/vendor/autoload.php", "<?php require '$root/vendor/autoload.php';");
     mkdir("$tree/etc/grids/alpha", 0o755, true);

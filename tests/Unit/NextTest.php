@@ -35,7 +35,7 @@ function next_run(array $arguments, string $home): array
  */
 function next_home(int $spacing = 0): string
 {
-    $root = sys_get_temp_dir() . '/next-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/next-' . bin2hex(random_bytes(4));
     $etc = "$root/etc";
     mkdir("$root/home", 0o755, true);
     mkdir("$etc/grids/alpha/sims/alpha_sim1/regions", 0o755, true);

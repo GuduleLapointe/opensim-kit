@@ -125,7 +125,7 @@ it('keeps what the setup did, to make it again', function () {
 });
 
 it('writes the setup file of a grid for its owner only', function () {
-    $dir = sys_get_temp_dir() . '/setup-' . uniqid();
+    $dir = test_tmp() . '/setup-' . uniqid();
     mkdir($dir);
     SetupFile::record($dir, static fn(array $d): array => $d + ['version' => 1]);
 

@@ -38,7 +38,7 @@ function web_run(array $arguments, string $home): array
  */
 function web_home(array $nicks = ['alpha'], string $helpers = ''): string
 {
-    $root = sys_get_temp_dir() . '/web-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/web-' . bin2hex(random_bytes(4));
     $etc = "$root/etc";
     mkdir("$root/home", 0o755, true);
     file_put_contents(
@@ -116,7 +116,7 @@ describe('Robust config with the helpers', function () {
     /** The Robust config a plan generates, from a minimal example. */
     function web_robust(GridPlan $plan): string
     {
-        $bin = sys_get_temp_dir() . '/web-robust-' . bin2hex(random_bytes(4));
+        $bin = test_tmp() . '/web-robust-' . bin2hex(random_bytes(4));
         mkdir($bin);
         file_put_contents(
             "$bin/Robust.HG.ini.example",

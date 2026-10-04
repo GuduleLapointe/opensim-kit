@@ -22,7 +22,7 @@ it('has an initialization script', function () {
 });
 
 it('enables OSSL in a grid', function () {
-    $bin = sys_get_temp_dir() . '/ossl-' . uniqid();
+    $bin = test_tmp() . '/ossl-' . uniqid();
     mkdir("$bin/config-include", 0777, true);
     file_put_contents("$bin/config-include/osslDefaultEnable.ini", "[OSSL]\n    Include-osslEnable = \"config-include/osslEnable.ini\"\n");
     file_put_contents("$bin/config-include/osslEnable.ini", "[OSSL]\n    AllowOSFunctions = false\n    ; Allow_osSetParcelDetails = true\n");

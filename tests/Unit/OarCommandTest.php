@@ -10,7 +10,7 @@ function oarCommand(string $args): array
 }
 
 it('makes an archive that checks out', function () {
-    $oar = sys_get_temp_dir() . '/oar-cmd-' . uniqid() . '.oar';
+    $oar = test_tmp() . '/oar-cmd-' . uniqid() . '.oar';
     $src = escapeshellarg(dirname(__DIR__, 2) . '/share/ossl-scripts/fix-parcel-name-src');
 
     [$out, $code] = oarCommand("pack $src " . escapeshellarg($oar));
@@ -24,7 +24,7 @@ it('makes an archive that checks out', function () {
 });
 
 it('says what is wrong with a file that is not an archive', function () {
-    $file = tempnam(sys_get_temp_dir(), 'oar');
+    $file = tempnam(test_tmp(), 'oar');
     file_put_contents($file, 'text');
 
     [$out, $code] = oarCommand('check ' . escapeshellarg($file));

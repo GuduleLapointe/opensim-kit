@@ -16,7 +16,7 @@ use OpenSim\Installer\TextFile;
  */
 function textfile_dir(): string
 {
-    $dir = sys_get_temp_dir() . '/textfile-' . bin2hex(random_bytes(4));
+    $dir = test_tmp() . '/textfile-' . bin2hex(random_bytes(4));
     mkdir($dir);
 
     return $dir;

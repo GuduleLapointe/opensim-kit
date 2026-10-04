@@ -83,7 +83,7 @@ final class RecordingUi implements InstallerUi
  */
 function hub_tree()
 {
-    $root = sys_get_temp_dir() . '/hub-' . bin2hex(random_bytes(4));
+    $root = test_tmp() . '/hub-' . bin2hex(random_bytes(4));
     $etc = "$root/etc";
     foreach (
         [
