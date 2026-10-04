@@ -68,79 +68,41 @@ fi
 # Before the helpers, which answer -h
 USAGE="opensim [-hvq] <command> [instance] [action] [options]"
 HELP="
-The instance (a grid or a simulator) comes right after the command, then the
-action and its arguments, then the options.
+Type 'opensim <command> --help' or 'opensim help <command>' for specific help on a command.
 
-Instances
-opensim status
-opensim <start|stop [now]|restart [now]> [instance...]
-opensim <enable|disable> <instance...>
-                        enable or disable a grid or a simulator
-opensim console|screen <instance>
-                        attach to the console of a running instance (Ctrl-A D
-                        leaves it running)
-opensim command <instance> <text>|-
-                        send a command to the console of an instance, or the
-                        lines read from the standard input (-)
-opensim ports [instance...] [--publish|--ufw]
-                        the ports the instances listen on, and who has to reach
-                        them; --publish gives the -p options of a container,
-                        --ufw the rules of the firewall
+Commands:
+    status
+    start [instance...]
+    stop|restart [now] [instance...]
+    enable|disable <instance...>
+    console|screen <instance>
+    command <instance> <text>|-
+    ports [instance...] [--publish|--ufw]
 
 Grids
-opensim setup           create or modify grids and simulators (setup wizard)
-opensim import [grid] FILE [--grid] [--simulator] [--users] [--apply]
-                        bring what a file holds into the install: the config of
-                        a grid or of a simulator not made by the kit (its files
-                        are not changed), a setup file (JSON or YAML: the grid,
-                        its simulators and regions, its accounts), or a list of
-                        accounts (CSV, JSON or YAML). Everything the file holds,
-                        or only what --grid, --simulator or --users ask for;
-                        without --apply, tells what would be made
-opensim web [grid] [show|check]
-opensim web [grid] snippet <caddy|nginx|apache>
-                        the helpers of a grid (economy, search): where they are
-                        served, what answers, and what the web server needs to
-                        serve them
-opensim next <grid> location [X,Y] [COUNT] [-e X,Y]
-                        the free places nearest to X,Y (default: the public port of the grid, twice) by
-                        the rule of the grid
+    setup
+    import [grid] FILE [--grid] [--simulator] [--users] [--apply]
+    web [grid] [show|check]
+    web [grid] snippet <caddy|nginx|apache>
+    next <grid> location [X,Y] [COUNT] [-e X,Y]
 
 Archives and backups
-opensim save [GRID [SIM]] iar [options] FIRST LAST PATH [PASSWORD] [FILE]
-opensim load [GRID [SIM]] iar [-m|--merge] FIRST LAST PATH [PASSWORD] [FILE]
-                        the inventory of an account, saved or loaded through a
-                        running simulator of the grid. Saved by default in the
-                        backups/iar folder of the data of the grid, as
-                        gridnick-first-last[-noassets][-perm<P>]-stamp.iar
-opensim save [GRID [SIM]] oar [--region NAME] [--all] [options] [FILE]
-opensim load [GRID [SIM]] oar [--region NAME] [--merge] [options] [FILE]
-                        a region (or all of the simulator with --all), saved in
-                        backups/oar as gridnick-sim[-region][-modes]-stamp.oar;
-                        without FILE, load takes the newest one. The options
-                        are the ones of the console of the simulator
-opensim backup [GRID [SIM]] [--logs] [--archives] [--output DIR]
-                        everything to install the grids again as they are
-                        (configuration, databases, data), one archive per grid
-                        or for one simulator, in <data>/backups/admin
+    save iar [GRID [SIM]] [options] FIRST LAST PATH [PASSWORD] [FILE]
+    load iar [GRID [SIM]] [-m|--merge] FIRST LAST PATH [PASSWORD] [FILE]
+    save oar [GRID [REGION|SIM]] [options] [FILE]
+    load oar [GRID [REGION|SIM]] [--merge] [options] [FILE]
+    backup [GRID [SIM]] [--logs] [--archives] [--output DIR]
 
 This machine
-opensim next port [-e PORT] [MIN] [COUNT]
-                        free ports from MIN (default 9010)
-opensim profile list|add|default|remove
-                        the installs the tools know about: add NAME --core DIR
-                        [--etc DIR] [--data DIR] registers an install made by hand
-opensim oar pack|info|check|unpack
-                        OpenSimulator archives: pack makes one from a folder,
-                        info and check read it, unpack extracts it
-opensim rest --url http://HOST:PORT --user USER (-- <command> | - | --repl)
-                        the remote console of an instance of another machine or
-                        a container (password in OPENSIM_REST_PASSWORD)
-opensim install-dotnet  install the .NET runtime OpenSim needs (as root)
+    next port [-e PORT] [MIN] [COUNT]
+    profile list|add|default|remove
+    oar pack|info|check|unpack
+    rest --url http://HOST:PORT --user USER (-- <command> | - | --repl)
+    install-dotnet  install the .NET runtime OpenSim needs (as root)
 
-	-h display this help
-	-v verbose mode
-	-q quiet mode"
+	-h|--help       display this help
+	-v|--verbose    verbose mode
+	-q|--quiet      quiet mode"
 
 # The arguments as given, for the switch below: the helpers take the options
 # they know out of them
@@ -201,7 +163,6 @@ debug "CacheRoot: $CacheRoot"
 debug "LogsRoot: $LogsRoot"
 
 [ -z "$EtcRoot" ] && end 1 "Etc directory not set"
-
 
 OPTS="shvq"
 while getopts $OPTS PARAM; do
@@ -266,7 +227,10 @@ startSim() {
 				inifile=$(buildIni "$instance")
 			}
 
-		[ ! -e "$inifile" ] && { STARTFAILED=1; continue; }
+		[ ! -e "$inifile" ] && {
+			STARTFAILED=1
+			continue
+		}
 
 		instance=$(echo "$instance" | sed "s/[^a-zA-Z0-9_]*//g")
 
@@ -333,7 +297,10 @@ startSim() {
 
 		# Fail early with a clear message if the runtime is missing, rather
 		# than letting the instance crash on launch.
-		checkRuntimeAvailable "$runtime" "$Executable" || { STARTFAILED=1; continue; }
+		checkRuntimeAvailable "$runtime" "$Executable" || {
+			STARTFAILED=1
+			continue
+		}
 
 		# A region stops at once without libgdiplus (dynamic textures)
 		if [ "$ExecName" = "OpenSim" ] && [ "$runtime" = "dotnet" ] && [ "$(uname -s)" = "Linux" ] && ! osHasLibrary gdiplus; then
@@ -591,7 +558,11 @@ stopSim() {
 				osConsole $simName "alert Attention: this simulator will be stopped in $remaining seconds. Please teleport to another region to avoid being disconnected."
 				# The countdown is the time left before the shutdown, not before the next warning
 				osCountdown $warnDelay "Stopping $simName" $(($remaining - $warnDelay)) osNoRealUsers ||
-					{ log "$simName: no user left in its regions, stopping now"; nobody=1; break; }
+					{
+						log "$simName: no user left in its regions, stopping now"
+						nobody=1
+						break
+					}
 				warn=$(($warn + 1))
 			done
 			[ $nobody = 1 ] || osConsole $simName "alert Shutting down now."
