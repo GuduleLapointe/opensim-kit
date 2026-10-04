@@ -107,7 +107,9 @@ final class SetupFile
             throw new \InvalidArgumentException('The setup file cannot be read: ' . $e->getMessage());
         }
         if (!is_array($data) || array_is_list($data)) {
-            throw new \InvalidArgumentException('The setup file is a list of settings (grid, owner, simulators, users).');
+            throw new \InvalidArgumentException(
+                'The setup file is a list of settings (grid, owner, simulators, users).',
+            );
         }
         $problems = self::problems($data);
         if ($problems !== []) {
@@ -124,7 +126,10 @@ final class SetupFile
             throw new \InvalidArgumentException("Cannot read $path");
         }
 
-        return self::parse($text, preg_match('/\.json$/i', $path) ? 'json' : (preg_match('/\.ya?ml$/i', $path) ? 'yaml' : null));
+        return self::parse(
+            $text,
+            preg_match('/\.json$/i', $path) ? 'json' : (preg_match('/\.ya?ml$/i', $path) ? 'yaml' : null),
+        );
     }
 
     /**
@@ -160,10 +165,12 @@ final class SetupFile
                 $problems[] = 'owner.name is a first and a last name, e.g. Jane Doe';
             }
             // The password, or its hash and salt as Robust keeps them (what the setup writes in its own file)
-            $hashed = preg_match('/^[0-9a-f]{32}$/i', (string) ($owner['password_hash'] ?? '')) === 1
-                && preg_match('/^[0-9a-zA-Z]{1,64}$/', (string) ($owner['password_salt'] ?? '')) === 1;
+            $hashed =
+                preg_match('/^[0-9a-f]{32}$/i', (string) ($owner['password_hash'] ?? '')) === 1 &&
+                preg_match('/^[0-9a-zA-Z]{1,64}$/', (string) ($owner['password_salt'] ?? '')) === 1;
             if (!$hashed && strlen((string) ($owner['password'] ?? '')) < 6) {
-                $problems[] = 'owner.password has at least 6 characters (or owner.password_hash and owner.password_salt)';
+                $problems[] =
+                    'owner.password has at least 6 characters (or owner.password_hash and owner.password_salt)';
             }
             $email = trim((string) ($owner['email'] ?? ''));
             if ($email !== '' && !preg_match('/^[^\s"\'\\\\]+@[^\s"\'\\\\]+$/', $email)) {
@@ -216,7 +223,13 @@ final class SetupFile
         foreach (['host', 'user', 'password', 'admin_user', 'admin_password'] as $key) {
             $own = $data['simulators'][$i]['database'][$key] ?? null;
             $grid = $data['grid']['database'][$key] ?? null;
-            $target = ['host' => 'Database host', 'user' => 'Database user', 'password' => 'Database password', 'admin_user' => 'Administrator user', 'admin_password' => 'Password of'][$key];
+            $target = [
+                'host' => 'Database host',
+                'user' => 'Database user',
+                'password' => 'Database password',
+                'admin_user' => 'Administrator user',
+                'admin_password' => 'Password of',
+            ][$key];
             if ($own === null && $grid !== null) {
                 $answers[$target] = (string) $grid;
             }
@@ -247,8 +260,10 @@ final class SetupFile
      */
     public static function regionAnswers(array $data, int $i, int $j): array
     {
-        return self::answers(self::REGION, $data, ['$i' => (string) $i, '$j' => (string) $j])
-            + ['Add region' => true, 'Load it now' => true];
+        return self::answers(self::REGION, $data, ['$i' => (string) $i, '$j' => (string) $j]) + [
+            'Add region' => true,
+            'Load it now' => true,
+        ];
     }
 
     /**
@@ -270,7 +285,12 @@ final class SetupFile
             'public_port' => $plan->publicPort,
             'private_port' => $plan->privatePort,
             'console' => $plan->consoleMode,
-            'database' => ['host' => $plan->dbHost, 'name' => $plan->dbName, 'user' => $plan->dbUser, 'password' => $plan->dbPass],
+            'database' => [
+                'host' => $plan->dbHost,
+                'name' => $plan->dbName,
+                'user' => $plan->dbUser,
+                'password' => $plan->dbPass,
+            ],
         ];
         $data['version'] = 1;
         $data['grid'] = $grid;
@@ -290,17 +310,25 @@ final class SetupFile
             'name' => $plan->simName,
             'http_port' => $plan->httpPort,
             'console' => $plan->consoleMode,
-            'database' => ['host' => $plan->dbHost, 'name' => $plan->dbName, 'user' => $plan->dbUser, 'password' => $plan->dbPass],
+            'database' => [
+                'host' => $plan->dbHost,
+                'name' => $plan->dbName,
+                'user' => $plan->dbUser,
+                'password' => $plan->dbPass,
+            ],
             'estate' => ['name' => $plan->estateName, 'owner' => $plan->estateOwner],
             'regions' => [],
         ];
         if ($plan->regionName !== '') {
-            $sim['regions'][] = array_filter([
-                'name' => $plan->regionName,
-                'location' => $plan->regionLocation,
-                'port' => $plan->regionPort,
-                'roles' => $plan->regionRoles ?: null,
-            ], static fn($v): bool => $v !== null);
+            $sim['regions'][] = array_filter(
+                [
+                    'name' => $plan->regionName,
+                    'location' => $plan->regionLocation,
+                    'port' => $plan->regionPort,
+                    'roles' => $plan->regionRoles ?: null,
+                ],
+                static fn($v): bool => $v !== null,
+            );
         }
 
         // What the plan does not say (a region added later knows nothing of the database) is not erased
@@ -312,7 +340,9 @@ final class SetupFile
                 // A region added later is kept with the ones this simulator already had
                 $regions = $existing['regions'] ?? [];
                 foreach ($sim['regions'] ?? [] as $region) {
-                    $regions = array_values(array_filter($regions, static fn(array $r): bool => ($r['name'] ?? '') !== $region['name']));
+                    $regions = array_values(
+                        array_filter($regions, static fn(array $r): bool => ($r['name'] ?? '') !== $region['name']),
+                    );
                     $regions[] = $region;
                 }
                 $sims[$k] = ['regions' => $regions] + array_replace_recursive($existing, $sim);
@@ -326,12 +356,15 @@ final class SetupFile
         if ($plan->createOwner && $plan->estateOwner !== '') {
             // The password is kept hashed, as Robust keeps it: the hash and its salt are what makes the account
             $salt = md5(random_bytes(16));
-            $data['owner'] = array_filter([
-                'name' => $plan->estateOwner,
-                'password_hash' => AccountWriter::passwordHash($plan->ownerPassword, $salt),
-                'password_salt' => $salt,
-                'email' => $plan->ownerEmail,
-            ], static fn(string $v): bool => $v !== '');
+            $data['owner'] = array_filter(
+                [
+                    'name' => $plan->estateOwner,
+                    'password_hash' => AccountWriter::passwordHash($plan->ownerPassword, $salt),
+                    'password_salt' => $salt,
+                    'email' => $plan->ownerEmail,
+                ],
+                static fn(string $v): bool => $v !== '',
+            );
         }
         $data['version'] = 1;
 
@@ -403,10 +436,21 @@ final class SetupFile
         foreach ($questions as $question => $path) {
             $value = self::get($data, strtr($path, $places));
             if ($value !== null && $value !== '') {
-                $answers[$question] = is_bool($value) ? $value : (is_array($value) ? self::roles($value) : (string) $value);
+                $answers[$question] = is_bool($value)
+                    ? $value
+                    : (is_array($value)
+                        ? self::roles($value)
+                        : (string) $value);
                 if (is_array($value)) {
                     // The roles are a yes or no each in the setup
-                    foreach (['DefaultRegion' => 'Default Region', 'DefaultHGRegion' => 'Default HG Region', 'FallbackRegion' => 'Fallback Region'] as $role => $label) {
+                    foreach (
+                        [
+                            'DefaultRegion' => 'Default Region',
+                            'DefaultHGRegion' => 'Default HG Region',
+                            'FallbackRegion' => 'Fallback Region',
+                        ]
+                        as $role => $label
+                    ) {
                         $answers[$label] = in_array($role, $answers[$question], true);
                     }
                 }

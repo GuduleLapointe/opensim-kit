@@ -52,7 +52,12 @@ function act(array $profile, string $op, array $args): bool
         return (new Actions(new QuietUi()))->perform($op, $args, $profile);
     }
     try {
-        Elevated::run(new QuietUi(), '--apply-action', ['op' => $op, 'args' => $args, 'profile' => $profile], $profile['SystemUser']);
+        Elevated::run(
+            new QuietUi(),
+            '--apply-action',
+            ['op' => $op, 'args' => $args, 'profile' => $profile],
+            $profile['SystemUser'],
+        );
     } catch (SetupFailed) {
         return false;
     }
@@ -68,13 +73,24 @@ function act(array $profile, string $op, array $args): bool
  */
 function report(array $lines, array $customizations): string
 {
-    $text = implode("\n", $lines) . "\n\n" . count($customizations) . " setting(s) of the original kept in the new config:\n";
+    $text =
+        implode("\n", $lines) .
+        "\n\n" .
+        count($customizations) .
+        " setting(s) of the original kept in the new config:\n";
     foreach ($customizations as $c) {
-        $text .= sprintf("  [%s] %s = %s%s\n", $c['section'], $c['key'], $c['value'], $c['unknown'] ? '   (not in the example of this core: it may be ignored)' : '');
+        $text .= sprintf(
+            "  [%s] %s = %s%s\n",
+            $c['section'],
+            $c['key'],
+            $c['value'],
+            $c['unknown'] ? '   (not in the example of this core: it may be ignored)' : '',
+        );
     }
     $unknown = count(array_filter($customizations, static fn(array $c): bool => $c['unknown']));
 
-    return $text . ($unknown > 0 ? "\n$unknown of them are not in the example of this core: look at them first.\n" : '');
+    return $text .
+        ($unknown > 0 ? "\n$unknown of them are not in the example of this core: look at them first.\n" : '');
 }
 
 $args = array_slice($argv, 1);
@@ -95,7 +111,12 @@ if (!in_array($what, ['robust', 'sim'], true)) {
 }
 array_shift($args);
 
-$options = ['nick' => $what === 'robust' ? $grid : '', 'core' => '', 'grid' => $what === 'sim' ? $grid : '', 'name' => ''];
+$options = [
+    'nick' => $what === 'robust' ? $grid : '',
+    'core' => '',
+    'grid' => $what === 'sim' ? $grid : '',
+    'name' => '',
+];
 $apply = false;
 $words = [];
 for ($i = 0; $i < count($args); $i++) {
@@ -133,7 +154,10 @@ if ($what === 'robust') {
         fail("the core has no $exampleFile", 2);
     }
     if (is_file($plan->robustIni())) {
-        fail("the grid {$plan->gridNick} is already configured ({$plan->robustIni()}): choose another nick: opensim import <nick> robust FILE", 2);
+        fail(
+            "the grid {$plan->gridNick} is already configured ({$plan->robustIni()}): choose another nick: opensim import <nick> robust FILE",
+            2,
+        );
     }
 
     $customizations = RobustImporter::customizations(
@@ -149,7 +173,8 @@ if ($what === 'robust') {
             "Grid {$plan->gridName} ({$plan->gridNick}), imported from $path",
             "Core: $core",
             "Database: {$plan->dbName} @ {$plan->dbHost} (user {$plan->dbUser}), kept as it is",
-            "Ports: public {$plan->publicPort}, private {$plan->privatePort}" . ($plan->consoleMode === 'rest' ? ", console {$plan->consolePort}" : ''),
+            "Ports: public {$plan->publicPort}, private {$plan->privatePort}" .
+            ($plan->consoleMode === 'rest' ? ", console {$plan->consolePort}" : ''),
             'Hypergrid: ' . ($plan->enableHypergrid ? 'yes' : 'no'),
         ],
         $customizations,
@@ -164,7 +189,12 @@ if ($what === 'robust') {
         if (!Elevated::needed($profile)) {
             (new NewGrid(new QuietUi()))->apply($plan, $profile);
         } else {
-            Elevated::run(new QuietUi(), '--apply-grid', ['plan' => $plan->toArray(), 'profile' => $profile], $profile['SystemUser']);
+            Elevated::run(
+                new QuietUi(),
+                '--apply-grid',
+                ['plan' => $plan->toArray(), 'profile' => $profile],
+                $profile['SystemUser'],
+            );
         }
     } catch (SetupFailed) {
         fail('the grid could not be written');
@@ -185,9 +215,17 @@ if ($what === 'robust') {
 // A simulator of a grid the kit knows
 $grid = $options['grid'] === '' ? null : GridInfo::load($profile, $options['grid']);
 if ($grid === null) {
-    fail('the grid of the simulator is one the kit knows (opensim setup, or opensim import for its Robust config): opensim import <grid> FILE', 2);
+    fail(
+        'the grid of the simulator is one the kit knows (opensim setup, or opensim import for its Robust config): opensim import <grid> FILE',
+        2,
+    );
 }
-$core = $options['core'] !== '' ? rtrim($options['core'], '/') : ($grid->coreDirectory !== '' ? $grid->coreDirectory : (string) ($profile['CoreDirectory'] ?? ''));
+$core =
+    $options['core'] !== ''
+        ? rtrim($options['core'], '/')
+        : ($grid->coreDirectory !== ''
+            ? $grid->coreDirectory
+            : (string) ($profile['CoreDirectory'] ?? ''));
 if ($core === '' || !is_dir("$core/bin")) {
     fail('choose the core the simulator will run with: --core DIR (the folder that has bin/)', 2);
 }
@@ -196,7 +234,10 @@ if (is_string($plan)) {
     fail($plan, 2);
 }
 if (is_file($plan->iniPath())) {
-    fail("the simulator {$plan->simName} is already configured ({$plan->iniPath()}): choose another name with --name", 2);
+    fail(
+        "the simulator {$plan->simName} is already configured ({$plan->iniPath()}): choose another name with --name",
+        2,
+    );
 }
 $regions = SimImporter::regionFiles($raw, $path);
 $plan->externalHost = SimImporter::externalHost($regions);
@@ -204,7 +245,10 @@ $plan->externalHost = SimImporter::externalHost($regions);
 // What the core has by default: its defaults file, then the example of OpenSim.ini
 $defaults = IniReader::load("{$plan->binDir()}/OpenSimDefaults.ini");
 $example = IniReader::load("{$plan->binDir()}/OpenSim.ini.example");
-$exampleText = (string) @file_get_contents("{$plan->binDir()}/OpenSimDefaults.ini") . "\n" . (string) @file_get_contents("{$plan->binDir()}/OpenSim.ini.example");
+$exampleText =
+    (string) @file_get_contents("{$plan->binDir()}/OpenSimDefaults.ini") .
+    "\n" .
+    (string) @file_get_contents("{$plan->binDir()}/OpenSim.ini.example");
 $default = array_replace_recursive($defaults, $example);
 $customizations = RobustImporter::customizations(
     $raw,
@@ -220,7 +264,10 @@ $report = report(
         "Core: $core",
         "Database: {$plan->dbName} @ {$plan->dbHost} (user {$plan->dbUser}), kept as it is",
         "HTTP port: {$plan->httpPort}" . ($plan->consoleMode === 'rest' ? ", console {$plan->consolePort}" : ''),
-        'Regions: ' . count($regions) . ' file(s) copied with their UUID' . ($regions === [] ? ' (none found: regionload_regionsdir of [Startup], else Regions/ next to bin/)' : ''),
+        'Regions: ' .
+        count($regions) .
+        ' file(s) copied with their UUID' .
+        ($regions === [] ? ' (none found: regionload_regionsdir of [Startup], else Regions/ next to bin/)' : ''),
     ],
     $customizations,
 );
@@ -234,7 +281,12 @@ try {
     if (!Elevated::needed($profile)) {
         (new NewSim(new QuietUi()))->apply($plan, $profile);
     } else {
-        Elevated::run(new QuietUi(), '--apply-sim', ['plan' => $plan->toArray(), 'profile' => $profile], $profile['SystemUser']);
+        Elevated::run(
+            new QuietUi(),
+            '--apply-sim',
+            ['plan' => $plan->toArray(), 'profile' => $profile],
+            $profile['SystemUser'],
+        );
     }
 } catch (SetupFailed) {
     fail('the simulator could not be written');
@@ -250,3 +302,4 @@ if (!$copied || !$done) {
     fail('the simulator is written, but its regions or its settings could not be added');
 }
 echo "\nWritten: {$plan->iniPath()}\nRegions: {$plan->regionsDir()}\nReport:  {$plan->gridDir}/sims/{$plan->slug}.import-report.txt\nCompare it with the original, then: opensim enable {$plan->slug}\n";
+

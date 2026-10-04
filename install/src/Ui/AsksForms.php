@@ -21,7 +21,9 @@ trait AsksForms
     {
         $values = [];
         foreach ($fields as $field) {
-            $values[$field['key']] = $this->visible($field, $values) ? $this->askField($field, $field['default'] ?? '') : '';
+            $values[$field['key']] = $this->visible($field, $values)
+                ? $this->askField($field, $field['default'] ?? '')
+                : '';
         }
 
         while (true) {
@@ -34,7 +36,10 @@ trait AsksForms
                 $lines[] = $field['label'] . ': ' . $this->shownValue($field, $value);
             }
             $this->note(implode("\n", $lines));
-            if ($this->choose(_('Is this right?'), ['ok' => _('Continue'), 'edit' => _('Change something')], 'ok') === 'ok') {
+            if (
+                $this->choose(_('Is this right?'), ['ok' => _('Continue'), 'edit' => _('Change something')], 'ok') ===
+                'ok'
+            ) {
                 return $values;
             }
 
@@ -79,7 +84,13 @@ trait AsksForms
             return $field['options'][$value] ?? $value;
         }
         if ($type === 'checklist') {
-            return implode(', ', array_map(static fn(string $k): string => $field['options'][$k] ?? $k, array_filter(explode(',', $value))));
+            return implode(
+                ', ',
+                array_map(
+                    static fn(string $k): string => $field['options'][$k] ?? $k,
+                    array_filter(explode(',', $value)),
+                ),
+            );
         }
 
         return $value;
@@ -93,22 +104,39 @@ trait AsksForms
             return $this->confirm($field['label'], in_array($current, ['yes', '1', 'true'], true)) ? 'yes' : 'no';
         }
         if ($type === 'choice') {
-            return $this->choose($field['label'], $field['options'], $current !== '' ? $current : null, $field['hint'] ?? null);
+            return $this->choose(
+                $field['label'],
+                $field['options'],
+                $current !== '' ? $current : null,
+                $field['hint'] ?? null,
+            );
         }
         if ($type === 'checklist') {
-            return implode(',', $this->checklist($field['label'], $field['options'], array_values(array_filter(explode(',', $current))), $field['hint'] ?? null));
+            return implode(
+                ',',
+                $this->checklist(
+                    $field['label'],
+                    $field['options'],
+                    array_values(array_filter(explode(',', $current))),
+                    $field['hint'] ?? null,
+                ),
+            );
         }
         $required = $field['required'] ?? true;
         $custom = $field['validate'] ?? null;
         $validate = static fn(string $v): ?string => $required && trim($v) === ''
             ? _('This field is required.')
-            : ($custom !== null && trim($v) !== '' ? $custom($v) : null);
+            : ($custom !== null && trim($v) !== ''
+                ? $custom($v)
+                : null);
 
         if (($field['type'] ?? 'text') === 'secret') {
             // A secret is never shown: nothing typed keeps the one given before
             $value = $this->secret(
                 $field['label'],
-                $keep && $current !== '' ? static fn(string $v): ?string => $v === '' ? null : ($custom !== null ? $custom($v) : null) : $validate,
+                $keep && $current !== ''
+                    ? static fn(string $v): ?string => $v === '' ? null : ($custom !== null ? $custom($v) : null)
+                    : $validate,
                 $field['hint'] ?? null,
             );
 

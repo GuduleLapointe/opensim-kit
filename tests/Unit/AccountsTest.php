@@ -54,7 +54,9 @@ describe('A list of accounts', function () {
     });
 
     test('tells each line that cannot be used, and keeps the others', function () {
-        $list = AccountList::parse("Jane,Doe\nBad\"Name,Doe\nJohn,Roe,not an email\nJANE,doe\nOk,Fine,ok@example.org\n");
+        $list = AccountList::parse(
+            "Jane,Doe\nBad\"Name,Doe\nJohn,Roe,not an email\nJANE,doe\nOk,Fine,ok@example.org\n",
+        );
 
         expect(array_column($list['accounts'], 'first'))->toBe(['Jane', 'Ok']);
         expect($list['errors'])->toHaveCount(3);
@@ -71,7 +73,13 @@ describe('A list of accounts', function () {
 
 describe('The statements of an account', function () {
     test('write it with the tables Robust has, in one transaction', function () {
-        $made = accounts_writer()->statements('Jane', 'Doe', 'jane@example.org', 'secret', '607c44e9-3d01-45eb-a07e-937dc72dbadb');
+        $made = accounts_writer()->statements(
+            'Jane',
+            'Doe',
+            'jane@example.org',
+            'secret',
+            '607c44e9-3d01-45eb-a07e-937dc72dbadb',
+        );
 
         expect($made['id'])->toBe('00000000-0000-4000-8000-000000000001');
         expect($made['sql'])->toStartWith('START TRANSACTION;');
@@ -124,20 +132,17 @@ describe('The import', function () {
      */
     function accounts_importer(array $names, bool $fail, array &$log): AccountImporter
     {
-        return new AccountImporter(
-            function (GridPlan $plan, string $sql) use ($names, $fail, &$log): ?array {
-                if (str_starts_with($sql, 'SELECT CONCAT')) {
-                    return $names;
-                }
-                if (str_starts_with($sql, 'SELECT uuid')) {
-                    return ['607c44e9-3d01-45eb-a07e-937dc72dbadb'];
-                }
-                $log[] = $sql;
+        return new AccountImporter(function (GridPlan $plan, string $sql) use ($names, $fail, &$log): ?array {
+            if (str_starts_with($sql, 'SELECT CONCAT')) {
+                return $names;
+            }
+            if (str_starts_with($sql, 'SELECT uuid')) {
+                return ['607c44e9-3d01-45eb-a07e-937dc72dbadb'];
+            }
+            $log[] = $sql;
 
-                return $fail ? null : [];
-            },
-            accounts_writer(),
-        );
+            return $fail ? null : [];
+        }, accounts_writer());
     }
 
     function accounts_to_make(): array
@@ -202,15 +207,22 @@ describe('The import', function () {
 describe('A password kept as Robust keeps it', function () {
     it('is read from a list, with its salt', function () {
         $hash = AccountWriter::passwordHash('secret', 'abc123');
-        $list = AccountList::parse((string) json_encode([
-            ['first' => 'Ann', 'last' => 'Lee', 'password_hash' => $hash, 'password_salt' => 'abc123'],
-            ['first' => 'Bob', 'last' => 'Roe', 'password_hash' => 'not-a-hash', 'password_salt' => 'x'],
-        ]), 'json');
+        $list = AccountList::parse(
+            (string) json_encode([
+                ['first' => 'Ann', 'last' => 'Lee', 'password_hash' => $hash, 'password_salt' => 'abc123'],
+                ['first' => 'Bob', 'last' => 'Roe', 'password_hash' => 'not-a-hash', 'password_salt' => 'x'],
+            ]),
+            'json',
+        );
 
-        expect($list['accounts'][0]['password_hash'])->toBe($hash)
-            ->and($list['accounts'][0]['password_salt'])->toBe('abc123')
-            ->and(count($list['accounts']))->toBe(1)
-            ->and($list['errors'][0])->toContain('password_hash');
+        expect($list['accounts'][0]['password_hash'])
+            ->toBe($hash)
+            ->and($list['accounts'][0]['password_salt'])
+            ->toBe('abc123')
+            ->and(count($list['accounts']))
+            ->toBe(1)
+            ->and($list['errors'][0])
+            ->toContain('password_hash');
     });
 
     it('is written as it is, and the password is not made', function () {
@@ -218,6 +230,8 @@ describe('A password kept as Robust keeps it', function () {
         $writer = new AccountWriter(fn() => '11111111-2222-3333-4444-555555555555', fn() => 1, fn() => 'randomsalt');
         $sql = $writer->statements('Ann', 'Lee', '', '', null, ['hash' => $hash, 'salt' => 'abc123'])['sql'];
 
-        expect($sql)->toContain("'$hash', 'abc123'")->not->toContain('randomsalt');
+        expect($sql)
+            ->toContain("'$hash', 'abc123'")
+            ->not->toContain('randomsalt');
     });
 });

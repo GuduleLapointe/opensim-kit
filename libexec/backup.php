@@ -30,7 +30,7 @@ while ($args !== []) {
     } elseif ($arg === '--logs' || $arg === '--archives') {
         $options[substr($arg, 2)] = true;
     } elseif ($arg === '--output' || str_starts_with($arg, '--output=')) {
-        $options['output'] = str_contains($arg, '=') ? substr($arg, 9) : (array_shift($args) ?? '');
+        $options['output'] = str_contains($arg, '=') ? substr($arg, 9) : array_shift($args) ?? '';
         if ($options['output'] === '') {
             fwrite(STDERR, "backup: --output needs a folder\n");
             exit(2);
@@ -52,13 +52,9 @@ if (($profile['EtcRoot'] ?? '') === '') {
     exit(1);
 }
 try {
-    $files = (new Backup(
-        $profile,
-        Backup::mysqldump(...),
-        static function (string $message): void {
-            fwrite(STDERR, $message . "\n");
-        },
-    ))->run($refs, $options);
+    $files = (new Backup($profile, Backup::mysqldump(...), static function (string $message): void {
+        fwrite(STDERR, $message . "\n");
+    }))->run($refs, $options);
 } catch (InvalidArgumentException $e) {
     fwrite(STDERR, 'backup: ' . $e->getMessage() . "\n");
     exit(2);
@@ -67,3 +63,4 @@ try {
     exit(1);
 }
 echo implode("\n", $files), "\n";
+

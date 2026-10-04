@@ -17,10 +17,15 @@ it('registers an install with its base directories', function () {
     $config = new Config($file);
     $config->addProfile('osgrid', '/opt/osgrid/bin');
 
-    expect($config->profiles())->toBe(['osgrid'])
-        ->and($config->defaultProfile())->toBe('osgrid')
-        ->and($config->profile('osgrid'))->toMatchArray([
-            'CoreDirectory' => '/opt/osgrid/bin', 'EtcRoot' => '/opt/osgrid/bin', 'DataRoot' => '/opt/osgrid/bin',
+    expect($config->profiles())
+        ->toBe(['osgrid'])
+        ->and($config->defaultProfile())
+        ->toBe('osgrid')
+        ->and($config->profile('osgrid'))
+        ->toMatchArray([
+            'CoreDirectory' => '/opt/osgrid/bin',
+            'EtcRoot' => '/opt/osgrid/bin',
+            'DataRoot' => '/opt/osgrid/bin',
         ]);
 });
 
@@ -29,8 +34,7 @@ it('keeps the default profile unless asked', function () {
     $config->addProfile('one', '/a');
     $config->addProfile('two', '/b', '/b/etc', '/b/data');
 
-    expect($config->defaultProfile())->toBe('one')
-        ->and($config->profile('two')['DataRoot'])->toBe('/b/data');
+    expect($config->defaultProfile())->toBe('one')->and($config->profile('two')['DataRoot'])->toBe('/b/data');
 
     $config->addProfile('three', '/c', null, null, true);
     expect($config->defaultProfile())->toBe('three');
@@ -41,9 +45,12 @@ it('removes a profile but not the default one', function () {
     $config->addProfile('one', '/a');
     $config->addProfile('two', '/b');
 
-    expect($config->removeProfile('two'))->toBeTrue()
-        ->and($config->removeProfile('nope'))->toBeFalse()
-        ->and(fn() => $config->removeProfile('one'))->toThrow(RuntimeException::class);
+    expect($config->removeProfile('two'))
+        ->toBeTrue()
+        ->and($config->removeProfile('nope'))
+        ->toBeFalse()
+        ->and(fn() => $config->removeProfile('one'))
+        ->toThrow(RuntimeException::class);
 });
 
 it('refuses a bad name', function () {

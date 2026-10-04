@@ -53,8 +53,16 @@ final class SetupRunner
             return null;
         }
 
-        $this->ui->note((new NewGrid($gridUi))->describe($gridPlan) . "\n\n" . (new NewSim($simUi))->describe($simPlan));
-        if ($this->ui->choose(_('Apply this configuration?'), ['yes' => _('Continue'), 'no' => _('Edit config')], 'yes') !== 'yes') {
+        $this->ui->note(
+            (new NewGrid($gridUi))->describe($gridPlan) . "\n\n" . (new NewSim($simUi))->describe($simPlan),
+        );
+        if (
+            $this->ui->choose(
+                _('Apply this configuration?'),
+                ['yes' => _('Continue'), 'no' => _('Edit config')],
+                'yes',
+            ) !== 'yes'
+        ) {
             throw new EditConfig();
         }
 
@@ -104,24 +112,40 @@ final class SetupRunner
         $owner = $data['owner'] ?? null;
         if (is_array($owner) && ($owner['password_hash'] ?? '') !== '' && ($owner['password'] ?? '') === '') {
             [$first, $lastName] = array_pad(explode(' ', trim((string) $owner['name']), 2), 2, '');
-            $this->users($profile, $nick, [[
-                'first' => $first,
-                'last' => $lastName,
-                'email' => (string) ($owner['email'] ?? ''),
-                'password_hash' => (string) $owner['password_hash'],
-                'password_salt' => (string) ($owner['password_salt'] ?? ''),
-            ]], $resultFile);
+            $this->users(
+                $profile,
+                $nick,
+                [
+                    [
+                        'first' => $first,
+                        'last' => $lastName,
+                        'email' => (string) ($owner['email'] ?? ''),
+                        'password_hash' => (string) $owner['password_hash'],
+                        'password_salt' => (string) ($owner['password_salt'] ?? ''),
+                    ],
+                ],
+                $resultFile,
+            );
         }
 
         $last = null;
         foreach ($data['simulators'] ?? [] as $i => $sim) {
-            $made = (new NewSim(new PresetUi($this->ui, SetupFile::simAnswers($data, $i) + ['Grid of the simulator' => $nick], $ask, $prefill)))->run($nick);
+            $made = (new NewSim(
+                new PresetUi(
+                    $this->ui,
+                    SetupFile::simAnswers($data, $i) + ['Grid of the simulator' => $nick],
+                    $ask,
+                    $prefill,
+                ),
+            ))->run($nick);
             if ($made === null) {
                 return null;
             }
             $last = $made;
             foreach (array_slice($sim['regions'] ?? [], 1, null, true) as $j => $_) {
-                (new NewSim(new PresetUi($this->ui, SetupFile::regionAnswers($data, $i, $j), $ask, $prefill)))->addRegion($made[0], $this->simName($made));
+                (new NewSim(
+                    new PresetUi($this->ui, SetupFile::regionAnswers($data, $i, $j), $ask, $prefill),
+                ))->addRegion($made[0], $this->simName($made));
             }
         }
 
@@ -166,17 +190,25 @@ final class SetupRunner
             $counts[$row['status']] = ($counts[$row['status']] ?? 0) + 1;
         }
         $this->ui->note(
-            sprintf(_('Accounts: %s'), implode(', ', array_map(static fn(string $s, int $n): string => "$n $s", array_keys($counts), $counts))),
+            sprintf(
+                _('Accounts: %s'),
+                implode(', ', array_map(static fn(string $s, int $n): string => "$n $s", array_keys($counts), $counts)),
+            ),
         );
 
-        $generated = array_filter($done['results'], static fn(array $row): bool => $row['generated'] && $row['status'] !== AccountImporter::EXISTS);
+        $generated = array_filter(
+            $done['results'],
+            static fn(array $row): bool => $row['generated'] && $row['status'] !== AccountImporter::EXISTS,
+        );
         if ($generated !== []) {
             $resultFile = $resultFile !== '' ? $resultFile : 'users-result-' . date('Ymd-His') . '.csv';
             $umask = umask(0o077);
             file_put_contents($resultFile, AccountImporter::resultCsv($done['results']));
             umask($umask);
             chmod($resultFile, 0o600);
-            $this->ui->note(sprintf(_('The passwords made for the accounts are in %s (only you can read it).'), $resultFile));
+            $this->ui->note(
+                sprintf(_('The passwords made for the accounts are in %s (only you can read it).'), $resultFile),
+            );
         }
     }
 }

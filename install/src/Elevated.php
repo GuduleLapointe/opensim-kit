@@ -45,7 +45,7 @@ final class Elevated
             $pipes,
         );
         if (!is_resource($process)) {
-            $ui->error(sprintf(_("Could not run the writing as %s."), $user));
+            $ui->error(sprintf(_('Could not run the writing as %s.'), $user));
 
             throw new SetupFailed('write');
         }

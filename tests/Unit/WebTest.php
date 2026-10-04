@@ -13,7 +13,9 @@ describe('Services', function () {
 
         expect($services->path('search'))->toBe('/helpers/query.php');
         expect($services->path('currency'))->toBe('/helpers/currency.php');
-        expect($services->url('https://play.example.org/', 'offline'))->toBe('https://play.example.org/helpers/offline.php');
+        expect($services->url('https://play.example.org/', 'offline'))->toBe(
+            'https://play.example.org/helpers/offline.php',
+        );
         expect($services->aliases())->toBe([]);
     });
 
@@ -67,7 +69,11 @@ describe('helpers.ini', function () {
         ]);
         file_put_contents(
             HelpersConfig::path($dir),
-            str_replace(["path = \"/helpers\"", ';; search = "/search"'], ['path = "/helper"', 'search = "/search"'], $first),
+            str_replace(
+                ["path = \"/helpers\"", ';; search = "/search"'],
+                ['path = "/helper"', 'search = "/search"'],
+                $first,
+            ),
         );
 
         $again = HelpersConfig::render((string) file_get_contents(HelpersConfig::path($dir)), [
@@ -97,20 +103,29 @@ describe('Snippets for the web server', function () {
         $nginx = Snippets::render('nginx', 'alpha');
         $apache = Snippets::render('apache', 'alpha');
 
-        expect($caddy)->toContain('root * /var/www/html')->and($caddy)->toContain('try_files {path} /index.php')
-            ->and($nginx)->toContain('try_files $uri $uri/ /index.php?$query_string')
-            ->and($apache)->toContain('FallbackResource /index.php');
+        expect($caddy)
+            ->toContain('root * /var/www/html')
+            ->and($caddy)
+            ->toContain('try_files {path} /index.php')
+            ->and($nginx)
+            ->toContain('try_files $uri $uri/ /index.php?$query_string')
+            ->and($apache)
+            ->toContain('FallbackResource /index.php');
     });
 
     test('have the grid in the PHP environment', function () {
-        expect(Snippets::render('caddy', 'alpha'))->toContain('env OPENSIM_GRID alpha')
-            ->and(Snippets::render('nginx', 'alpha'))->toContain('fastcgi_param OPENSIM_GRID alpha;')
-            ->and(Snippets::render('apache', 'alpha'))->toContain('SetEnv OPENSIM_GRID alpha');
+        expect(Snippets::render('caddy', 'alpha'))
+            ->toContain('env OPENSIM_GRID alpha')
+            ->and(Snippets::render('nginx', 'alpha'))
+            ->toContain('fastcgi_param OPENSIM_GRID alpha;')
+            ->and(Snippets::render('apache', 'alpha'))
+            ->toContain('SetEnv OPENSIM_GRID alpha');
     });
 
     test('take another root and socket', function () {
         expect(Snippets::render('nginx', 'alpha', '/srv/site', '/run/php/php8.3-fpm.sock'))
-            ->toContain('root /srv/site;')->toContain('unix:/run/php/php8.3-fpm.sock');
+            ->toContain('root /srv/site;')
+            ->toContain('unix:/run/php/php8.3-fpm.sock');
     });
 
     test('refuse an unknown server', function () {
@@ -120,8 +135,11 @@ describe('Snippets for the web server', function () {
 
 describe('Pages', function () {
     test('have a path of their own, or the default one', function () {
-        expect((new Services())->path('home'))->toBe('/')
-            ->and((new Services())->path('welcome'))->toBe('/welcome')
-            ->and((new Services('/helpers', ['welcome' => 'hello']))->path('welcome'))->toBe('/hello');
+        expect((new Services())->path('home'))
+            ->toBe('/')
+            ->and((new Services())->path('welcome'))
+            ->toBe('/welcome')
+            ->and((new Services('/helpers', ['welcome' => 'hello']))->path('welcome'))
+            ->toBe('/hello');
     });
 });

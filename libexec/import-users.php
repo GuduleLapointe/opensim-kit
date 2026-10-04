@@ -115,15 +115,31 @@ if ($done['error'] !== null) {
 $counts = [];
 foreach ($done['results'] as $row) {
     $counts[$row['status']] = ($counts[$row['status']] ?? 0) + 1;
-    printf("%-14s %s %s%s\n", $row['status'], $row['first'], $row['last'], $row['detail'] !== '' ? " ({$row['detail']})" : '');
+    printf(
+        "%-14s %s %s%s\n",
+        $row['status'],
+        $row['first'],
+        $row['last'],
+        $row['detail'] !== '' ? " ({$row['detail']})" : '',
+    );
 }
-echo "\n" . implode(', ', array_map(static fn(string $s, int $n): string => "$n $s", array_keys($counts), $counts)) . "\n";
+echo "\n" .
+    implode(', ', array_map(static fn(string $s, int $n): string => "$n $s", array_keys($counts), $counts)) .
+    "\n";
 if (!$flags['apply']) {
     echo "Nothing was written: --apply makes the accounts.\n";
 }
 
-$generated = array_filter($done['results'], static fn(array $row): bool => $row['generated'] && $row['status'] !== AccountImporter::EXISTS);
-$resultFile = $options['result'] !== '' ? $options['result'] : ($flags['apply'] ? 'users-result-' . date('Ymd-His') . '.csv' : '');
+$generated = array_filter(
+    $done['results'],
+    static fn(array $row): bool => $row['generated'] && $row['status'] !== AccountImporter::EXISTS,
+);
+$resultFile =
+    $options['result'] !== ''
+        ? $options['result']
+        : ($flags['apply']
+            ? 'users-result-' . date('Ymd-His') . '.csv'
+            : '');
 if ($resultFile !== '' && ($flags['apply'] || $generated !== [])) {
     $umask = umask(0o077);
     file_put_contents($resultFile, AccountImporter::resultCsv($done['results']));
@@ -134,3 +150,4 @@ if ($resultFile !== '' && ($flags['apply'] || $generated !== [])) {
 
 $failed = ($counts[AccountImporter::FAILED] ?? 0) + ($counts[AccountImporter::NOT_TRIED] ?? 0);
 exit($failed > 0 || $list['errors'] !== [] ? 1 : 0);
+

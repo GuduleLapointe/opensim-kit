@@ -19,14 +19,27 @@ final class SimImporter
      * @param array<string,array<string,string>> $raw the original, as written, includes read
      * @return SimPlan|string the plan, or what makes it impossible
      */
-    public static function plan(array $raw, string $path, GridInfo $grid, array $profile, ?string $name, string $core): SimPlan|string
-    {
+    public static function plan(
+        array $raw,
+        string $path,
+        GridInfo $grid,
+        array $profile,
+        ?string $name,
+        string $core,
+    ): SimPlan|string {
         $ini = IniReader::expand($raw);
-        $architecture = $ini['Architecture']['Include-Architecture'] ?? ($raw['Architecture']['Include-Architecture'] ?? '');
+        $architecture =
+            $ini['Architecture']['Include-Architecture'] ?? ($raw['Architecture']['Include-Architecture'] ?? '');
         if ($architecture !== '' && stripos($architecture, 'Standalone') !== false) {
             return 'a standalone simulator has its own services: only the simulators of a grid are ported';
         }
-        if (!preg_match('/Data Source=([^;"\s]*);Database=([^;"\s]*);User ID=([^;"\s]*);Password=([^;"]*?);/i', $ini['DatabaseService']['ConnectionString'] ?? '', $db)) {
+        if (
+            !preg_match(
+                '/Data Source=([^;"\s]*);Database=([^;"\s]*);User ID=([^;"\s]*);Password=([^;"]*?);/i',
+                $ini['DatabaseService']['ConnectionString'] ?? '',
+                $db,
+            )
+        ) {
             return 'no database in [DatabaseService] ConnectionString (the simulator has its own)';
         }
         $port = (int) ($ini['Network']['http_listener_port'] ?? 0);
@@ -34,7 +47,10 @@ final class SimImporter
             return 'no http_listener_port in [Network]';
         }
 
-        $name = $name !== null && $name !== '' ? $name : (string) preg_replace('/[^A-Za-z0-9 _-]/', '', basename(dirname($path, 2)));
+        $name =
+            $name !== null && $name !== ''
+                ? $name
+                : (string) preg_replace('/[^A-Za-z0-9 _-]/', '', basename(dirname($path, 2)));
         if ($name === '') {
             return 'the simulator has no name: give one with --name';
         }
@@ -87,7 +103,9 @@ final class SimImporter
         $dir = $raw['Startup']['regionload_regionsdir'] ?? 'Regions';
         $dir = str_starts_with($dir, '/') ? $dir : dirname($path) . "/$dir";
 
-        return array_values(array_merge(glob(rtrim($dir, '/') . '/*.ini') ?: [], glob(rtrim($dir, '/') . '/*.ini.disabled') ?: []));
+        return array_values(
+            array_merge(glob(rtrim($dir, '/') . '/*.ini') ?: [], glob(rtrim($dir, '/') . '/*.ini.disabled') ?: []),
+        );
     }
 
     /** The address the regions of the simulator announce, from their files (the first one that has it). */

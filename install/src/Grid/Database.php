@@ -111,7 +111,7 @@ final class Database
         // 2. The database, with this account.
         [$code, , $err] = $this->run($client, $plan, $plan->dbName);
         if ($code === 0) {
-            $this->ui->note(sprintf(_("Database %s on %s: connection OK."), $plan->dbName, $plan->dbHost));
+            $this->ui->note(sprintf(_('Database %s on %s: connection OK.'), $plan->dbName, $plan->dbHost));
 
             return self::OK;
         }
@@ -154,7 +154,9 @@ final class Database
         if ($hosts === null) {
             $this->ui->error(
                 sprintf(
-                    _("Login refused for user %s: the password is wrong, or the account does not exist for '%s'. The administrator access to the server, to check, is not available (%s).%s"),
+                    _(
+                        "Login refused for user %s: the password is wrong, or the account does not exist for '%s'. The administrator access to the server, to check, is not available (%s).%s",
+                    ),
                     $plan->dbUser,
                     $host,
                     $this->adminReason,
@@ -167,7 +169,11 @@ final class Database
         }
         if (in_array($host, $hosts, true)) {
             $this->ui->error(
-                sprintf(_("User '%s'@'%s' exists but the password is rejected: give the right password."), $plan->dbUser, $host),
+                sprintf(
+                    _("User '%s'@'%s' exists but the password is rejected: give the right password."),
+                    $plan->dbUser,
+                    $host,
+                ),
             );
 
             return self::RETRY;
@@ -176,9 +182,16 @@ final class Database
         $this->ui->warn(
             $hosts === []
                 ? sprintf(_('User %s does not exist on %s.'), $plan->dbUser, $plan->dbHost)
-                : sprintf(_("User %s exists for %s, not for '%s' (the host it connects from)."), $plan->dbUser, implode(', ', $hosts), $host),
+                : sprintf(
+                    _("User %s exists for %s, not for '%s' (the host it connects from)."),
+                    $plan->dbUser,
+                    implode(', ', $hosts),
+                    $host,
+                ),
         );
-        if (!$this->ui->confirm(sprintf(_("Create user '%s'@'%s' on %s?"), $plan->dbUser, $host, $plan->dbHost), true)) {
+        if (
+            !$this->ui->confirm(sprintf(_("Create user '%s'@'%s' on %s?"), $plan->dbUser, $host, $plan->dbHost), true)
+        ) {
             return self::RETRY;
         }
 
@@ -206,13 +219,24 @@ final class Database
     {
         $host = $this->accountHost($plan);
         $this->ui->warn(
-            sprintf(_("User %s can connect to %s, but has no access to database %s: it does not exist, or the user has no rights on it."), $plan->dbUser, $plan->dbHost, $plan->dbName),
+            sprintf(
+                _(
+                    'User %s can connect to %s, but has no access to database %s: it does not exist, or the user has no rights on it.',
+                ),
+                $plan->dbUser,
+                $plan->dbHost,
+                $plan->dbName,
+            ),
         );
 
         $exists = $this->databaseExists($client, $plan);
         if ($exists === null) {
             $this->ui->error(
-                sprintf(_("The administrator access to the server, to check or create it, is not available (%s).%s"), $this->adminReason, $this->adminHint()),
+                sprintf(
+                    _('The administrator access to the server, to check or create it, is not available (%s).%s'),
+                    $this->adminReason,
+                    $this->adminHint(),
+                ),
             );
             $this->showCommands($plan, $host, false, true);
 
@@ -244,7 +268,7 @@ final class Database
 
             return self::ABORT;
         }
-        $this->ui->note(sprintf(_("Database %s ready on %s."), $plan->dbName, $plan->dbHost));
+        $this->ui->note(sprintf(_('Database %s ready on %s.'), $plan->dbName, $plan->dbHost));
 
         return self::OK;
     }
@@ -277,7 +301,9 @@ final class Database
         }
         $lines[] = "GRANT ALL ON `{$plan->dbName}`.* TO $account;";
         $this->ui->note(
-            _('From an account with administrator rights on the database server, run what is missing:') . "\n  " . implode("\n  ", $lines),
+            _('From an account with administrator rights on the database server, run what is missing:') .
+                "\n  " .
+                implode("\n  ", $lines),
         );
     }
 
@@ -453,11 +479,21 @@ final class Database
     private function askAdmin(string $client, GridPlan $plan): array|false
     {
         $this->ui->note(
-            sprintf(_('Creating what is missing needs an administrator account of the database server %s, one that may create users and databases.'), $plan->dbHost) .
+            sprintf(
+                _(
+                    'Creating what is missing needs an administrator account of the database server %s, one that may create users and databases.',
+                ),
+                $plan->dbHost,
+            ) .
                 ' ' .
                 _('Its password is used for this setup only, kept in memory, never written.'),
         );
-        if (!$this->ui->confirm(sprintf(_("Enter the credentials of an administrator account of %s?"), $plan->dbHost), true)) {
+        if (
+            !$this->ui->confirm(
+                sprintf(_('Enter the credentials of an administrator account of %s?'), $plan->dbHost),
+                true,
+            )
+        ) {
             return false;
         }
 
@@ -467,14 +503,21 @@ final class Database
                 'root',
                 fn(string $value) => trim($value) === '' ? 'Required.' : null,
             );
-            $access = $this->explicitAccess($client, $plan->dbHost, $user, $this->ui->secret(sprintf(_("Password of %s"), $user)));
+            $access = $this->explicitAccess(
+                $client,
+                $plan->dbHost,
+                $user,
+                $this->ui->secret(sprintf(_('Password of %s'), $user)),
+            );
             [$code, , $err] = $this->exec(array_merge($access['command'], ['-BN', '-e', 'SELECT 1']), $access['env']);
             if ($code === 0) {
                 self::$admins[$plan->dbHost] = [$user, $access['env']['MYSQL_PWD']];
 
                 return $access;
             }
-            $this->ui->error(sprintf(_('Login refused for %s on %s: %s'), $user, $plan->dbHost, $this->errorLine($err)));
+            $this->ui->error(
+                sprintf(_('Login refused for %s on %s: %s'), $user, $plan->dbHost, $this->errorLine($err)),
+            );
         } while ($this->ui->confirm(_('Try again with other credentials?'), false));
 
         return false;

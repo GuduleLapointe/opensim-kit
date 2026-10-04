@@ -79,7 +79,7 @@ final class FormPrompt extends Prompt
     /** The options of a choice or a checklist: key => label (yes or no for a confirm) */
     public static function optionsOf(array $field): array
     {
-        return self::typeOf($field) === 'confirm' ? ['yes' => _('Yes'), 'no' => _('No')] : ($field['options'] ?? []);
+        return self::typeOf($field) === 'confirm' ? ['yes' => _('Yes'), 'no' => _('No')] : $field['options'] ?? [];
     }
 
     /** The value a field starts with: the default, or the first option of a choice */
@@ -145,7 +145,8 @@ final class FormPrompt extends Prompt
             $parts = [];
             foreach (array_keys(self::optionsOf($field)) as $n => $key) {
                 $part = (in_array($key, $checked, true) ? '[x] ' : '[ ] ') . self::optionsOf($field)[$key];
-                $parts[] = $focused && ($this->cursors[$field['key']] ?? 0) === $n ? '‹' . $part . '›' : ' ' . $part . ' ';
+                $parts[] =
+                    $focused && ($this->cursors[$field['key']] ?? 0) === $n ? '‹' . $part . '›' : ' ' . $part . ' ';
             }
 
             return trim(implode(' ', $parts));
@@ -167,7 +168,11 @@ final class FormPrompt extends Prompt
             return false;
         }
         $name = $field['key'];
-        $step = in_array($key, [Key::RIGHT, Key::RIGHT_ARROW], true) ? 1 : (in_array($key, [Key::LEFT, Key::LEFT_ARROW], true) ? -1 : 0);
+        $step = in_array($key, [Key::RIGHT, Key::RIGHT_ARROW], true)
+            ? 1
+            : (in_array($key, [Key::LEFT, Key::LEFT_ARROW], true)
+                ? -1
+                : 0);
         if ($type === 'choice' || $type === 'confirm') {
             if ($step === 0 && $key !== Key::SPACE) {
                 return false;
@@ -189,7 +194,10 @@ final class FormPrompt extends Prompt
                 $option = (string) $options[$cursor];
                 $checked = in_array($option, $checked, true) ? array_diff($checked, [$option]) : [...$checked, $option];
                 // In the order of the options
-                $this->values[$name] = implode(',', array_values(array_filter($options, static fn($o): bool => in_array((string) $o, $checked, true))));
+                $this->values[$name] = implode(
+                    ',',
+                    array_values(array_filter($options, static fn($o): bool => in_array((string) $o, $checked, true))),
+                );
 
                 return true;
             }

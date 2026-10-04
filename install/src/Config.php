@@ -10,9 +10,7 @@ namespace OpenSim\Installer;
  */
 final class Config
 {
-    public function __construct(private readonly ?string $file = null)
-    {
-    }
+    public function __construct(private readonly ?string $file = null) {}
 
     public function path(): ?string
     {
@@ -141,8 +139,13 @@ final class Config
      *
      * @return array<string,string> the profile written
      */
-    public function addProfile(string $name, string $core, ?string $etc = null, ?string $data = null, bool $makeDefault = false): array
-    {
+    public function addProfile(
+        string $name,
+        string $core,
+        ?string $etc = null,
+        ?string $data = null,
+        bool $makeDefault = false,
+    ): array {
         if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9._-]*$/', $name) || $name === 'Defaults') {
             throw new \InvalidArgumentException(sprintf(_('Invalid profile name: %s'), $name));
         }
@@ -156,7 +159,7 @@ final class Config
             'DataRoot' => $data,
         ];
 
-        $path = $this->path() ?? $this->file ?? '/etc/opensim/opensim.conf';
+        $path = $this->path() ?? ($this->file ?? '/etc/opensim/opensim.conf');
         $all = is_file($path) ? (parse_ini_file($path, true, INI_SCANNER_RAW) ?: []) : [];
         $all[$name] = $profile;
         $current = $all['Defaults']['DefaultProfile'] ?? null;
@@ -177,7 +180,9 @@ final class Config
             return false;
         }
         if (($all['Defaults']['DefaultProfile'] ?? null) === $name) {
-            throw new \RuntimeException(sprintf(_('%s is the default profile, make another one the default first'), $name));
+            throw new \RuntimeException(
+                sprintf(_('%s is the default profile, make another one the default first'), $name),
+            );
         }
         unset($all[$name]);
         $this->save($path, $all);

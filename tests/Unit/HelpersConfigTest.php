@@ -89,19 +89,22 @@ describe('the config of the helpers', function () {
     });
 
     test('lets helpers.ini override', function () {
-        [$conf] = helpers_config_tree(<<<'INI'
-        [Helpers]
-        path = "/helper"
-        mail_sender = "no-reply@example.org"
-        currency_provider = "gloebit"
-        [search_db]
-        hostname = "db2"
-        prefix = "ossearch"
-        user = "search"
-        password = "pw"
-        [Urls]
-        search = "/search"
-        INI);
+        [$conf] = helpers_config_tree(
+            <<<'INI'
+            [Helpers]
+            path = "/helper"
+            mail_sender = "no-reply@example.org"
+            currency_provider = "gloebit"
+            [search_db]
+            hostname = "db2"
+            prefix = "ossearch"
+            user = "search"
+            password = "pw"
+            [Urls]
+            search = "/search"
+            INI
+            ,
+        );
 
         $settings = OpenSimKit_HelpersConfig::settings('Alpha', $conf);
         $constants = OpenSimKit_HelpersConfig::constants($settings);
@@ -119,21 +122,26 @@ describe('the config of the helpers', function () {
     test('gives the message of the day of helpers.ini', function () {
         [$conf] = helpers_config_tree("[Helpers]\nmotd = \"Hello\\nthere\"\n");
 
-        expect(OpenSimKit_HelpersConfig::constants(OpenSimKit_HelpersConfig::settings(null, $conf))['OPENSIM_MOTD'])->toBe('Hello\\nthere');
+        expect(
+            OpenSimKit_HelpersConfig::constants(OpenSimKit_HelpersConfig::settings(null, $conf))['OPENSIM_MOTD'],
+        )->toBe('Hello\\nthere');
     });
 
     test('does without Robust when helpers.ini is full', function () {
-        [$conf, $grid] = helpers_config_tree(<<<'INI'
-        [Helpers]
-        grid_name = "Alpha"
-        login_uri = "http://play.example.org:8002"
-        web_url = "https://play.example.org"
-        [robust_db]
-        hostname = "localhost"
-        prefix = "alpha_robust"
-        user = "helpers"
-        password = "pw"
-        INI);
+        [$conf, $grid] = helpers_config_tree(
+            <<<'INI'
+            [Helpers]
+            grid_name = "Alpha"
+            login_uri = "http://play.example.org:8002"
+            web_url = "https://play.example.org"
+            [robust_db]
+            hostname = "localhost"
+            prefix = "alpha_robust"
+            user = "helpers"
+            password = "pw"
+            INI
+            ,
+        );
         chmod("$grid/Robust.HG.ini", 0o000);
 
         $settings = OpenSimKit_HelpersConfig::settings(null, $conf);
@@ -177,7 +185,9 @@ describe('the config of the helpers', function () {
     });
 
     test('reads a connection string', function () {
-        expect(OpenSimKit_HelpersConfig::connection('Data Source=db;Database=x;User ID=u;Password=p;Old Guids=true;'))->toBe([
+        expect(
+            OpenSimKit_HelpersConfig::connection('Data Source=db;Database=x;User ID=u;Password=p;Old Guids=true;'),
+        )->toBe([
             'hostname' => 'db',
             'prefix' => 'x',
             'user' => 'u',
@@ -203,8 +213,14 @@ function helpers_config_run(array $environment, array $names): array
     foreach (['vendor/autoload.php', 'includes/databases.php', 'includes/functions.php'] as $stub) {
         file_put_contents("$root/$stub", "<?php\n");
     }
-    $code = 'require ' . var_export("$root/includes/config.php", true) . '; echo json_encode(array_combine('
-        . var_export($names, true) . ', array_map("constant", ' . var_export($names, true) . ')));';
+    $code =
+        'require ' .
+        var_export("$root/includes/config.php", true) .
+        '; echo json_encode(array_combine(' .
+        var_export($names, true) .
+        ', array_map("constant", ' .
+        var_export($names, true) .
+        ')));';
     $process = proc_open(
         [PHP_BINARY, '-d', 'display_errors=0', '-r', $code],
         [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
@@ -226,17 +242,23 @@ describe('config.php of the packaged helpers', function () {
             ['OPENSIM_GRID_NAME', 'OPENSIM_DB_NAME', 'SEARCH_DB_USER', 'CURRENCY_HELPER_URL'],
         );
 
-        expect($status)->toBe(0)->and($constants)->toBe([
-            'OPENSIM_GRID_NAME' => 'Alpha World',
-            'OPENSIM_DB_NAME' => 'alpha_robust',
-            'SEARCH_DB_USER' => 'opensim',
-            'CURRENCY_HELPER_URL' => 'https://play.example.org/helpers/currency.php',
-        ]);
+        expect($status)
+            ->toBe(0)
+            ->and($constants)
+            ->toBe([
+                'OPENSIM_GRID_NAME' => 'Alpha World',
+                'OPENSIM_DB_NAME' => 'alpha_robust',
+                'SEARCH_DB_USER' => 'opensim',
+                'CURRENCY_HELPER_URL' => 'https://play.example.org/helpers/currency.php',
+            ]);
     });
 
     test('refuses to run when the grid cannot be found', function () {
         [$conf] = helpers_config_tree();
-        [, $constants, $errors] = helpers_config_run(['OPENSIM_CONF' => $conf, 'OPENSIM_GRID' => 'nowhere'], ['OPENSIM_GRID_NAME']);
+        [, $constants, $errors] = helpers_config_run(
+            ['OPENSIM_CONF' => $conf, 'OPENSIM_GRID' => 'nowhere'],
+            ['OPENSIM_GRID_NAME'],
+        );
 
         expect($constants)->toBe([])->and($errors)->toContain('no grid found in opensim.conf');
     });

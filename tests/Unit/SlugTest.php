@@ -21,6 +21,8 @@ it('keeps the words apart, in snake_case', function (string $name, string $slug)
 ]);
 
 it('gives the instances the same names', function () {
-    expect(GridInfo::instanceName('The Rapist_Sim 1'))->toBe('the_rapist_sim_1')
-        ->and(GridInfo::instanceName('testgrid_sim1'))->toBe('testgrid_sim1');
+    expect(GridInfo::instanceName('The Rapist_Sim 1'))
+        ->toBe('the_rapist_sim_1')
+        ->and(GridInfo::instanceName('testgrid_sim1'))
+        ->toBe('testgrid_sim1');
 });

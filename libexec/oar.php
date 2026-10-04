@@ -58,3 +58,4 @@ try {
     fwrite(STDERR, 'oar: ' . $e->getMessage() . "\n");
     exit(1);
 }
+

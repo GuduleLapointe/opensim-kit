@@ -21,13 +21,19 @@ final class Snippets
     public const SOCKET = '/run/php/php-fpm.sock';
 
     /** @throws \InvalidArgumentException for a server that is not written */
-    public static function render(string $server, string $nick, string $docroot = self::DOCROOT, string $socket = self::SOCKET): string
-    {
+    public static function render(
+        string $server,
+        string $nick,
+        string $docroot = self::DOCROOT,
+        string $socket = self::SOCKET,
+    ): string {
         return match ($server) {
             'caddy' => self::caddy($nick, $docroot, $socket),
             'nginx' => self::nginx($nick, $docroot, $socket),
             'apache' => self::apache($nick, $docroot),
-            default => throw new \InvalidArgumentException("No snippet for $server (" . implode(', ', self::SERVERS) . ').'),
+            default => throw new \InvalidArgumentException(
+                "No snippet for $server (" . implode(', ', self::SERVERS) . ').',
+            ),
         };
     }
 
@@ -45,14 +51,22 @@ final class Snippets
 
     private static function nginx(string $nick, string $docroot, string $socket): string
     {
-        return self::header('nginx', $nick, 'Put it in the server block of the web site. Adjust the socket of PHP-FPM to your version.') .
+        return self::header(
+            'nginx',
+            $nick,
+            'Put it in the server block of the web site. Adjust the socket of PHP-FPM to your version.',
+        ) .
             "\nroot $docroot;\nindex index.php index.html;\n\nlocation / {\n\ttry_files \$uri \$uri/ /index.php?\$query_string;\n}\n\n" .
             "location ~ \\.php\$ {\n\tinclude snippets/fastcgi-php.conf;\n\tfastcgi_param OPENSIM_GRID $nick;\n\tfastcgi_pass unix:$socket;\n}\n";
     }
 
     private static function apache(string $nick, string $docroot): string
     {
-        return self::header('apache', $nick, 'Put it in the virtual host of the web site (PHP through libapache2-mod-php or PHP-FPM handling .php).') .
+        return self::header(
+            'apache',
+            $nick,
+            'Put it in the virtual host of the web site (PHP through libapache2-mod-php or PHP-FPM handling .php).',
+        ) .
             "\nDocumentRoot $docroot\n<Directory $docroot>\n\tOptions -Indexes\n\tRequire all granted\n\tDirectoryIndex index.php index.html\n" .
             "\tFallbackResource /index.php\n\tSetEnv OPENSIM_GRID $nick\n</Directory>\n";
     }

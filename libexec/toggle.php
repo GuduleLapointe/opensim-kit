@@ -55,7 +55,12 @@ $failed = false;
 foreach ($names as $name) {
     $instance = $instances[GridInfo::instanceName($name)] ?? null;
     if ($instance === null) {
-        fwrite(STDERR, "$verb: no grid or simulator called $name" . ($instances === [] ? '' : ' (known: ' . implode(', ', array_keys($instances)) . ')') . "\n");
+        fwrite(
+            STDERR,
+            "$verb: no grid or simulator called $name" .
+                ($instances === [] ? '' : ' (known: ' . implode(', ', array_keys($instances)) . ')') .
+                "\n",
+        );
         $failed = true;
         continue;
     }
@@ -73,3 +78,4 @@ foreach ($names as $name) {
 }
 
 exit($failed ? 1 : 0);
+

@@ -141,12 +141,12 @@ final class Installer
         (new Runtime($ui))->install($plan);
 
         if (!is_file("{$plan->coreDirectory}/bin/OpenSim.exe") && !is_file("{$plan->coreDirectory}/bin/OpenSim.dll")) {
-            $ui->error(sprintf(_("Core not found after install: %s/bin/OpenSim.dll"), $plan->coreDirectory));
+            $ui->error(sprintf(_('Core not found after install: %s/bin/OpenSim.dll'), $plan->coreDirectory));
 
             return;
         }
 
         $path = (new Config())->write($plan);
-        $ui->note(sprintf(_("OpenSim %s installed. Config: %s"), $plan->version, $path));
+        $ui->note(sprintf(_('OpenSim %s installed. Config: %s'), $plan->version, $path));
     }
 }

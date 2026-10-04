@@ -30,24 +30,35 @@ final class Actions
 
         switch ($op) {
             case 'grid-enable':
-                return GridState::enable($etcRoot, $args['nick']) || $this->no('Cannot enable the grid (no Robust config).');
+                return GridState::enable($etcRoot, $args['nick']) ||
+                    $this->no('Cannot enable the grid (no Robust config).');
             case 'grid-disable':
                 GridState::disable($etcRoot, $args['nick']);
 
-                return !GridState::isEnabled($etcRoot, $args['nick']) || $this->no('Cannot disable the grid (permission).');
+                return !GridState::isEnabled($etcRoot, $args['nick']) ||
+                    $this->no('Cannot disable the grid (permission).');
             case 'sim-enable':
-                return SimState::enable($etcRoot, $args['slug'], $args['ini']) || $this->no('Cannot enable the simulator (no config).');
+                return SimState::enable($etcRoot, $args['slug'], $args['ini']) ||
+                    $this->no('Cannot enable the simulator (no config).');
             case 'sim-disable':
                 SimState::disable($etcRoot, $args['slug']);
 
-                return !SimState::isEnabled($etcRoot, $args['slug']) || $this->no('Cannot disable the simulator (permission).');
+                return !SimState::isEnabled($etcRoot, $args['slug']) ||
+                    $this->no('Cannot disable the simulator (permission).');
             case 'region-enable':
             case 'region-disable':
-                $moved = $op === 'region-enable' ? RegionState::enable($args['file']) : RegionState::disable($args['file']);
+                $moved =
+                    $op === 'region-enable' ? RegionState::enable($args['file']) : RegionState::disable($args['file']);
                 if ($moved === null) {
-                    return $this->no('Cannot change the region (permission, or a region of that name is there already).');
+                    return $this->no(
+                        'Cannot change the region (permission, or a region of that name is there already).',
+                    );
                 }
-                PendingRestarts::add($profile, $args['instance'], "region {$args['name']} " . ($op === 'region-enable' ? 'enabled' : 'disabled'));
+                PendingRestarts::add(
+                    $profile,
+                    $args['instance'],
+                    "region {$args['name']} " . ($op === 'region-enable' ? 'enabled' : 'disabled'),
+                );
 
                 return true;
             case 'restart':
@@ -66,7 +77,13 @@ final class Actions
             case 'inject-config':
                 // The settings of an imported config go into the config the kit wrote, and the report beside it
                 $path = (string) $args['path'];
-                if (!is_file($path) || @file_put_contents($path, RobustImporter::inject((string) file_get_contents($path), $args['customizations'])) === false) {
+                if (
+                    !is_file($path) ||
+                    @file_put_contents(
+                        $path,
+                        RobustImporter::inject((string) file_get_contents($path), $args['customizations']),
+                    ) === false
+                ) {
                     return $this->no("Cannot write the settings into $path.");
                 }
                 if (($args['report_path'] ?? '') !== '') {
@@ -97,13 +114,17 @@ final class Actions
         $etcRoot = (string) ($profile['EtcRoot'] ?? '');
         $opensim = dirname(__DIR__, 2) . '/bin/opensim';
         $instances = array_values(array_unique(array_column(PendingRestarts::read($profile), 'instance')));
-        usort($instances, static fn(string $a, string $b): int => is_file("$etcRoot/robust.d/$b.ini") <=> is_file("$etcRoot/robust.d/$a.ini"));
+        usort(
+            $instances,
+            static fn(string $a, string $b): int => is_file("$etcRoot/robust.d/$b.ini") <=>
+                is_file("$etcRoot/robust.d/$a.ini"),
+        );
 
         $ok = true;
         foreach ($instances as $instance) {
             $now = $warn ? '' : 'now ';
             if (is_file("$etcRoot/robust.d/$instance.ini")) {
-                $ok = System::run(System::arg($opensim) . " restart now " . System::arg($instance)) === 0 && $ok;
+                $ok = System::run(System::arg($opensim) . ' restart now ' . System::arg($instance)) === 0 && $ok;
 
                 continue;
             }

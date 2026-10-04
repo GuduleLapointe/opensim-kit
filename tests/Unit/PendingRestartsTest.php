@@ -55,7 +55,9 @@ describe('Pending restarts', function () {
 
         expect($done)->toBeTrue();
         expect(is_file("$file.disabled"))->toBeTrue();
-        expect(PendingRestarts::read($profile))->toBe([['instance' => 'vonda_sim1', 'reason' => 'region Far disabled']]);
+        expect(PendingRestarts::read($profile))->toBe([
+            ['instance' => 'vonda_sim1', 'reason' => 'region Far disabled'],
+        ]);
     });
 
     test('are not left by an action that failed', function () {

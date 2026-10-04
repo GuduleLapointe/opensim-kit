@@ -89,7 +89,8 @@ $gridDir = "$etc/grids/$nick";
 $services = HelpersConfig::services($gridDir);
 $ini = HelpersConfig::read($gridDir);
 $robust = (string) file_get_contents((string) GridState::robustIni($etc, $nick));
-$webUrl = $ini['Helpers']['web_url'] ?? (preg_match('/^\s*WebURL\s*=\s*"?([^"\r\n]+)"?/m', $robust, $m) ? trim($m[1]) : '');
+$webUrl =
+    $ini['Helpers']['web_url'] ?? (preg_match('/^\s*WebURL\s*=\s*"?([^"\r\n]+)"?/m', $robust, $m) ? trim($m[1]) : '');
 
 if ($command === 'snippet') {
     $server = $words[0] ?? '';
@@ -112,7 +113,11 @@ foreach (array_keys(Services::PAGES) as $page) {
 if ($command === 'check') {
     $failed = false;
     foreach ($rows as $service => [$url]) {
-        $headers = @get_headers($url, false, stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true]]));
+        $headers = @get_headers(
+            $url,
+            false,
+            stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true]]),
+        );
         $status = $headers === false ? 'no answer' : (string) ($headers[0] ?? '?');
         // A script that answers, even with an error of its own (a query without arguments), is served
         $ok = $headers !== false && !preg_match('# (404|403|50[234]) #', $status);
@@ -124,9 +129,15 @@ if ($command === 'check') {
 
 echo "Grid:      $nick\n";
 echo 'Web URL:   ' . ($webUrl !== '' ? $webUrl : '(none: WebURL of the Robust config)') . "\n";
-echo "Helpers:   {$services->base()}" . (is_file(HelpersConfig::path($gridDir)) ? '' : "  (no helpers.ini: run `opensim setup` for this grid)") . "\n";
-echo 'Docroot:   ' . $options['docroot'] . (is_dir(Snippets::WEBROOT) ? '' : '  (the helpers are not installed: apt install opensim-helpers)') . "\n\n";
+echo "Helpers:   {$services->base()}" .
+    (is_file(HelpersConfig::path($gridDir)) ? '' : '  (no helpers.ini: run `opensim setup` for this grid)') .
+    "\n";
+echo 'Docroot:   ' .
+    $options['docroot'] .
+    (is_dir(Snippets::WEBROOT) ? '' : '  (the helpers are not installed: apt install opensim-helpers)') .
+    "\n\n";
 foreach ($rows as $service => [$url, $script]) {
     printf("  %-15s %s\n", $service, $url);
 }
 echo "\nThe web server needs: opensim web $nick snippet <caddy|nginx|apache>\n";
+

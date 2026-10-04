@@ -46,7 +46,8 @@ function import_tree(): string
             ConsoleUser = "admin"
             ConsolePass = "adminpw"
             ConsolePort = 8004
-        INI,
+        INI
+        ,
     );
     file_put_contents("$root/bin/robust-include/extra.ini", "[Modules]\n    MyModule = \"on\"\n");
 
@@ -65,8 +66,14 @@ describe('IniReader', function () {
     test('follows Include-* and stops at a loop', function () {
         $root = test_tmp() . '/import-inc-' . bin2hex(random_bytes(4));
         mkdir("$root/bin/config-include", 0o755, true);
-        file_put_contents("$root/bin/OpenSim.ini", "[Architecture]\n    Include-Architecture = \"config-include/Grid.ini\"\n[Startup]\n    a = 1\n");
-        file_put_contents("$root/bin/config-include/Grid.ini", "[Modules]\n    Include-Loop = \"../OpenSim.ini\"\n    b = 2\n");
+        file_put_contents(
+            "$root/bin/OpenSim.ini",
+            "[Architecture]\n    Include-Architecture = \"config-include/Grid.ini\"\n[Startup]\n    a = 1\n",
+        );
+        file_put_contents(
+            "$root/bin/config-include/Grid.ini",
+            "[Modules]\n    Include-Loop = \"../OpenSim.ini\"\n    b = 2\n",
+        );
 
         $ini = IniReader::load("$root/bin/OpenSim.ini");
 
@@ -81,7 +88,12 @@ describe('The plan of an imported Robust', function () {
         $plan = RobustImporter::plan(
             IniReader::load($path),
             $path,
-            ['EtcRoot' => '/etc/opensim', 'DataRoot' => '/var/lib/opensim', 'CacheRoot' => '/var/cache/opensim', 'LogsRoot' => '/var/log/opensim'],
+            [
+                'EtcRoot' => '/etc/opensim',
+                'DataRoot' => '/var/lib/opensim',
+                'CacheRoot' => '/var/cache/opensim',
+                'LogsRoot' => '/var/log/opensim',
+            ],
             null,
             '/usr/share/opensim/0.9.3.0',
         );
@@ -124,7 +136,13 @@ describe('The customizations of an imported Robust', function () {
             'Network' => ['ConsolePort' => '0'],
         ];
 
-        $found = RobustImporter::customizations($original, $generated, $example, '/old/bin', "MaxRegionSize = 0\n;ExportSupported = true\n");
+        $found = RobustImporter::customizations(
+            $original,
+            $generated,
+            $example,
+            '/old/bin',
+            "MaxRegionSize = 0\n;ExportSupported = true\n",
+        );
         $by = array_column($found, null, 'key');
 
         // What the setup asked and wrote is its own (the console), the layout of the kit too, the defaults are no choice
@@ -136,12 +154,24 @@ describe('The customizations of an imported Robust', function () {
 
     test('keep the data places, made absolute', function () {
         $found = RobustImporter::customizations(
-            ['AssetService' => ['BaseDirectory' => './fsassets/data', 'SpoolDirectory' => '${Const|CacheDirectory}/tmp', 'Name' => '../x']],
+            [
+                'AssetService' => [
+                    'BaseDirectory' => './fsassets/data',
+                    'SpoolDirectory' => '${Const|CacheDirectory}/tmp',
+                    'Name' => '../x',
+                ],
+            ],
             ['AssetService' => ['BaseDirectory' => '${Const|DataDirectory}/fsassets/data']],
             ['AssetService' => ['BaseDirectory' => './fsassets/data']],
             '/old/bin',
             '',
-            ['AssetService' => ['BaseDirectory' => './fsassets/data', 'SpoolDirectory' => '/old/cache/tmp', 'Name' => '../x']],
+            [
+                'AssetService' => [
+                    'BaseDirectory' => './fsassets/data',
+                    'SpoolDirectory' => '/old/cache/tmp',
+                    'Name' => '../x',
+                ],
+            ],
         );
         $by = array_column($found, null, 'key');
 
@@ -189,7 +219,11 @@ function import_run(array $arguments, string $original): array
 
     $code = dirname(__DIR__, 2);
     $process = proc_open(
-        [PHP_BINARY, "$code/libexec/import.php", ...array_map(static fn(string $a): string => str_replace('@OLD@', "$root/old/bin", $a), $arguments)],
+        [
+            PHP_BINARY,
+            "$code/libexec/import.php",
+            ...array_map(static fn(string $a): string => str_replace('@OLD@', "$root/old/bin", $a), $arguments),
+        ],
         [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
         $pipes,
         $code,
@@ -202,7 +236,8 @@ function import_run(array $arguments, string $original): array
 }
 
 describe('import grid config', function () {
-    $original = "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n[GridService]\n MaxRegionSize = 1024\n[AssetService]\n BaseDirectory = \"./fsassets/data\"\n SpoolDirectory = \"./tmp\"\n";
+    $original =
+        "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n[GridService]\n MaxRegionSize = 1024\n[AssetService]\n BaseDirectory = \"./fsassets/data\"\n SpoolDirectory = \"./tmp\"\n";
 
     test('tells the plan, writes nothing', function () use ($original) {
         [$status, $output, , $root] = import_run(['@OLD@/Robust.HG.ini'], $original);
@@ -262,7 +297,10 @@ describe('The plan of an imported simulator', function () {
             "$root/sim1/bin/config-include/GridHypergrid.ini",
             "[Modules]\n    X = 1\n[DatabaseService]\n    ConnectionString = \"Data Source=localhost;Database=old_sim1;User ID=oldsim;Password=pw2;\"\n",
         );
-        file_put_contents("$root/sim1/bin/Regions/Welcome.ini", "[Welcome]\nRegionUUID = 607c44e9-3d01-45eb-a07e-937dc72dbadb\nLocation = 1000,1000\nExternalHostName = old.example.org\n");
+        file_put_contents(
+            "$root/sim1/bin/Regions/Welcome.ini",
+            "[Welcome]\nRegionUUID = 607c44e9-3d01-45eb-a07e-937dc72dbadb\nLocation = 1000,1000\nExternalHostName = old.example.org\n",
+        );
 
         return "$root/sim1/bin/OpenSim.ini";
     }
@@ -289,7 +327,9 @@ describe('The plan of an imported simulator', function () {
         expect($plan->estateOwner)->toBe('Jane Doe');
         expect($plan->createRegion)->toBeFalse();
         expect(array_map('basename', SimImporter::regionFiles(IniReader::load($path), $path)))->toBe(['Welcome.ini']);
-        expect(SimImporter::externalHost(SimImporter::regionFiles(IniReader::load($path), $path)))->toBe('old.example.org');
+        expect(SimImporter::externalHost(SimImporter::regionFiles(IniReader::load($path), $path)))->toBe(
+            'old.example.org',
+        );
     });
 
     test('is refused for a standalone sim', function () {
@@ -304,7 +344,8 @@ describe('The plan of an imported simulator', function () {
 
 describe('import sim config', function () {
     test('writes the sim and its regions', function () {
-        $robust = "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n";
+        $robust =
+            "[Const]\n BaseHostname = \"old.example.org\"\n PublicPort = 8002\n PrivatePort = 8003\n[DatabaseService]\n ConnectionString = \"Data Source=localhost;Database=old_robust;User ID=oldrobust;Password=pw;\"\n[GridInfoService]\n gridname = \"Old World\"\n gridnick = \"oldworld\"\n";
         [$status, , $errors, $root] = import_run(['@OLD@/Robust.HG.ini', '--apply'], $robust);
         expect($status)->toBe(0, $errors);
 
@@ -326,7 +367,9 @@ describe('import sim config', function () {
         expect($ini)->toContain('http_listener_port = 9100');
         expect($ini)->toContain('DefaultEstateName = "Old Estate"');
         expect($ini)->toContain("[Modules]\nX = 1");
-        expect(file_get_contents("$root/etc/grids/oldworld/sims/oldworld_sim1/regions/Welcome.ini"))->toContain('607c44e9-3d01-45eb-a07e-937dc72dbadb');
+        expect(file_get_contents("$root/etc/grids/oldworld/sims/oldworld_sim1/regions/Welcome.ini"))->toContain(
+            '607c44e9-3d01-45eb-a07e-937dc72dbadb',
+        );
         expect(file_exists("$root/etc/grids/oldworld/sims/oldworld_sim1.import-report.txt"))->toBeTrue();
         expect(is_link("$root/etc/opensim.d/oldworld_sim1.ini"))->toBeFalse();
         expect($output)->toContain('Written:');
@@ -341,7 +384,11 @@ function import_file(string $name, string $content, array $arguments = []): arra
     file_put_contents("$dir/$name", $content);
     $code = dirname(__DIR__, 2);
     $process = proc_open(
-        [PHP_BINARY, "$code/libexec/import.php", ...array_map(static fn(string $a): string => str_replace('@FILE@', "$dir/$name", $a), $arguments)],
+        [
+            PHP_BINARY,
+            "$code/libexec/import.php",
+            ...array_map(static fn(string $a): string => str_replace('@FILE@', "$dir/$name", $a), $arguments),
+        ],
         [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
         $pipes,
         $code,
@@ -354,14 +401,19 @@ function import_file(string $name, string $content, array $arguments = []): arra
 }
 
 describe('import setup file', function () {
-    $setup = "grid: { name: My Grid, database: { user: a, password: b } }\nowner: { name: Jane Doe, password: hunter22 }\nsimulators:\n  - regions: [ { name: One }, { name: Two } ]\nusers:\n  - { first: Bob, last: Roe, password: pw123456 }\n";
+    $setup =
+        "grid: { name: My Grid, database: { user: a, password: b } }\nowner: { name: Jane Doe, password: hunter22 }\nsimulators:\n  - regions: [ { name: One }, { name: Two } ]\nusers:\n  - { first: Bob, last: Roe, password: pw123456 }\n";
 
     test('tells what it holds, makes nothing', function () use ($setup) {
         [$status, $output] = import_file('setup.yaml', $setup, ['@FILE@']);
 
-        expect($status)->toBe(0)
-            ->and($output)->toContain('the grid My Grid')->toContain('1 simulator(s) with 2 region(s)')
-            ->toContain('1 account(s)')->toContain('Nothing was made');
+        expect($status)
+            ->toBe(0)
+            ->and($output)
+            ->toContain('the grid My Grid')
+            ->toContain('1 simulator(s) with 2 region(s)')
+            ->toContain('1 account(s)')
+            ->toContain('Nothing was made');
     });
 
     test('is restricted to what is asked: --users', function () use ($setup) {

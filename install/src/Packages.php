@@ -35,16 +35,16 @@ final class Packages
             return;
         }
 
-        if ($this->ui->confirm(sprintf(_("%s is not installed. Install %s now?"), $command, $package), true)) {
+        if ($this->ui->confirm(sprintf(_('%s is not installed. Install %s now?'), $command, $package), true)) {
             // Judge success by the binary appearing, not the package manager's
             // exit code (post-install warnings can make it non-zero).
             $this->install($package);
             if (!System::commandExists($command)) {
-                $this->ui->error(sprintf(_("Could not install %s."), $package));
+                $this->ui->error(sprintf(_('Could not install %s.'), $package));
                 exit(1);
             }
         } elseif ($required) {
-            $this->ui->error(sprintf(_("%s is required to continue."), $command));
+            $this->ui->error(sprintf(_('%s is required to continue.'), $command));
             exit(1);
         }
     }

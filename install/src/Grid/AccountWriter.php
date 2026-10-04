@@ -106,7 +106,7 @@ final class AccountWriter
     /** A value of a statement, quoted: backslashes and quotes escaped, nothing else can end the string. */
     public static function quote(string $value): string
     {
-        return "'" . str_replace(["\\", "'", "\0"], ["\\\\", "\\'", ''], $value) . "'";
+        return "'" . str_replace(['\\', "'", "\0"], ['\\\\', "\\'", ''], $value) . "'";
     }
 
     /**
@@ -164,7 +164,17 @@ final class AccountWriter
         foreach (self::OUTFIT as [$name, $asset, $folder, $assetType, $wearable]) {
             $item = ($this->uuid)();
             $sql[] = $this->item($id, $item, $asset, $assetType, $name, self::ALL, $wearable, $folders[$folder], $now);
-            $sql[] = $this->item($id, ($this->uuid)(), $item, self::ASSET_LINK, $name, self::COPY, $wearable, $folders['Current Outfit'], $now);
+            $sql[] = $this->item(
+                $id,
+                ($this->uuid)(),
+                $item,
+                self::ASSET_LINK,
+                $name,
+                self::COPY,
+                $wearable,
+                $folders['Current Outfit'],
+                $now,
+            );
         }
         $sql[] = 'COMMIT';
 
@@ -176,8 +186,14 @@ final class AccountWriter
      * @param array<string,string>                                 $folders name => id, for the top folders
      * @param list<array{0:string,1:int,2?:list<mixed>}>           $tree
      */
-    private function folders(array &$sql, array &$folders, string $user, string $parent, array $tree, bool $top = true): void
-    {
+    private function folders(
+        array &$sql,
+        array &$folders,
+        string $user,
+        string $parent,
+        array $tree,
+        bool $top = true,
+    ): void {
         foreach ($tree as $entry) {
             [$name, $type] = $entry;
             $id = ($this->uuid)();

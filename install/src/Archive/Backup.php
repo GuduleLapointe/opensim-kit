@@ -88,8 +88,12 @@ final class Backup
             throw new \RuntimeException("cannot make the folder $output");
         }
 
-        $name = $nick . ($slug !== null ? '-' . $this->simName($nick, $slug) : '')
-            . "-{$this->stamp}" . (($options['logs'] ?? false) ? '-logs' : '') . (($options['archives'] ?? false) ? '-archives' : '');
+        $name =
+            $nick .
+            ($slug !== null ? '-' . $this->simName($nick, $slug) : '') .
+            "-{$this->stamp}" .
+            ($options['logs'] ?? false ? '-logs' : '') .
+            ($options['archives'] ?? false ? '-archives' : '');
         $file = "$output/$name.tar.gz";
         if (file_exists($file)) {
             throw new \RuntimeException("$file exists already");
@@ -99,25 +103,38 @@ final class Backup
         @mkdir($stage, 0700, true);
 
         try {
-            ($this->say)("backing up " . ($slug ?? "grid $nick") . '...');
+            ($this->say)('backing up ' . ($slug ?? "grid $nick") . '...');
             $databases = $this->databases($grid, $slug);
             @mkdir("$stage/db", 0700, true);
             foreach ($databases as $db) {
                 ($this->say)("  database {$db['name']}");
                 ($this->dump)($db, "$stage/db/{$db['name']}.sql.gz");
             }
-            file_put_contents("$stage/manifest.json", json_encode([
-                'kit' => 'opensim-kit',
-                'date' => date('c'),
-                'host' => gethostname(),
-                'grid' => $nick,
-                'simulator' => $slug,
-                'databases' => array_map(static fn(array $db): array => ['host' => $db['host'], 'name' => $db['name'], 'user' => $db['user']], $databases),
-                'etc' => $etc,
-                'data' => $grid->dataDirectory,
-                'logs' => (bool) ($options['logs'] ?? false),
-                'archives' => (bool) ($options['archives'] ?? false),
-            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            file_put_contents(
+                "$stage/manifest.json",
+                json_encode(
+                    [
+                        'kit' => 'opensim-kit',
+                        'date' => date('c'),
+                        'host' => gethostname(),
+                        'grid' => $nick,
+                        'simulator' => $slug,
+                        'databases' => array_map(
+                            static fn(array $db): array => [
+                                'host' => $db['host'],
+                                'name' => $db['name'],
+                                'user' => $db['user'],
+                            ],
+                            $databases,
+                        ),
+                        'etc' => $etc,
+                        'data' => $grid->dataDirectory,
+                        'logs' => (bool) ($options['logs'] ?? false),
+                        'archives' => (bool) ($options['archives'] ?? false),
+                    ],
+                    JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
+                ) . "\n",
+            );
 
             $this->tar(['-cf', $tar, '-C', $stage, 'manifest.json', 'db']);
             // The configuration
@@ -133,9 +150,16 @@ final class Backup
                 }
                 $paths = ["grids/$nick"];
             }
-            $links = $slug === null
-                ? [GridState::link($etc, $nick), ...array_map(static fn(string $s): string => SimState::link($etc, $s), SimState::names($grid->dir))]
-                : [SimState::link($etc, $slug)];
+            $links =
+                $slug === null
+                    ? [
+                        GridState::link($etc, $nick),
+                        ...array_map(
+                            static fn(string $s): string => SimState::link($etc, $s),
+                            SimState::names($grid->dir),
+                        ),
+                    ]
+                    : [SimState::link($etc, $slug)];
             foreach ($links as $link) {
                 if (is_link($link) && str_starts_with($link, "$etc/")) {
                     $paths[] = substr($link, strlen($etc) + 1);
@@ -149,17 +173,29 @@ final class Backup
             // The data: the folder of the grid, without the archives of the users unless asked
             $data = rtrim($grid->dataDirectory, '/');
             if (is_dir($data)) {
-                $excludes = ($options['archives'] ?? false) ? [] : [basename($data) . '/backups'];
+                $excludes = $options['archives'] ?? false ? [] : [basename($data) . '/backups'];
                 $root = dirname($data);
                 if ($slug !== null) {
-                    $this->append($tar, 'var', $root, array_filter([basename($data) . "/$slug"], static fn(string $p): bool => is_dir("$root/$p")), []);
+                    $this->append(
+                        $tar,
+                        'var',
+                        $root,
+                        array_filter([basename($data) . "/$slug"], static fn(string $p): bool => is_dir("$root/$p")),
+                        [],
+                    );
                 } else {
                     $this->append($tar, 'var', $root, [basename($data)], $excludes);
                 }
             }
             if ($options['logs'] ?? false) {
                 $logs = rtrim($grid->logsDirectory, '/');
-                $names = $slug !== null ? ["$slug.log*"] : array_merge(["{$grid->robustInstance()}.log*"], array_map(static fn(string $s): string => "$s.log*", SimState::names($grid->dir)));
+                $names =
+                    $slug !== null
+                        ? ["$slug.log*"]
+                        : array_merge(
+                            ["{$grid->robustInstance()}.log*"],
+                            array_map(static fn(string $s): string => "$s.log*", SimState::names($grid->dir)),
+                        );
                 $found = [];
                 foreach ($names as $pattern) {
                     foreach (glob("$logs/$pattern") ?: [] as $log) {
@@ -201,7 +237,12 @@ final class Backup
     {
         $found = [];
         if ($slug === null && !$grid->remote && $grid->dbName !== '') {
-            $found["{$grid->dbHost}/{$grid->dbName}"] = ['host' => $grid->dbHost, 'name' => $grid->dbName, 'user' => $grid->dbUser, 'pass' => $grid->dbPass];
+            $found["{$grid->dbHost}/{$grid->dbName}"] = [
+                'host' => $grid->dbHost,
+                'name' => $grid->dbName,
+                'user' => $grid->dbUser,
+                'pass' => $grid->dbPass,
+            ];
         }
         foreach ($slug !== null ? [$slug] : SimState::names($grid->dir) as $sim) {
             $db = GridInfo::parse("{$grid->dir}/sims/$sim.ini");
@@ -293,7 +334,9 @@ final class Backup
             }
         }
         if ($client === null) {
-            throw new \RuntimeException('mysqldump not found (the package of the client of the database, mariadb-client)');
+            throw new \RuntimeException(
+                'mysqldump not found (the package of the client of the database, mariadb-client)',
+            );
         }
         $host = $db['host'];
         $port = null;
@@ -303,12 +346,35 @@ final class Backup
         $options = tempnam(sys_get_temp_dir(), 'osdump');
         chmod($options, 0600);
         $quote = static fn(string $v): string => '"' . addcslashes($v, '\\"') . '"';
-        file_put_contents($options, "[client]\nhost=" . $quote($host) . ($port !== null ? "\nport=$port" : '') . "\nuser=" . $quote($db['user']) . "\npassword=" . $quote($db['pass']) . "\n");
+        file_put_contents(
+            $options,
+            "[client]\nhost=" .
+                $quote($host) .
+                ($port !== null ? "\nport=$port" : '') .
+                "\nuser=" .
+                $quote($db['user']) .
+                "\npassword=" .
+                $quote($db['pass']) .
+                "\n",
+        );
         // MySQL 8 asks for a privilege the account of a grid does not have unless told it has no tablespaces to dump
-        $tablespaces = str_contains((string) shell_exec(escapeshellarg($client) . ' --help 2>/dev/null'), 'no-tablespaces') ? ['--no-tablespaces'] : [];
+        $tablespaces = str_contains(
+            (string) shell_exec(escapeshellarg($client) . ' --help 2>/dev/null'),
+            'no-tablespaces',
+        )
+            ? ['--no-tablespaces']
+            : [];
         try {
             $process = proc_open(
-                [$client, "--defaults-extra-file=$options", '--single-transaction', '--routines', '--events', ...$tablespaces, $db['name']],
+                [
+                    $client,
+                    "--defaults-extra-file=$options",
+                    '--single-transaction',
+                    '--routines',
+                    '--events',
+                    ...$tablespaces,
+                    $db['name'],
+                ],
                 [1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
                 $pipes,
             );

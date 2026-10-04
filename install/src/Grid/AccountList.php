@@ -33,7 +33,10 @@ final class AccountList
             $problem = null;
             $hash = strtolower(trim((string) ($row['password_hash'] ?? '')));
             $salt = trim((string) ($row['password_salt'] ?? ''));
-            if ($hash !== '' && (preg_match('/^[0-9a-f]{32}$/', $hash) !== 1 || preg_match('/^[0-9a-zA-Z]{1,64}$/', $salt) !== 1)) {
+            if (
+                $hash !== '' &&
+                (preg_match('/^[0-9a-f]{32}$/', $hash) !== 1 || preg_match('/^[0-9a-zA-Z]{1,64}$/', $salt) !== 1)
+            ) {
                 $problem = 'password_hash is the 32 hexadecimal characters Robust keeps, with its password_salt';
             } elseif (!GridAccounts::validName("$first $last")) {
                 $problem = "name \"$first $last\" must be a first and a last name of letters, digits, . _ and -";
@@ -74,7 +77,7 @@ final class AccountList
         if (!is_array($data)) {
             return [];
         }
-        $list = array_is_list($data) ? $data : ($data['accounts'] ?? $data['users'] ?? []);
+        $list = array_is_list($data) ? $data : $data['accounts'] ?? ($data['users'] ?? []);
         $rows = [];
         foreach (is_array($list) ? $list : [] as $i => $entry) {
             if (is_array($entry)) {
@@ -99,7 +102,8 @@ final class AccountList
     {
         $lines = preg_split('/\r\n|\r|\n/', $text) ?: [];
         $first = trim((string) ($lines[0] ?? ''));
-        $delimiter = substr_count($first, ';') > substr_count($first, ',') ? ';' : (str_contains($first, "\t") ? "\t" : ',');
+        $delimiter =
+            substr_count($first, ';') > substr_count($first, ',') ? ';' : (str_contains($first, "\t") ? "\t" : ',');
         $names = ['first', 'last', 'email', 'password'];
         $header = null;
         if (preg_match('/^"?(first|firstname|first name)"?\s*[' . preg_quote($delimiter, '/') . ']/i', $first) === 1) {
@@ -111,13 +115,16 @@ final class AccountList
 
         $rows = [];
         foreach ($lines as $i => $line) {
-            if ($i === 0 && $header !== null || trim($line) === '') {
+            if (($i === 0 && $header !== null) || trim($line) === '') {
                 continue;
             }
             $cells = str_getcsv($line, $delimiter, '"', '');
-            $rows[$i + 1] = $header !== null
-                ? self::keys(array_combine($header, array_pad(array_slice($cells, 0, count($header)), count($header), '')))
-                : array_combine($names, array_pad(array_slice($cells, 0, 4), 4, ''));
+            $rows[$i + 1] =
+                $header !== null
+                    ? self::keys(
+                        array_combine($header, array_pad(array_slice($cells, 0, count($header)), count($header), '')),
+                    )
+                    : array_combine($names, array_pad(array_slice($cells, 0, 4), 4, ''));
         }
 
         return $rows;

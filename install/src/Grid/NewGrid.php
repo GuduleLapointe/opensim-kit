@@ -180,14 +180,14 @@ final class NewGrid
         $etcRoot = $profile['EtcRoot'];
         $this->makeDirs($plan);
         $conf = (new GridConf())->write($plan);
-        $this->ui->note(sprintf(_("Wrote %s"), $conf));
+        $this->ui->note(sprintf(_('Wrote %s'), $conf));
         $this->writeRobust($plan);
         $this->writeHelpers($plan);
         $this->copyConfigInclude($plan);
 
         $logConfig = (new LogConfig())->write($plan);
         if ($logConfig !== null) {
-            $this->ui->note(sprintf(_("Wrote %s"), $logConfig));
+            $this->ui->note(sprintf(_('Wrote %s'), $logConfig));
         }
 
         // What was asked is kept, to make the same grid again from a file (opensim import)
@@ -212,7 +212,9 @@ final class NewGrid
         if ($plan->helpers) {
             $this->ui->note(
                 sprintf(
-                    _("Web site: the helpers are in %s, the placeholder site in /usr/share/opensim-web/html (when the opensim-web package is installed). The configuration for your web server is in %s/web: %s.caddyfile, %s-nginx.conf, %s-apache.conf, to include in the site of the grid (opensim web %s snippet <caddy|nginx|apache> writes it again)."),
+                    _(
+                        'Web site: the helpers are in %s, the placeholder site in /usr/share/opensim-web/html (when the opensim-web package is installed). The configuration for your web server is in %s/web: %s.caddyfile, %s-nginx.conf, %s-apache.conf, to include in the site of the grid (opensim web %s snippet <caddy|nginx|apache> writes it again).',
+                    ),
                     Snippets::WEBROOT,
                     $plan->gridDir,
                     $plan->gridNick,
@@ -273,7 +275,12 @@ final class NewGrid
 
         $this->ui->error(
             $pending
-                ? sprintf(_("Grid '%s' is configured but was not ready after two minutes. Try: %s -v start %s"), $nick, $opensim, $nick)
+                ? sprintf(
+                    _("Grid '%s' is configured but was not ready after two minutes. Try: %s -v start %s"),
+                    $nick,
+                    $opensim,
+                    $nick,
+                )
                 : sprintf(_("Grid '%s' is configured but did not start. Try: %s -v start %s"), $nick, $opensim, $nick),
         );
         $log = $plan->logsDirectory . '/' . $plan->gridSlug . '_robust.log';
@@ -320,7 +327,7 @@ final class NewGrid
             @copy($path, "$path~"); // backup
         }
         file_put_contents($path, (new RobustConfig())->generate($plan));
-        $this->ui->note(sprintf(_("Wrote %s"), $path));
+        $this->ui->note(sprintf(_('Wrote %s'), $path));
     }
 
     /**
@@ -354,15 +361,26 @@ final class NewGrid
             chmod($path, 0o640);
         } else {
             chmod($path, 0o644);
-            $this->ui->warn(sprintf(_("%s holds the database password and is readable by every user of this machine: give it to the group of your web server (chgrp, then chmod 640)."), $path));
+            $this->ui->warn(
+                sprintf(
+                    _(
+                        '%s holds the database password and is readable by every user of this machine: give it to the group of your web server (chgrp, then chmod 640).',
+                    ),
+                    $path,
+                ),
+            );
         }
-        $this->ui->note(sprintf(_("Wrote %s"), $path));
+        $this->ui->note(sprintf(_('Wrote %s'), $path));
 
         // The configuration of the web server for this grid, one file for each server, to include in its site
         $webDir = "{$plan->gridDir}/web";
         is_dir($webDir) || mkdir($webDir, 0o755, true);
         // Named for the grid and the server, with the extension the editors know
-        $names = ['caddy' => "{$plan->gridNick}.caddyfile", 'nginx' => "{$plan->gridNick}-nginx.conf", 'apache' => "{$plan->gridNick}-apache.conf"];
+        $names = [
+            'caddy' => "{$plan->gridNick}.caddyfile",
+            'nginx' => "{$plan->gridNick}-nginx.conf",
+            'apache' => "{$plan->gridNick}-apache.conf",
+        ];
         foreach (Snippets::SERVERS as $server) {
             $file = "$webDir/{$names[$server]}";
             file_put_contents($file, Snippets::render($server, $plan->gridNick));
@@ -413,7 +431,7 @@ final class NewGrid
         $coreRoot = $profile['CoreRoot'] ?? '';
         $cores = Cores::list($coreRoot);
         if ($cores === []) {
-            $this->ui->error(sprintf(_("No OpenSim core found under %s."), $coreRoot));
+            $this->ui->error(sprintf(_('No OpenSim core found under %s.'), $coreRoot));
 
             return null;
         }
@@ -427,7 +445,13 @@ final class NewGrid
             $existing = $this->findExisting("$etcRoot/grids/$nick");
             $current = $existing !== null ? $this->parseExisting($existing) : [];
         }
-        $identity = function (array $current, ?string $existing, string $nick = '') use ($required, $cores, $profile, $defaultName, $modifyNick): array {
+        $identity = function (array $current, ?string $existing, string $nick = '') use (
+            $required,
+            $cores,
+            $profile,
+            $defaultName,
+            $modifyNick,
+        ): array {
             $name = $current['gridName'] ?? ($modifyNick !== null ? ucfirst($nick) : $defaultName);
 
             return $this->ui->form(
@@ -446,7 +470,8 @@ final class NewGrid
                         'key' => 'hypergrid',
                         'label' => _('Enable Hypergrid?'),
                         'type' => 'confirm',
-                        'default' => $existing !== null ? (str_contains(basename($existing), '.HG.') ? 'yes' : 'no') : 'yes',
+                        'default' =>
+                            $existing !== null ? (str_contains(basename($existing), '.HG.') ? 'yes' : 'no') : 'yes',
                     ],
                     [
                         'key' => 'spacing',
@@ -510,24 +535,39 @@ final class NewGrid
         // The ports of an instance are a block of ten, the first free one (see Ports):
         // public ends with 2, private with 3, the console with 4
         $privateFor = static fn(int $public): int => $public % 10 === 2 ? $public + 1 : Ports::next($public + 1);
-        $consoleFor = static fn(int $public, int $private): int => $public % 10 === 2 ? $public + 2 : Ports::next($private + 1);
+        $consoleFor = static fn(int $public, int $private): int => $public % 10 === 2
+            ? $public + 2
+            : Ports::next($private + 1);
         $defaultPrivate = (int) ($current['privatePort'] ?? $privateFor($defaultPublic));
         $defaultConsole = (int) ($current['consolePort'] ?? $consoleFor($defaultPublic, $defaultPrivate));
         $defaultWeb = $current['webUrl'] ?? "https://$defaultHost";
         $saved = @parse_ini_file("$gridDir/$nick.conf", true, INI_SCANNER_RAW)['Grid']['Center'] ?? '';
-        $defaultCenter = trim((string) $saved, " \t\"") !== '' ? trim((string) $saved, " \t\"") : "$defaultPublic,$defaultPublic";
+        $defaultCenter =
+            trim((string) $saved, " \t\"") !== '' ? trim((string) $saved, " \t\"") : "$defaultPublic,$defaultPublic";
         $existingHelpers = HelpersConfig::read($gridDir);
         $v = $this->ui->form(
             [
                 ['key' => 'host', 'label' => _('Base hostname'), 'default' => $defaultHost, 'validate' => $required],
-                ['key' => 'public', 'label' => _('Public port'), 'default' => (string) $defaultPublic, 'validate' => $numeric],
-                ['key' => 'private', 'label' => _('Private port'), 'default' => (string) $defaultPrivate, 'validate' => $numeric],
+                [
+                    'key' => 'public',
+                    'label' => _('Public port'),
+                    'default' => (string) $defaultPublic,
+                    'validate' => $numeric,
+                ],
+                [
+                    'key' => 'private',
+                    'label' => _('Private port'),
+                    'default' => (string) $defaultPrivate,
+                    'validate' => $numeric,
+                ],
                 [
                     'key' => 'center',
                     'label' => _('Center of the grid (x,y)'),
                     'default' => $defaultCenter,
                     'hint' => _('Where new regions are searched from, kept'),
-                    'validate' => static fn(string $v): ?string => LocationFinder::parse($v) === null ? _('Use x,y (e.g. 8002,8002).') : null,
+                    'validate' => static fn(string $v): ?string => LocationFinder::parse($v) === null
+                        ? _('Use x,y (e.g. 8002,8002).')
+                        : null,
                 ],
                 [
                     'key' => 'console',
@@ -569,28 +609,35 @@ final class NewGrid
         $plan->baseHostname = $v['host'];
         $plan->publicPort = (int) $v['public'];
         // What was left as proposed follows what was changed
-        $plan->privatePort = (int) $v['private'] === $defaultPrivate && $plan->publicPort !== $defaultPublic
-            ? $privateFor($plan->publicPort)
-            : (int) $v['private'];
+        $plan->privatePort =
+            (int) $v['private'] === $defaultPrivate && $plan->publicPort !== $defaultPublic
+                ? $privateFor($plan->publicPort)
+                : (int) $v['private'];
         // The center follows the port when it was left as proposed, else it is what was confirmed
-        $plan->center = $v['center'] === $defaultCenter && $plan->publicPort !== $defaultPublic && $saved === ''
-            ? "{$plan->publicPort},{$plan->publicPort}"
-            : $v['center'];
-        $plan->webUrl = $v['web'] === $defaultWeb && $v['host'] !== $defaultHost ? "https://{$plan->baseHostname}" : $v['web'];
+        $plan->center =
+            $v['center'] === $defaultCenter && $plan->publicPort !== $defaultPublic && $saved === ''
+                ? "{$plan->publicPort},{$plan->publicPort}"
+                : $v['center'];
+        $plan->webUrl =
+            $v['web'] === $defaultWeb && $v['host'] !== $defaultHost ? "https://{$plan->baseHostname}" : $v['web'];
         $plan->helpers = $v['helpers'] === 'yes';
         if ($plan->helpers) {
             $plan->helpersUrls = $existingHelpers['Urls'] ?? [];
             // The URL of the web site is given, the path after it is the choice of the operator
             $plan->helpersPath = Services::normalize($v['helpers_path']);
             $this->ui->note(
-                sprintf(_('Helpers URL: %s (the viewers add the name of the script)'), rtrim($plan->webUrl, '/') . $plan->helpersPath),
+                sprintf(
+                    _('Helpers URL: %s (the viewers add the name of the script)'),
+                    rtrim($plan->webUrl, '/') . $plan->helpersPath,
+                ),
             );
         }
         $plan->consoleMode = $v['console'];
         if ($plan->consoleMode === 'rest') {
-            $plan->consolePort = (int) ($v['console_port'] === (string) $defaultConsole && $plan->publicPort !== $defaultPublic
-                ? $consoleFor($plan->publicPort, $plan->privatePort)
-                : $v['console_port']);
+            $plan->consolePort =
+                (int) ($v['console_port'] === (string) $defaultConsole && $plan->publicPort !== $defaultPublic
+                    ? $consoleFor($plan->publicPort, $plan->privatePort)
+                    : $v['console_port']);
             // As the helpers make theirs: 12 lower case letters, 32 letters and digits
             $plan->consoleHost = (string) ($current['consoleHost'] ?? $plan->baseHostname);
             $plan->consoleUser = (string) ($current['consoleUser'] ?? $this->randomLetters(12));
@@ -621,12 +668,30 @@ final class NewGrid
         // An account keeps its password for the whole session, entered or
         // generated once: an attempt started again proposes the same one
         $password = Database::recall($defaults['dbHost'], $defaults['dbUser']) ?? $defaults['dbPass'];
-        $v = $this->ui->form([
-            ['key' => 'host', 'label' => _('Database host'), 'default' => $defaults['dbHost'], 'validate' => $required],
-            ['key' => 'name', 'label' => _('Database name'), 'default' => $defaults['dbName'], 'validate' => $required],
-            ['key' => 'user', 'label' => _('Database user'), 'default' => $defaults['dbUser'], 'validate' => $required],
-            ['key' => 'pass', 'label' => _('Database password'), 'default' => $password, 'validate' => $required],
-        ], _('Database'));
+        $v = $this->ui->form(
+            [
+                [
+                    'key' => 'host',
+                    'label' => _('Database host'),
+                    'default' => $defaults['dbHost'],
+                    'validate' => $required,
+                ],
+                [
+                    'key' => 'name',
+                    'label' => _('Database name'),
+                    'default' => $defaults['dbName'],
+                    'validate' => $required,
+                ],
+                [
+                    'key' => 'user',
+                    'label' => _('Database user'),
+                    'default' => $defaults['dbUser'],
+                    'validate' => $required,
+                ],
+                ['key' => 'pass', 'label' => _('Database password'), 'default' => $password, 'validate' => $required],
+            ],
+            _('Database'),
+        );
         [$plan->dbHost, $plan->dbName, $plan->dbUser, $plan->dbPass] = [$v['host'], $v['name'], $v['user'], $v['pass']];
         Database::remember($plan->dbHost, $plan->dbUser, $plan->dbPass);
     }
@@ -716,7 +781,8 @@ final class NewGrid
                 ? "remote, port {$plan->consolePort}, user {$plan->consoleUser}"
                 : 'screen session'),
             "  Web URL:     {$plan->webUrl}",
-            '  Helpers:     ' . ($plan->helpers ? "served at {$plan->webUrl}{$plan->helpersPath}" : 'not served by this web site'),
+            '  Helpers:     ' .
+            ($plan->helpers ? "served at {$plan->webUrl}{$plan->helpersPath}" : 'not served by this web site'),
             "  Database:    {$plan->dbName} @ {$plan->dbHost} (user {$plan->dbUser})",
             "  Robust ini:  {$plan->robustIni()}",
             "  Grid dir:    {$plan->etcDirectory}",

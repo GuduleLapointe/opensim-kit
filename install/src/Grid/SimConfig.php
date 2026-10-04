@@ -74,7 +74,12 @@ final class SimConfig
             '[DataSnapshot]',
             'snapshot_cache_directory = "${Const|CacheDirectory}/DataSnapshot"',
             ...$plan->registerUrl !== ''
-                ? [';; The search of the grid: the simulator tells its regions to the helpers', 'index_sims = true', 'gridname = "' . $plan->gridName . '"', 'DATA_SRV_MISearch = "' . $plan->registerUrl . '"']
+                ? [
+                    ';; The search of the grid: the simulator tells its regions to the helpers',
+                    'index_sims = true',
+                    'gridname = "' . $plan->gridName . '"',
+                    'DATA_SRV_MISearch = "' . $plan->registerUrl . '"',
+                ]
                 : [],
             '',
             ...$plan->offlineUrl !== ''

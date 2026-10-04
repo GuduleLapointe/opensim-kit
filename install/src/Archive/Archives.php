@@ -194,8 +194,13 @@ final class Archives
      */
     public static function iarName(string $grid, string $first, string $last, array $options, string $stamp): string
     {
-        return self::part($grid) . '-' . self::part($first) . '-' . self::part($last)
-            . self::modes($options, ['noassets', 'perm', 'skipbadassets']) . "-$stamp.iar";
+        return self::part($grid) .
+            '-' .
+            self::part($first) .
+            '-' .
+            self::part($last) .
+            self::modes($options, ['noassets', 'perm', 'skipbadassets']) .
+            "-$stamp.iar";
     }
 
     /**
@@ -224,7 +229,10 @@ final class Archives
 
     public static function oarPrefix(string $grid, string $sim, ?string $region): string
     {
-        return implode('-', array_filter([self::part($grid), self::part($sim), $region !== null ? self::part($region) : null])) . '-';
+        return implode(
+            '-',
+            array_filter([self::part($grid), self::part($sim), $region !== null ? self::part($region) : null]),
+        ) . '-';
     }
 
     /**
@@ -239,7 +247,13 @@ final class Archives
             $name = basename($file);
             if (
                 str_starts_with($name, $prefix) &&
-                preg_match('/^(?:(?:noassets|skipbadassets|publish|perm[A-Za-z0-9_.]*)-)*(\d{8}-\d{6})\.' . preg_quote($extension, '/') . '$/', substr($name, strlen($prefix)), $m)
+                preg_match(
+                    '/^(?:(?:noassets|skipbadassets|publish|perm[A-Za-z0-9_.]*)-)*(\d{8}-\d{6})\.' .
+                        preg_quote($extension, '/') .
+                        '$/',
+                    substr($name, strlen($prefix)),
+                    $m,
+                )
             ) {
                 $found[$m[1] . '/' . $name] = $file;
             }

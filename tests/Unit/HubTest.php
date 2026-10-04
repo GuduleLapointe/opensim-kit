@@ -234,15 +234,7 @@ describe('Hub simulator and region', function () {
     });
 
     test('a region disabled and enabled again renames its file', function () {
-        [$ui, $etc] = hub_run([
-            'grid:alpha',
-            'region:alpha_sim1:Sim1',
-            'toggle',
-            'toggle',
-            'back',
-            'back',
-            'quit',
-        ]);
+        [$ui, $etc] = hub_run(['grid:alpha', 'region:alpha_sim1:Sim1', 'toggle', 'toggle', 'back', 'back', 'quit']);
         $regions = "$etc/grids/alpha/sims/alpha_sim1/regions";
 
         expect($ui->screens[2]['labels'])->toBe(['Reconfigure', 'Disable this region', 'Back', 'Quit']);

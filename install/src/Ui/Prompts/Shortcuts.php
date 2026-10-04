@@ -103,7 +103,11 @@ trait Shortcuts
             case self::CTRL_T:
                 if ($at > 0 && mb_strlen($value) > 1) {
                     $at = min($at, mb_strlen($value) - 1);
-                    $this->typedValue = mb_substr($value, 0, $at - 1) . mb_substr($value, $at, 1) . mb_substr($value, $at - 1, 1) . mb_substr($value, $at + 1);
+                    $this->typedValue =
+                        mb_substr($value, 0, $at - 1) .
+                        mb_substr($value, $at, 1) .
+                        mb_substr($value, $at - 1, 1) .
+                        mb_substr($value, $at + 1);
                     $this->cursorPosition = $at + 1;
                 }
                 break;
@@ -130,7 +134,9 @@ trait Shortcuts
     {
         $class = (string) get_parent_class($this);
 
-        return new (static::$themes[static::$theme][$class] ?? static::$themes['default'][$class])($this);
+        $renderer = static::$themes[static::$theme][$class] ?? static::$themes['default'][$class];
+
+        return new $renderer($this);
     }
 
     /** Leave the terminal as it was found: the exception goes up through the prompt. */

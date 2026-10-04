@@ -101,7 +101,8 @@ describe('Roles of a region', function () {
     });
 
     test('are found in the config, the commented example left out', function () {
-        $text = "[GridService]\n    ; Region_Welcome_Area = \"DefaultRegion\"\n    Region_Home = \"DefaultRegion, Persistent\"\n    Region_Two = \"FallbackRegion\"\n";
+        $text =
+            "[GridService]\n    ; Region_Welcome_Area = \"DefaultRegion\"\n    Region_Home = \"DefaultRegion, Persistent\"\n    Region_Two = \"FallbackRegion\"\n";
 
         expect(RegionFlags::found($text))->toBe(['DefaultRegion', 'Persistent', 'FallbackRegion']);
         expect(RegionFlags::found("[GridService]\n    ; Region_Welcome_Area = \"DefaultRegion\"\n"))->toBe([]);
@@ -119,7 +120,9 @@ describe('Roles of a region', function () {
     });
 
     test('are written before the next section', function () {
-        $file = robust_file(str_replace('    ;; Region_Welcome_Area = "DefaultRegion, DefaultHGRegion"' . "\n", '', robust_example()));
+        $file = robust_file(
+            str_replace('    ;; Region_Welcome_Area = "DefaultRegion, DefaultHGRegion"' . "\n", '', robust_example()),
+        );
         RegionFlags::give($file, 'Welcome', ['DefaultRegion']);
         $text = (string) file_get_contents($file);
         unlink($file);

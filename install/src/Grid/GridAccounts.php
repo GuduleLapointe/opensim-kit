@@ -119,7 +119,9 @@ final class GridAccounts
             $this->ui->note(sprintf(_("Starting the grid '%s' to create the account."), $grid->nick));
             [$code] = System::runShown(System::arg($opensim) . ' start ' . System::arg($grid->nick));
             if ($code !== 0 || !Console::send($instance, $lines)) {
-                $this->ui->error(sprintf(_("Could not reach the console of the grid '%s' to create the account."), $grid->nick));
+                $this->ui->error(
+                    sprintf(_("Could not reach the console of the grid '%s' to create the account."), $grid->nick),
+                );
 
                 return false;
             }
@@ -137,7 +139,7 @@ final class GridAccounts
                 Console::send($instance, $lines);
             }
         }
-        $this->ui->error(sprintf(_("The account %s was not created: see the console of the grid."), $name));
+        $this->ui->error(sprintf(_('The account %s was not created: see the console of the grid.'), $name));
 
         return false;
     }

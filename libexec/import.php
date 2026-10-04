@@ -46,7 +46,10 @@ function kind(string $path, string $format): string
         return 'accounts';
     }
     $isYaml = in_array($format ?: $ext, ['yaml', 'yml'], true);
-    $json = in_array($format ?: $ext, ['json'], true) || preg_match('/^\s*[\[{]/', $text) === 1 ? json_decode($text, true) : null;
+    $json =
+        in_array($format ?: $ext, ['json'], true) || preg_match('/^\s*[\[{]/', $text) === 1
+            ? json_decode($text, true)
+            : null;
     // An ini starts with a [Section], which a list of JSON does too: it is JSON when it reads as JSON
     if ($isYaml || $format === 'json' || $ext === 'json' || is_array($json)) {
         $data = $isYaml ? yamlData($text) : $json;
@@ -54,7 +57,9 @@ function kind(string $path, string $format): string
             fail("$path is not a list of settings or of accounts", 2);
         }
 
-        return array_is_list($data) || (isset($data['accounts']) && count($data) === 1) || (isset($data['users']) && count($data) === 1)
+        return array_is_list($data) ||
+            (isset($data['accounts']) && count($data) === 1) ||
+            (isset($data['users']) && count($data) === 1)
             ? 'accounts'
             : 'setup';
     }
@@ -140,36 +145,56 @@ $holds = match ($kind) {
 };
 $wanted = array_values(array_filter($holds, static fn(string $part): bool => $all || $only[$part]));
 if ($wanted === []) {
-    fail("nothing to import: $file holds " . ($kind === 'robust' ? 'the config of a grid' : ($kind === 'sim' ? 'the config of a simulator' : 'a list of accounts')) . ', not what ' . implode(' and ', array_keys(array_filter($only))) . ' asks for', 2);
+    fail(
+        "nothing to import: $file holds " .
+            ($kind === 'robust'
+                ? 'the config of a grid'
+                : ($kind === 'sim'
+                    ? 'the config of a simulator'
+                    : 'a list of accounts')) .
+            ', not what ' .
+            implode(' and ', array_keys(array_filter($only))) .
+            ' asks for',
+        2,
+    );
 }
 
-$extra = ($apply ? ['--apply'] : []);
+$extra = $apply ? ['--apply'] : [];
 if ($kind === 'robust') {
-    worker('import-settings.php', array_merge(
-        $grid !== '' ? [$grid] : [],
-        ['robust', $path],
-        $options['core'] !== '' ? ['--core', $options['core']] : [],
-        $extra,
-    ));
+    worker(
+        'import-settings.php',
+        array_merge(
+            $grid !== '' ? [$grid] : [],
+            ['robust', $path],
+            $options['core'] !== '' ? ['--core', $options['core']] : [],
+            $extra,
+        ),
+    );
 }
 if ($kind === 'sim') {
-    worker('import-settings.php', array_merge(
-        $grid !== '' ? [$grid] : [],
-        ['sim', $path],
-        $options['core'] !== '' ? ['--core', $options['core']] : [],
-        $options['name'] !== '' ? ['--name', $options['name']] : [],
-        $extra,
-    ));
+    worker(
+        'import-settings.php',
+        array_merge(
+            $grid !== '' ? [$grid] : [],
+            ['sim', $path],
+            $options['core'] !== '' ? ['--core', $options['core']] : [],
+            $options['name'] !== '' ? ['--name', $options['name']] : [],
+            $extra,
+        ),
+    );
 }
 if ($kind === 'accounts') {
-    worker('import-users.php', array_merge(
-        $grid !== '' ? [$grid] : [],
-        ['import', $path],
-        $options['result'] !== '' ? ['--result', $options['result']] : [],
-        $options['format'] !== '' ? ['--format', $options['format']] : [],
-        $keepGoing ? ['--keep-going'] : [],
-        $extra,
-    ));
+    worker(
+        'import-users.php',
+        array_merge(
+            $grid !== '' ? [$grid] : [],
+            ['import', $path],
+            $options['result'] !== '' ? ['--result', $options['result']] : [],
+            $options['format'] !== '' ? ['--format', $options['format']] : [],
+            $keepGoing ? ['--keep-going'] : [],
+            $extra,
+        ),
+    );
 }
 
 // A setup file of the kit: its grid, its simulators, its accounts
@@ -208,7 +233,9 @@ if (!$apply) {
     if (trim((string) ($data['grid']['name'] ?? '')) !== '') {
         $made[] = "the grid {$data['grid']['name']}";
     }
-    $regions = array_sum(array_map(static fn(array $s): int => max(1, count($s['regions'] ?? [])), $data['simulators'] ?? []));
+    $regions = array_sum(
+        array_map(static fn(array $s): int => max(1, count($s['regions'] ?? [])), $data['simulators'] ?? []),
+    );
     if (!empty($data['simulators'])) {
         $made[] = count($data['simulators']) . ' simulator(s) with ' . $regions . ' region(s)';
     }
@@ -228,3 +255,4 @@ try {
     exit(1);
 }
 exit($made === null ? 1 : 0);
+

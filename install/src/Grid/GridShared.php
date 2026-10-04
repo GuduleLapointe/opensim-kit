@@ -35,7 +35,10 @@ final class GridShared
         $architecture = $hypergrid ? 'GridHypergrid.ini' : 'Grid.ini';
         $written = [];
 
-        foreach ([$architecture, 'GridCommon.ini', 'FlotsamCache.ini', 'osslDefaultEnable.ini', 'osslEnable.ini'] as $file) {
+        foreach (
+            [$architecture, 'GridCommon.ini', 'FlotsamCache.ini', 'osslDefaultEnable.ini', 'osslEnable.ini']
+            as $file
+        ) {
             $dest = "$dir/$file";
             if (is_file($dest)) {
                 if (TextFile::clean($dest)) {

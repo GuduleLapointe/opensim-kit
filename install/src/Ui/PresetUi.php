@@ -52,7 +52,9 @@ final class PresetUi implements InstallerUi
         }
         $values = [];
         foreach ($fields as $field) {
-            $values[$field['key']] = $this->visible($field, $values) ? $this->askField($field, $field['default'] ?? '') : '';
+            $values[$field['key']] = $this->visible($field, $values)
+                ? $this->askField($field, $field['default'] ?? '')
+                : '';
         }
 
         return $values;
@@ -116,13 +118,17 @@ final class PresetUi implements InstallerUi
     {
         $preset = $this->preset($label);
         if ($preset !== null) {
-            $keys = is_array($preset) ? array_map('strval', $preset) : array_values(array_filter(explode(',', (string) $preset)));
+            $keys = is_array($preset)
+                ? array_map('strval', $preset)
+                : array_values(array_filter(explode(',', (string) $preset)));
             $keys = array_values(array_filter($keys, static fn(string $k): bool => isset($options[$k])));
 
             return $this->prefill ? $this->inner->checklist($label, $options, $keys, $hint) : $keys;
         }
 
-        return $this->asked($label) || $this->prefill ? $this->inner->checklist($label, $options, $defaults, $hint) : $defaults;
+        return $this->asked($label) || $this->prefill
+            ? $this->inner->checklist($label, $options, $defaults, $hint)
+            : $defaults;
     }
 
     public function text(string $label, string $default = '', ?\Closure $validate = null, ?string $hint = null): string
@@ -162,16 +168,16 @@ final class PresetUi implements InstallerUi
         }
 
         // A secret has no default: it is asked, unless it can be nothing
-        return $validate === null || $validate('') === null
-            ? ''
-            : $this->inner->secret($label, $validate, $hint);
+        return $validate === null || $validate('') === null ? '' : $this->inner->secret($label, $validate, $hint);
     }
 
     public function confirm(string $label, bool $default = true): bool
     {
         $preset = $this->preset($label);
         if ($preset !== null) {
-            $value = is_bool($preset) ? $preset : in_array(strtolower((string) $preset), ['1', 'true', 'yes', 'y'], true);
+            $value = is_bool($preset)
+                ? $preset
+                : in_array(strtolower((string) $preset), ['1', 'true', 'yes', 'y'], true);
             if ($this->prefill) {
                 return $this->inner->confirm($label, $value);
             }

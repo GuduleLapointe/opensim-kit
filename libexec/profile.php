@@ -98,3 +98,4 @@ switch ($action) {
         fwrite(STDERR, USAGE);
         exit(in_array($action, ['-h', '--help'], true) ? 0 : 2);
 }
+

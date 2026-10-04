@@ -128,7 +128,12 @@ final class GridInfo
     public function helperUrl(string $service): string
     {
         if ($this->planned) {
-            return $this->helpers ? (new \OpenSim\Installer\Web\Services($this->helpersPath, $this->helpersUrls))->url($this->webUrl, $service) : '';
+            return $this->helpers
+                ? (new \OpenSim\Installer\Web\Services($this->helpersPath, $this->helpersUrls))->url(
+                    $this->webUrl,
+                    $service,
+                )
+                : '';
         }
         $ini = \OpenSim\Installer\Web\HelpersConfig::read($this->dir);
         $webUrl = $ini['Helpers']['web_url'] ?? '';
@@ -147,9 +152,7 @@ final class GridInfo
      */
     public function missingRoles(): array
     {
-        return $this->remote
-            ? []
-            : array_values(array_diff(RegionFlags::roles($this->hypergrid), $this->regionFlags));
+        return $this->remote ? [] : array_values(array_diff(RegionFlags::roles($this->hypergrid), $this->regionFlags));
     }
 
     /**

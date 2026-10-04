@@ -78,10 +78,14 @@ it('asks every question to edit a setup', function () {
     $inner = askingUi([null, null]);
     $ui = new PresetUi($inner, ['Grid name' => 'Vonda'], [], true);
 
-    expect($ui->text('Grid name', 'Other'))->toBe('Vonda')
-        ->and($inner->asked[0])->toBe(['Grid name', 'Vonda'])
-        ->and($ui->text('Region name', 'Welcome'))->toBe('Welcome')
-        ->and($inner->asked[1])->toBe(['Region name', 'Welcome']);
+    expect($ui->text('Grid name', 'Other'))
+        ->toBe('Vonda')
+        ->and($inner->asked[0])
+        ->toBe(['Grid name', 'Vonda'])
+        ->and($ui->text('Region name', 'Welcome'))
+        ->toBe('Welcome')
+        ->and($inner->asked[1])
+        ->toBe(['Region name', 'Welcome']);
 });
 
 it('asks the database again after a failure', function () {
@@ -94,10 +98,14 @@ it('asks the database again after a failure', function () {
 });
 
 it('reads a login URI as host:port, with or without the scheme', function () {
-    expect(QuickSetup::login('play.example.org:8002'))->toBe(['play.example.org', 8002])
-        ->and(QuickSetup::login(' http://vonda:8012/ '))->toBe(['vonda', 8012])
-        ->and(QuickSetup::login('play.example.org'))->toBeNull()
-        ->and(QuickSetup::login('host:99999'))->toBeNull();
+    expect(QuickSetup::login('play.example.org:8002'))
+        ->toBe(['play.example.org', 8002])
+        ->and(QuickSetup::login(' http://vonda:8012/ '))
+        ->toBe(['vonda', 8012])
+        ->and(QuickSetup::login('play.example.org'))
+        ->toBeNull()
+        ->and(QuickSetup::login('host:99999'))
+        ->toBeNull();
 });
 
 it('answers what is also to be asked', function () {
@@ -111,10 +119,27 @@ it('answers what is also to be asked', function () {
 it('answers a form field by field', function () {
     $ui = new PresetUi(askingUi([]), ['Console of' => 'screen', 'Start it' => false]);
     $v = $ui->form([
-        ['key' => 'mode', 'label' => 'Console of the thing', 'type' => 'choice', 'options' => ['rest' => 'REST', 'screen' => 'Screen'], 'default' => 'rest'],
-        ['key' => 'port', 'label' => 'Console port', 'default' => '9004', 'when' => fn(array $v) => $v['mode'] === 'rest'],
+        [
+            'key' => 'mode',
+            'label' => 'Console of the thing',
+            'type' => 'choice',
+            'options' => ['rest' => 'REST', 'screen' => 'Screen'],
+            'default' => 'rest',
+        ],
+        [
+            'key' => 'port',
+            'label' => 'Console port',
+            'default' => '9004',
+            'when' => fn(array $v) => $v['mode'] === 'rest',
+        ],
         ['key' => 'start', 'label' => 'Start it now', 'type' => 'confirm', 'default' => 'yes'],
-        ['key' => 'roles', 'label' => 'Roles', 'type' => 'checklist', 'options' => ['a' => 'A', 'b' => 'B'], 'default' => 'a,b'],
+        [
+            'key' => 'roles',
+            'label' => 'Roles',
+            'type' => 'checklist',
+            'options' => ['a' => 'A', 'b' => 'B'],
+            'default' => 'a,b',
+        ],
     ]);
 
     expect($v)->toBe(['mode' => 'screen', 'port' => '', 'start' => 'no', 'roles' => 'a,b']);

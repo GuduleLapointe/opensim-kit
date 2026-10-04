@@ -17,10 +17,22 @@ final class ArchiveRunner
 {
     /** What the log of a simulator says when the command is over, by command: [success, failure] */
     private const ENDS = [
-        'save iar' => ['/Saved archive with \d+ items/', '/Archive save for .* failed|Password for user .* incorrect|User .* not found|Inventory path .* does not exist|Failed to find user info/'],
-        'load iar' => ['/Loaded \d+ items from archive/', '/Archive load for .* failed|Password for user .* incorrect|User .* not found|Failed to find user info|Inventory path .* does not exist/'],
-        'save oar' => ['/Finished writing out OAR/', '/Error closing archive|Terminating archive creation|Aborted because/'],
-        'load oar' => ['/Successfully loaded archive/', '/Aborting load with error|Control file not found|Error reading archive|Error loading|Not loading archived region/'],
+        'save iar' => [
+            '/Saved archive with \d+ items/',
+            '/Archive save for .* failed|Password for user .* incorrect|User .* not found|Inventory path .* does not exist|Failed to find user info/',
+        ],
+        'load iar' => [
+            '/Loaded \d+ items from archive/',
+            '/Archive load for .* failed|Password for user .* incorrect|User .* not found|Failed to find user info|Inventory path .* does not exist/',
+        ],
+        'save oar' => [
+            '/Finished writing out OAR/',
+            '/Error closing archive|Terminating archive creation|Aborted because/',
+        ],
+        'load oar' => [
+            '/Successfully loaded archive/',
+            '/Aborting load with error|Control file not found|Error reading archive|Error loading|Not loading archived region/',
+        ],
     ];
 
     /**
@@ -114,10 +126,14 @@ final class ArchiveRunner
             $lines[] = 'change region ' . ($region ?? 'root');
             $sim = $this->simName($grid, $slug);
             $prefix = Archives::oarPrefix($grid->nick, $sim, isset($options['all']) ? null : $region);
-            $name = $verb === 'save' ? Archives::oarName($grid->nick, $sim, $region, $options, Archives::stamp()) : null;
+            $name =
+                $verb === 'save' ? Archives::oarName($grid->nick, $sim, $region, $options, Archives::stamp()) : null;
         } else {
             $prefix = Archives::iarPrefix($grid->nick, $given['first'], $given['last']);
-            $name = $verb === 'save' ? Archives::iarName($grid->nick, $given['first'], $given['last'], $options, Archives::stamp()) : null;
+            $name =
+                $verb === 'save'
+                    ? Archives::iarName($grid->nick, $given['first'], $given['last'], $options, Archives::stamp())
+                    : null;
             $arguments = [$given['first'], $given['last'], $given['path'], $this->password($given)];
         }
 
@@ -190,13 +206,18 @@ final class ArchiveRunner
     {
         $etc = $this->profile['EtcRoot'] ?? '';
         $names = SimState::names($grid->dir);
-        $up = array_values(array_filter($names, fn(string $slug): bool => ($this->running)(SimState::link($etc, $slug))));
+        $up = array_values(
+            array_filter($names, fn(string $slug): bool => ($this->running)(SimState::link($etc, $slug))),
+        );
         if ($up === []) {
-            throw new \RuntimeException("no simulator of the grid '{$grid->nick}' runs" . ($names === [] ? ' (it has none)' : ': start one of ' . implode(', ', $names)));
+            throw new \RuntimeException(
+                "no simulator of the grid '{$grid->nick}' runs" .
+                    ($names === [] ? ' (it has none)' : ': start one of ' . implode(', ', $names)),
+            );
         }
 
         if ($onlyOne && count($up) > 1) {
-            throw new \InvalidArgumentException("which simulator? " . implode(', ', $up));
+            throw new \InvalidArgumentException('which simulator? ' . implode(', ', $up));
         }
 
         return $up[0];
@@ -217,13 +238,17 @@ final class ArchiveRunner
      */
     private function region(GridInfo $grid, string $slug, array $options): ?string
     {
-        $names = array_keys(array_filter(
-            RegionState::list("{$grid->dir}/sims/$slug/regions"),
-            static fn(array $region): bool => $region['enabled'],
-        ));
+        $names = array_keys(
+            array_filter(
+                RegionState::list("{$grid->dir}/sims/$slug/regions"),
+                static fn(array $region): bool => $region['enabled'],
+            ),
+        );
         if (isset($options['region'])) {
             if ($names !== [] && !in_array($options['region'], $names, true)) {
-                throw new \InvalidArgumentException("'{$options['region']}' is not a region of $slug (" . implode(', ', $names) . ')');
+                throw new \InvalidArgumentException(
+                    "'{$options['region']}' is not a region of $slug (" . implode(', ', $names) . ')',
+                );
             }
 
             return (string) $options['region'];
@@ -235,7 +260,13 @@ final class ArchiveRunner
             return $names[0];
         }
 
-        throw new \InvalidArgumentException($names === [] ? "$slug has no region" : "$slug has several regions, give one with --region (" . implode(', ', $names) . ') or all of them with --all');
+        throw new \InvalidArgumentException(
+            $names === []
+                ? "$slug has no region"
+                : "$slug has several regions, give one with --region (" .
+                    implode(', ', $names) .
+                    ') or all of them with --all',
+        );
     }
 
     /** The password of the account, given, from OPENSIM_IAR_PASSWORD, or asked without echo */
@@ -262,8 +293,14 @@ final class ArchiveRunner
      * command was typed in: the simulator runs elsewhere), else a new name to save to, else the newest archive of the
      * inventory or the region.
      */
-    private function file(string $verb, string $kind, ?string $given, string $directory, ?string $name, string $prefix): string
-    {
+    private function file(
+        string $verb,
+        string $kind,
+        ?string $given,
+        string $directory,
+        ?string $name,
+        string $prefix,
+    ): string {
         if ($given !== null) {
             if (!str_contains($given, '/')) {
                 $given = "$directory/$given";
@@ -273,8 +310,9 @@ final class ArchiveRunner
         } elseif ($verb === 'save') {
             $given = "$directory/$name";
         } else {
-            $given = Archives::newest($directory, $prefix, $kind)
-                ?? throw new \RuntimeException("no $kind archive starting with $prefix in $directory, give the file");
+            $given =
+                Archives::newest($directory, $prefix, $kind) ??
+                throw new \RuntimeException("no $kind archive starting with $prefix in $directory, give the file");
             ($this->say)("the newest archive is $given");
         }
         if ($verb === 'save') {

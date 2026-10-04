@@ -102,11 +102,7 @@ class OpenSimKit_HelpersConfig
         $const = $ini['Const'] ?? [];
         $replace = function ($value) use (&$const) {
             for ($i = 0; $i < 5 && strpos($value, '${Const|') !== false; $i++) {
-                $value = preg_replace_callback(
-                    '/\$\{Const\|([^}]+)\}/',
-                    fn($m) => $const[$m[1]] ?? $m[0],
-                    $value,
-                );
+                $value = preg_replace_callback('/\$\{Const\|([^}]+)\}/', fn($m) => $const[$m[1]] ?? $m[0], $value);
             }
 
             return $value;
@@ -173,7 +169,12 @@ class OpenSimKit_HelpersConfig
     public static function grid_nick($nick = null, $conf = null)
     {
         $grids = self::grids(self::profile($conf));
-        $nick = $nick ?: (defined('OPENSIM_GRID') ? OPENSIM_GRID : (getenv('OPENSIM_GRID') ?: ($_SERVER['OPENSIM_GRID'] ?? '')));
+        $nick =
+            $nick ?:
+            (defined('OPENSIM_GRID')
+                ? OPENSIM_GRID
+                : (getenv('OPENSIM_GRID') ?:
+                $_SERVER['OPENSIM_GRID'] ?? ''));
         if ($nick !== '') {
             return isset($grids[$nick]) ? $nick : null;
         }
@@ -391,7 +392,6 @@ class OpenSimKit_HelpersConfig
     }
 }
 
-
 if (!defined('OPENSIM_KIT_CONFIG_CLASS_ONLY')) {
     if (!defined('OPENSIM_ENGINE')) {
         define('OPENSIM_ENGINE', true);
@@ -407,7 +407,9 @@ if (!defined('OPENSIM_KIT_CONFIG_CLASS_ONLY')) {
     // helpers.ini holds the password of the database: without it the helpers would try the placeholder of the Robust config
     $kit_ini = $kit_settings['dir'] . '/helpers.ini';
     if (is_file($kit_ini) && !is_readable($kit_ini)) {
-        error_log("opensim-helpers: $kit_ini is not readable by the web server user (it belongs to the group of the web server, mode 640: chgrp www-data)");
+        error_log(
+            "opensim-helpers: $kit_ini is not readable by the web server user (it belongs to the group of the web server, mode 640: chgrp www-data)",
+        );
         http_response_code(503);
         die('Not properly configured');
     }

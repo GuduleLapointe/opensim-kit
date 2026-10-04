@@ -27,9 +27,12 @@ final class FormPromptRenderer extends Renderer
             }
             $label = str_pad($this->truncate($field['label'], $width), $width);
             $value = $prompt->shown($i, $valueWidth);
-            $lines[] = $prompt->state === 'submit'
-                ? $this->dim($label) . '  ' . $this->truncate($value, $valueWidth)
-                : ($i === $prompt->focus ? $this->cyan('›') . ' ' . $this->cyan($label) : '  ' . $label) . '  ' . $this->truncate($value, $valueWidth);
+            $lines[] =
+                $prompt->state === 'submit'
+                    ? $this->dim($label) . '  ' . $this->truncate($value, $valueWidth)
+                    : ($i === $prompt->focus ? $this->cyan('›') . ' ' . $this->cyan($label) : '  ' . $label) .
+                        '  ' .
+                        $this->truncate($value, $valueWidth);
         }
         $body = implode(PHP_EOL, $lines);
         $title = $prompt->state === 'submit' ? $this->dim($prompt->title) : $this->cyan($prompt->title);
@@ -37,9 +40,13 @@ final class FormPromptRenderer extends Renderer
         return (string) match ($prompt->state) {
             'submit' => $this->box($title, $body),
             'error' => $this->box($title, $body, color: 'yellow')->warning($this->truncate($prompt->error, $cols - 5)),
-            default => $this
-                ->box($title, $body)
-                ->hint($prompt->hint() !== '' ? $prompt->hint() : _('Tab or Enter: next field, Shift-Tab: back, Left, Right, Space: choose, Enter on the last one: continue')),
+            default => $this->box($title, $body)->hint(
+                $prompt->hint() !== ''
+                    ? $prompt->hint()
+                    : _(
+                        'Tab or Enter: next field, Shift-Tab: back, Left, Right, Space: choose, Enter on the last one: continue',
+                    ),
+            ),
         };
     }
 }

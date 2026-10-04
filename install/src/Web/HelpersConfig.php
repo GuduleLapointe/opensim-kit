@@ -100,35 +100,35 @@ final class HelpersConfig
     private static function template(string $path): string
     {
         return <<<INI
-            ;; Web side of the grid, read by opensim-helpers (through the engine).
-            ;; opensim setup writes grid_name, login_uri, web_url and [robust_db]; the rest is yours.
+        ;; Web side of the grid, read by opensim-helpers (through the engine).
+        ;; opensim setup writes grid_name, login_uri, web_url and [robust_db]; the rest is yours.
 
-            [Helpers]
-            ;; Where the helpers are on the web site of the grid. Change it if your users, your viewers or your
-            ;; grid already use another one (e.g. /helper). The web server needs the same path (opensim web snippet).
-            path = "$path"
-            ;; mail_sender = "no-reply@example.org"
-            ;; The message of the day shown at login (motd.php, read by Robust when it starts; <USERNAME> is the avatar)
-            ;; motd = "Welcome to My Grid, <USERNAME>!"
-            ;; events_url = "https://2do.directory/events"
-            ;; currency_provider = "gloebit"
-            ;; currency_use_moneyserver = false
+        [Helpers]
+        ;; Where the helpers are on the web site of the grid. Change it if your users, your viewers or your
+        ;; grid already use another one (e.g. /helper). The web server needs the same path (opensim web snippet).
+        path = "$path"
+        ;; mail_sender = "no-reply@example.org"
+        ;; The message of the day shown at login (motd.php, read by Robust when it starts; <USERNAME> is the avatar)
+        ;; motd = "Welcome to My Grid, <USERNAME>!"
+        ;; events_url = "https://2do.directory/events"
+        ;; currency_provider = "gloebit"
+        ;; currency_use_moneyserver = false
 
-            [Urls]
-            ;; The URL of a service or a page, when it is not <path>/<script>.php: the helpers route it.
-            ;; welcome = "/welcome"
-            ;; search = "/search"
-            ;; guide = "/guide"
-            ;; motd = "/motd"
-            ;; currency = "/helper/currency.php"
-            ;; register = "/helper/register.php"
-            ;; offline = "/helper/offline.php"
+        [Urls]
+        ;; The URL of a service or a page, when it is not <path>/<script>.php: the helpers route it.
+        ;; welcome = "/welcome"
+        ;; search = "/search"
+        ;; guide = "/guide"
+        ;; motd = "/motd"
+        ;; currency = "/helper/currency.php"
+        ;; register = "/helper/register.php"
+        ;; offline = "/helper/offline.php"
 
-            [robust_db]
-            ;; The databases of the helpers are the one of Robust. Another one, for a service: a section
-            ;; [search_db], [currency_db], [offline_db] or [opensim_db] with hostname, prefix (the name of the
-            ;; database), user and password.
+        [robust_db]
+        ;; The databases of the helpers are the one of Robust. Another one, for a service: a section
+        ;; [search_db], [currency_db], [offline_db] or [opensim_db] with hostname, prefix (the name of the
+        ;; database), user and password.
 
-            INI;
+        INI;
     }
 }

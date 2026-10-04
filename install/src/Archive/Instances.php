@@ -53,14 +53,19 @@ final class Instances
         }
         if ($nick === null || !in_array($nick, $nicks, true)) {
             throw new \InvalidArgumentException(
-                $nicks === [] ? 'no grid here' : ($target !== null ? "'$target' is not a simulator or a region, " : '') . 'which grid? ' . implode(', ', $nicks),
+                $nicks === []
+                    ? 'no grid here'
+                    : ($target !== null ? "'$target' is not a simulator or a region, " : '') .
+                        'which grid? ' .
+                        implode(', ', $nicks),
             );
         }
         if ($target === null) {
             return [$nick, null, null];
         }
-        $found = self::find($etc, $nick, $target)
-            ?? throw new \InvalidArgumentException("'$target' is not a simulator or a region of the grid '$nick'");
+        $found =
+            self::find($etc, $nick, $target) ??
+            throw new \InvalidArgumentException("'$target' is not a simulator or a region of the grid '$nick'");
 
         return [$nick, ...$found];
     }

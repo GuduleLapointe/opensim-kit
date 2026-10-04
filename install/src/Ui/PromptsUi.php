@@ -69,7 +69,13 @@ final class PromptsUi implements InstallerUi
     {
         return array_map(
             'strval',
-            (new MultiSelectPrompt(label: $label, options: $options, default: $defaults, required: false, hint: $hint ?? ''))->prompt(),
+            (new MultiSelectPrompt(
+                label: $label,
+                options: $options,
+                default: $defaults,
+                required: false,
+                hint: $hint ?? '',
+            ))->prompt(),
         );
     }
 

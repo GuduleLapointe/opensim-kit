@@ -31,12 +31,18 @@ final class RobustImporter
     {
         $ini = IniReader::expand($raw);
         $name = $ini['GridInfoService']['gridname'] ?? '';
-        $nick = $nick ?: ($ini['GridInfoService']['gridnick'] ?? '') ?: Slug::nick($name);
+        $nick = $nick ?: $ini['GridInfoService']['gridnick'] ?? '' ?: Slug::nick($name);
         $nick = preg_replace('/[^A-Za-z0-9]/', '', $nick) ?? '';
         if ($nick === '') {
             return 'the grid has no nick (gridnick of [GridInfoService]): give one with --nick';
         }
-        if (!preg_match('/Data Source=([^;"\s]*);Database=([^;"\s]*);User ID=([^;"\s]*);Password=([^;"]*?);/i', $ini['DatabaseService']['ConnectionString'] ?? '', $db)) {
+        if (
+            !preg_match(
+                '/Data Source=([^;"\s]*);Database=([^;"\s]*);User ID=([^;"\s]*);Password=([^;"]*?);/i',
+                $ini['DatabaseService']['ConnectionString'] ?? '',
+                $db,
+            )
+        ) {
             return 'no database in [DatabaseService] ConnectionString';
         }
 
@@ -94,8 +100,14 @@ final class RobustImporter
      * @param array<string,array<string,string>> $expanded   the original with its references replaced (for the places)
      * @return list<array{section:string,key:string,value:string,unknown:bool,path:bool}>
      */
-    public static function customizations(array $original, array $generated, array $example, string $dir, string $exampleText = '', array $expanded = []): array
-    {
+    public static function customizations(
+        array $original,
+        array $generated,
+        array $example,
+        string $dir,
+        string $exampleText = '',
+        array $expanded = [],
+    ): array {
         $found = [];
         foreach ($original as $section => $values) {
             // The layout of the kit (its folders, its pid, its registry) is its own
@@ -109,20 +121,39 @@ final class RobustImporter
                 }
                 $standard = $generated[$section][$key] ?? null;
                 $default = $example[$section][$key] ?? null;
-                $unknown = $exampleText !== '' && preg_match('/^\s*;*\s*' . preg_quote($key, '/') . '\s*=/mi', $exampleText) !== 1;
+                $unknown =
+                    $exampleText !== '' &&
+                    preg_match('/^\s*;*\s*' . preg_quote($key, '/') . '\s*=/mi', $exampleText) !== 1;
 
                 if ($value !== '' && preg_match('/(Directory|Path|Dir|Location)$/i', $key) === 1) {
                     $place = self::absolute($key, $expanded[$section][$key] ?? $value, $dir);
                     if ($place !== $standard) {
-                        $found[] = ['section' => $section, 'key' => $key, 'value' => $place, 'unknown' => $unknown, 'path' => true];
+                        $found[] = [
+                            'section' => $section,
+                            'key' => $key,
+                            'value' => $place,
+                            'unknown' => $unknown,
+                            'path' => true,
+                        ];
                     }
                     continue;
                 }
                 // What the setup wrote is its own; what is as in the core is no choice of the user
-                if (($standard !== null && $standard !== $default) || $value === $standard || $value === $default || $value === '') {
+                if (
+                    ($standard !== null && $standard !== $default) ||
+                    $value === $standard ||
+                    $value === $default ||
+                    $value === ''
+                ) {
                     continue;
                 }
-                $found[] = ['section' => $section, 'key' => $key, 'value' => $value, 'unknown' => $unknown, 'path' => false];
+                $found[] = [
+                    'section' => $section,
+                    'key' => $key,
+                    'value' => $value,
+                    'unknown' => $unknown,
+                    'path' => false,
+                ];
             }
         }
 
@@ -138,7 +169,10 @@ final class RobustImporter
     {
         $ini = new Ini($text);
         foreach ($customizations as $c) {
-            $value = preg_match('/^(-?\d+(\.\d+)?|true|false)$/i', $c['value']) === 1 ? $c['value'] : '"' . $c['value'] . '"';
+            $value =
+                preg_match('/^(-?\d+(\.\d+)?|true|false)$/i', $c['value']) === 1
+                    ? $c['value']
+                    : '"' . $c['value'] . '"';
             $ini->set($c['section'], $c['key'], $value);
         }
 
@@ -148,7 +182,13 @@ final class RobustImporter
     /** A path that was relative to the original config is made absolute: the user's data stays where it is. */
     private static function absolute(string $key, string $value, string $dir): string
     {
-        if (!preg_match('/(Directory|Path|Dir|Location)$/i', $key) || $value === '' || str_starts_with($value, '/') || str_contains($value, '${') || str_contains($value, '://')) {
+        if (
+            !preg_match('/(Directory|Path|Dir|Location)$/i', $key) ||
+            $value === '' ||
+            str_starts_with($value, '/') ||
+            str_contains($value, '${') ||
+            str_contains($value, '://')
+        ) {
             return $value;
         }
         $parts = [];

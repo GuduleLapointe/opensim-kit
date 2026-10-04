@@ -44,7 +44,10 @@ final class AccountImporter
         $exists = array_fill_keys(array_map('strtolower', array_map('trim', $names)), true);
         // The home of the accounts: the default region, when the grid has one
         $home = ($this->query)($plan, 'SELECT uuid FROM regions WHERE (flags & 1) = 1 ORDER BY regionName LIMIT 1');
-        $homeId = $home !== null && isset($home[0]) && preg_match('/^[0-9a-fA-F-]{36}$/', trim($home[0])) === 1 ? trim($home[0]) : null;
+        $homeId =
+            $home !== null && isset($home[0]) && preg_match('/^[0-9a-fA-F-]{36}$/', trim($home[0])) === 1
+                ? trim($home[0])
+                : null;
 
         $results = [];
         $stopped = false;
@@ -68,9 +71,10 @@ final class AccountImporter
                 $results[] = $row;
                 continue;
             }
-            $hash = ($account['password_hash'] ?? '') !== ''
-                ? ['hash' => $account['password_hash'], 'salt' => $account['password_salt'] ?? '']
-                : null;
+            $hash =
+                ($account['password_hash'] ?? '') !== ''
+                    ? ['hash' => $account['password_hash'], 'salt' => $account['password_salt'] ?? '']
+                    : null;
             if ($row['password'] === '' && $hash === null) {
                 $row['password'] = self::password();
                 $row['generated'] = true;
@@ -82,7 +86,14 @@ final class AccountImporter
                 continue;
             }
 
-            $statements = $this->writer->statements($row['first'], $row['last'], $row['email'], $row['password'], $homeId, $hash);
+            $statements = $this->writer->statements(
+                $row['first'],
+                $row['last'],
+                $row['email'],
+                $row['password'],
+                $homeId,
+                $hash,
+            );
             if (($this->query)($plan, $statements['sql']) === null) {
                 $row['status'] = self::FAILED;
                 $row['detail'] = 'the database refused it, nothing was written for this account';
@@ -121,7 +132,14 @@ final class AccountImporter
         foreach ($results as $row) {
             fputcsv(
                 $out,
-                [$row['first'], $row['last'], $row['email'], $row['status'], $row['generated'] ? $row['password'] : '', $row['detail']],
+                [
+                    $row['first'],
+                    $row['last'],
+                    $row['email'],
+                    $row['status'],
+                    $row['generated'] ? $row['password'] : '',
+                    $row['detail'],
+                ],
                 ',',
                 '"',
                 '',

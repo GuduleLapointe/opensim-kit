@@ -117,12 +117,18 @@ final class Hub
         }
         $this->ui->note(_('To take these changes into account, restart:') . "\n" . implode("\n", $lines));
         if (!$this->ui->confirm(_('Restart them now?'), true)) {
-            $this->ui->note(sprintf(_('They stay listed in %s: the setup offers them again next time.'), PendingRestarts::path($profile)));
+            $this->ui->note(
+                sprintf(
+                    _('They stay listed in %s: the setup offers them again next time.'),
+                    PendingRestarts::path($profile),
+                ),
+            );
 
             return;
         }
         // A simulator that runs warns its users and waits, or restarts at once
-        $warn = $running && $this->ui->confirm(_('Warn the users of the simulators first (it takes two minutes)?'), false);
+        $warn =
+            $running && $this->ui->confirm(_('Warn the users of the simulators first (it takes two minutes)?'), false);
         if (!$this->act('restart', ['warn' => $warn])) {
             $this->ui->warn(_('Some instances did not restart: see above, they stay listed.'));
         }
@@ -246,15 +252,17 @@ final class Hub
         $profile = (new Config())->profile();
         $grid = GridInfo::load($profile, $nick);
         $this->ui->note(
-            sprintf(_("Your grid %s is ready, nothing more is needed."), $this->ui->entity($grid !== null && $grid->name !== '' ? $grid->name : $nick))
-            . ($grid !== null && !$grid->remote ? "\n" . sprintf(_('Login URI: %s'), "http://{$grid->baseHostname}:{$grid->publicPort}") : '')
-            . "\n" . _('You can finish now, or continue to add regions and simulators and change settings.'),
+            sprintf(
+                _('Your grid %s is ready, nothing more is needed.'),
+                $this->ui->entity($grid !== null && $grid->name !== '' ? $grid->name : $nick),
+            ) .
+                ($grid !== null && !$grid->remote
+                    ? "\n" . sprintf(_('Login URI: %s'), "http://{$grid->baseHostname}:{$grid->publicPort}")
+                    : '') .
+                "\n" .
+                _('You can finish now, or continue to add regions and simulators and change settings.'),
         );
-        $choice = $this->ui->choose(
-            _('Setup'),
-            ['quit' => _('Finish setup'), 'more' => _('Continue setup')],
-            'quit',
-        );
+        $choice = $this->ui->choose(_('Setup'), ['quit' => _('Finish setup'), 'more' => _('Continue setup')], 'quit');
 
         return $choice === 'quit' || $this->simScreen($nick, $slug);
     }
@@ -273,7 +281,11 @@ final class Hub
             foreach ($sims as $slug) {
                 foreach (RegionState::list("$etcRoot/grids/$nick/sims/$slug/regions") as $name => $region) {
                     $options["region:$slug:$name"] =
-                        $this->ui->entity($name) . ' [' . $this->simName($nick, $slug) . ']' . ($region['enabled'] ? '' : ' [disabled]');
+                        $this->ui->entity($name) .
+                        ' [' .
+                        $this->simName($nick, $slug) .
+                        ']' .
+                        ($region['enabled'] ? '' : ' [disabled]');
                 }
             }
             $options['addregion'] = _('Add region');
@@ -342,7 +354,11 @@ final class Hub
             $options['back'] = _('Back');
             $options['quit'] = _('Quit');
 
-            $choice = $this->ui->choose('Simulators of ' . $this->ui->entity($nick), $options, $sims !== [] ? "sim:{$sims[0]}" : 'addsim');
+            $choice = $this->ui->choose(
+                'Simulators of ' . $this->ui->entity($nick),
+                $options,
+                $sims !== [] ? "sim:{$sims[0]}" : 'addsim',
+            );
             if ($choice === 'back' || $choice === 'quit') {
                 return $choice === 'quit';
             }
@@ -396,10 +412,10 @@ final class Hub
                     $this->guard(fn() => (new NewSim($this->ui))->addRegion($nick, $this->simName($nick, $slug)));
                     break;
                 case $choice === 'toggle':
-                    $done = $this->act(
-                        $enabled ? 'sim-disable' : 'sim-enable',
-                        ['slug' => $slug, 'ini' => "$etcRoot/grids/$nick/sims/$slug.ini"],
-                    );
+                    $done = $this->act($enabled ? 'sim-disable' : 'sim-enable', [
+                        'slug' => $slug,
+                        'ini' => "$etcRoot/grids/$nick/sims/$slug.ini",
+                    ]);
                     if ($done) {
                         $this->ui->note(($enabled ? 'Disabled' : 'Enabled') . " $slug.");
                     }
@@ -435,7 +451,9 @@ final class Hub
 
             switch ($choice) {
                 case 'reconfigure':
-                    $this->guard(fn() => (new NewSim($this->ui))->reconfigureRegion($nick, $this->simName($nick, $slug), $name));
+                    $this->guard(
+                        fn() => (new NewSim($this->ui))->reconfigureRegion($nick, $this->simName($nick, $slug), $name),
+                    );
                     break;
                 case 'toggle':
                     $done = $this->act($region['enabled'] ? 'region-disable' : 'region-enable', [
