@@ -57,7 +57,7 @@ final class Snippets
             'Put it in the server block of the web site. Adjust the socket of PHP-FPM to your version.',
         ) .
             "\nroot $docroot;\nindex index.php index.html;\n\nlocation / {\n\ttry_files \$uri \$uri/ /index.php?\$query_string;\n}\n\n" .
-            "location ~ \\.php\$ {\n\tinclude snippets/fastcgi-php.conf;\n\tfastcgi_param OPENSIM_GRID $nick;\n\tfastcgi_pass unix:$socket;\n}\n";
+            "location ~ \\.php\$ {\n\t# A script that is not a file of the root is the business of the router\n\ttry_files \$uri /index.php?\$query_string;\n\tinclude fastcgi_params;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\tfastcgi_param OPENSIM_GRID $nick;\n\tfastcgi_pass unix:$socket;\n}\n";
     }
 
     private static function apache(string $nick, string $docroot): string

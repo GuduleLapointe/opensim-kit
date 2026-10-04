@@ -198,7 +198,7 @@ done
 if wants opensim-helpers; then
     BUILD=build/opensim-helpers
     rm -rf "$BUILD"
-    constraint=$(sed -n 's/.*"magicoli\/opensim-helpers": *"\([^"]*\)".*/\1/p' composer.json | head -1)
+    constraint=${HELPERS_CONSTRAINT:-$(sed -n 's/.*"magicoli\/opensim-helpers": *"\([^"]*\)".*/\1/p' composer.json | head -1)}
     if [[ -z "$constraint" ]]; then
         echo "magicoli/opensim-helpers is not in composer.json" >&2
         exit 1

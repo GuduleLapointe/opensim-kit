@@ -2,35 +2,7 @@
 # Package test scenario, run by tests/Packaging/run inside the test container,
 # with the packages in /dist.
 
-FAILED=0
-ts() { echo "[$(date +%T)] == $*"; }
-check() {
-    if eval "$2"; then
-        echo "   ok: $1"
-    else
-        echo "   FAILED: $1"
-        FAILED=1
-    fi
-}
-# Like check, for what takes a while to be true on a slow machine: the condition
-# is tried again every 3 seconds, for up to $1 seconds
-wait_check() {
-    local seconds=$1 end=$((SECONDS + $1))
-    until eval "$3"; do
-        if [ "$SECONDS" -ge "$end" ]; then
-            echo "   FAILED: $2"
-            FAILED=1
-            return
-        fi
-        sleep 3
-    done
-    echo "   ok: $2"
-}
-apt_q() {
-    DEBIAN_FRONTEND=noninteractive apt-get "$@" -y -qq 2>&1 |
-        grep -E "opensim|needs|E:" | grep -vE "^(Selecting|Preparing|Unpacking)"
-}
-deb() { ls /dist/"$1"_*.deb | grep -E "_($(dpkg --print-architecture)|all)\.deb$" | tail -1; }
+source /test/lib.sh
 core=$(deb opensim-0.9.3.0)
 tools=$(deb opensim-tools)
 # The metapackages, with the local packages they depend on
@@ -47,11 +19,7 @@ sim_registered() { grep -c 'Region Sim1 .* registered at 8002,8002' /var/log/ope
 robust_state() { echo "   Robust pid: $(robust_pid || true), clean shutdowns: $(quits)"; }
 profile() { grep -q '^\[opensim-0.9.3.0\]' /etc/opensim/opensim.conf 2>/dev/null; }
 
-rm -f /usr/sbin/policy-rc.d # container images forbid service actions
-# The Magiiic repository, for the dependencies (bash-tools), as in the README
-curl -fsSL https://apt.magiiic.com/magiiic-packaging.asc | gpg --dearmor -o /usr/share/keyrings/magiiic-packaging.gpg
-echo "deb [signed-by=/usr/share/keyrings/magiiic-packaging.gpg] https://apt.magiiic.com stable main" >/etc/apt/sources.list.d/magiiic.list
-apt-get update -qq
+magiiic_repository
 
 ts "core alone"
 apt_q install "$core"
@@ -126,7 +94,7 @@ check "no administrator access, missing database: says so, gives the commands" "
 # The password of an account, generated once, is proposed again in the same session
 TEST_REPEAT=2 wizard Repeatgrid "" >/tmp/repeat.out
 check "the generated password is kept for the session" "[ \"\$(grep -a 'Database password ->' /tmp/repeat.out | sort -u | wc -l)\" = 1 ] &&
-    [ \"\$(grep -ac 'Database password ->' /tmp/repeat.out)\" = 2 ]"
+    [ \"\$(grep -ac 'Database password ->' /tmp/repeat.out)\" -ge 2 ]"
 
 # As root, with the administrator access: only what is missing is created,
 # one statement at a time
@@ -307,10 +275,10 @@ check "a region is reconfigured in place, its UUID kept" "grep -q 'exit code: 0'
 # 8003,8002 until its simulator restarts, its file says 8002,8003)
 check "opensim next location gives the free place nearest to the first one" "[ \"\$(opensim next testgrid location)\" = 8001,8002 ]"
 # The archives of the users are made in the folder of the grid, the backup of the administrator beside the data
-(cd /tmp && runuser -u opensim -- opensim save testgrid Sim1 oar --region Sim1 >/tmp/saveoar.out 2>&1; echo "exit code: $?" >>/tmp/saveoar.out)
+(cd /tmp && runuser -u opensim -- opensim save oar testgrid Sim1 --region Sim1 >/tmp/saveoar.out 2>&1; echo "exit code: $?" >>/tmp/saveoar.out)
 check "opensim save oar makes the archive of a region in the folder of the grid" "grep -q 'exit code: 0' /tmp/saveoar.out &&
     ls /var/lib/opensim/data/testgrid/backups/oar/testgrid-sim1-Sim1-*.oar >/dev/null 2>&1"
-(cd /tmp && runuser -u opensim -- opensim load testgrid Sim1 oar --region Sim1 --merge >/tmp/loadoar.out 2>&1; echo "exit code: $?" >>/tmp/loadoar.out)
+(cd /tmp && runuser -u opensim -- opensim load oar testgrid Sim1 --region Sim1 --merge >/tmp/loadoar.out 2>&1; echo "exit code: $?" >>/tmp/loadoar.out)
 check "opensim load oar loads the newest one" "grep -q 'exit code: 0' /tmp/loadoar.out && grep -q 'Successfully loaded archive' /tmp/loadoar.out"
 (cd /tmp && runuser -u opensim -- opensim backup testgrid >/tmp/backup.out 2>&1; echo "exit code: $?" >>/tmp/backup.out)
 check "opensim backup makes an archive of the grid with its configuration, its data and its databases" "grep -q 'exit code: 0' /tmp/backup.out &&

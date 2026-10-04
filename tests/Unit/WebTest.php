@@ -113,6 +113,13 @@ describe('Snippets for the web server', function () {
             ->toContain('FallbackResource /index.php');
     });
 
+    test('hand a script that is not a file to the router, nginx included', function () {
+        expect(Snippets::render('nginx', 'alpha'))
+            ->toContain('try_files $uri /index.php?$query_string;')
+            ->toContain('include fastcgi_params;')
+            ->not->toContain('snippets/fastcgi-php.conf');
+    });
+
     test('have the grid in the PHP environment', function () {
         expect(Snippets::render('caddy', 'alpha'))
             ->toContain('env OPENSIM_GRID alpha')

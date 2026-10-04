@@ -6,7 +6,7 @@
 # Usage, from the repository root, after building the packages:
 #   tests/Packaging/run [base image]
 #   e.g. tests/Packaging/run docker.io/library/ubuntu:24.04
-# KEEP=1 keeps the container for inspection.
+# KEEP=1 keeps the container for inspection, SCENARIO=web-scenario.sh runs another script of this folder.
 
 set -e
 
@@ -30,4 +30,4 @@ podman run -d --name "$name" --systemd=always --memory="${MEMORY:-700m}" \
     -v "$PWD/dist:/dist:ro" -v "$PWD/$TEST_DIR:/test:ro" "$name" >/dev/null
 [[ -n "${KEEP:-}" ]] || trap 'podman rm -f "$name" >/dev/null' EXIT
 sleep 3
-podman exec "$name" bash /test/scenario.sh
+podman exec "$name" bash "/test/${SCENARIO:-scenario.sh}"
