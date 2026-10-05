@@ -38,3 +38,11 @@ vendor/
 !**/.keep
 *.mo
 /share/ossl-scripts/*.oar
+**/.env
+.env
+.envrc
+.env.*
+.envrc.*
+!.env*.example
+.venv/
+venv/
