@@ -4,7 +4,11 @@
 
 - fix: web server files are complete, for the site of the web URL: to include, or to use alone
 - new: `--keep N` on `opensim backup` and `opensim save iar|oar` removes the older ones
-- fix: libraries don't know the kit, the helpers `config.php` defines their constants
+- new: `dev/build.sh` makes the Debian packages and the zip of the tools
+- new: `BUILD_HOST` builds OpenSimulator on another machine
+- update: helpers, engine and rest-php are packages of their projects, the tools depend on them
+- update: the helpers read the config of the grid, no `config.php` from the kit
+- new: tests of the packages run on the podman of another machine (`CONTAINER_CONNECTION`)
 - fix: nginx hands a script that is not a file to the router
 - fix: `opensim save|load iar|oar [instance]`, the instance is a grid, a simulator or a region
 - fix: the public port sets the first center of a grid only, its regions give it afterwards

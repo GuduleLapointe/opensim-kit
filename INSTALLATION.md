@@ -36,7 +36,7 @@ What is left to do, if you want it: serve the economy and the search of the grid
 - `opensim`: the latest release
 - `opensim-<version>-<module>`, e.g. `opensim-0.9.3.0-gloebit`, `opensim-0.9.3.0-opensimsearch`: a module for a release. Installing it does not enable it. It works with any build of the same version.
 - `opensim-unstable`: OpenSimulator built from the development branch, in `/usr/share/opensim/unstable`
-- `opensim-helpers`: the helpers of a grid (economy, search, destination guide, offline messages, message of the day), in `/usr/share/opensim-helpers`, to be served by a web server. Their settings are read from the kit (`/etc/opensim/grids/<grid>/helpers.ini`), nothing is to edit.
+- `opensim-helpers`: the helpers of a grid (economy, search, destination guide, offline messages, message of the day), in `/usr/share/opensim-helpers`, to be served by a web server. A package of its own project, installed with the tools. Their settings are read from the config of the grid (`/etc/opensim/grids/<grid>/helpers.ini`), nothing is to edit.
 - `opensim-web`: a placeholder site for the grid (its name, how to connect, where its services are), until it has its own.
 - `opensim-kit`: the tools, the latest release, its essential modules and a database server. The other modules are in the repository, not installed automatically.
 
