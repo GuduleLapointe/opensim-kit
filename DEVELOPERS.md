@@ -67,6 +67,23 @@ The PHP dependencies are locked for PHP 8.1 (`config.platform.php` in `composer.
 
 The releases are installed read-only, so nothing may be written in their `bin/` folder at run time. OpenSim writes its platform `System.Drawing.Common.dll` there on start when it differs: the build puts it in place beforehand.
 
+## Release
+
+The projects of the family are released in the order of their dependencies, rest-php, engine, helpers, kit, each one completely before the next: the next one requires the version just published (and its tag has to be pushed, Packagist to know it).
+
+```bash
+dev/release.sh prepare [VERSION]   # the release commit: .version, the family required by version, CHANGELOG
+dev/release.sh publish             # tag, push to the github remote (RELEASE_REMOTE=name), clean build of the tag
+```
+
+When the four are published, in the same order:
+
+```bash
+dev/release.sh next [VERSION]      # the next development version, the family linked again, a new Unreleased section
+```
+
+`dev/switch.sh dev|release` does the composer part alone, and updates `composer.lock`: `dev` links the projects next to this one (path repositories, `@dev`), `release` requires `^` the `.version` of each from Packagist, and waits for Packagist to know it (`SWITCH_WAIT` seconds, 180 by default). It refuses a project that is still at a `-dev` version. A step that fails leaves the files as they were. `publish` tags and pushes: it is yours to run.
+
 ## Tests
 
 One command runs every test, `vendor/bin/pest` (`composer test`): the PHP ones with [Pest](https://pestphp.com), the shell scripts with [bashunit](https://bashunit.typeddevs.com) (`tests/lib/bashunit`), run from Pest. Everything is in `tests/`:
