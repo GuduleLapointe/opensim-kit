@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Tries the files of dist/ (made by dev/build.sh) in a clean container (podman), without systemd, the quick test: the
+# opensim-tools package installs with the packages of the family it depends on and the command runs, the zip is used
+# without composer. tests/Packaging/run is the long one, with the whole system. Exits non-zero when a check fails.
+#
+#   tests/Packaging/check [base image]       default: Debian 12; docker.io/library/ubuntu:24.04 for another
+#   DEPS_ENGINE=folder DEPS_REST=folder DEPS_HELPERS=folder
+#                                            where the Debian packages of the other projects are (default: the dist
+#                                            folders of ../opensim-engine, ../opensim-rest-php, ../opensim-helpers)
+#   CONTAINER_CONNECTION=name                run it on the podman of another machine
+#   MEMORY=400m                              memory of the container
+#   Both can be set in tests/.env (see tests/.env.example); the environment of the command wins.
+
+set -eo pipefail
+BASE=${1:-docker.io/library/debian:bookworm}
+cd "$(dirname "$0")/../.."
+
+# tests/.env (KEY=value lines) gives what the environment of the command does not: CONTAINER_CONNECTION, MEMORY...
+if [ -f tests/.env ]; then
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+        case $key in '' | '#'* | *[!A-Za-z0-9_]*) continue ;; esac
+        value=${value%$'\r'}
+        value=${value#[\"\']}
+        value=${value%[\"\']}
+        [ -n "${!key+x}" ] || export "$key=$value"
+    done <tests/.env
+fi
+[ -z "${CONTAINER_CONNECTION:-}" ] || echo "Podman connection: $CONTAINER_CONNECTION"
+
+DEPS_ENGINE=${DEPS_ENGINE:-$PWD/../opensim-engine/dist}
+DEPS_REST=${DEPS_REST:-$PWD/../opensim-rest-php/dist}
+DEPS_HELPERS=${DEPS_HELPERS:-$PWD/../opensim-helpers/dist}
+for dir in dist "$DEPS_ENGINE" "$DEPS_REST" "$DEPS_HELPERS"; do
+    if ! ls "$dir"/*.deb >/dev/null 2>&1; then
+        echo "tests/Packaging/check: no Debian package in $dir: build it first (dev/build.sh in that project)" >&2
+        exit 1
+    fi
+done
+if ! ls dist/opensim-tools_*.deb dist/opensim-kit-*.zip >/dev/null 2>&1; then
+    echo "tests/Packaging/check: dist/ needs the package and the zip of the tools: dev/build.sh deb opensim-tools && dev/build.sh zip" >&2
+    exit 1
+fi
+
+# What the container needs is sent to it as a tar stream, so it can run on any machine:
+# CONTAINER_CONNECTION=name (see podman system connection) uses the podman of another one
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT
+mkdir "$stage/deps" "$stage/test" "$stage/dist"
+ln -s "$PWD"/dist/opensim-tools_*.deb "$PWD"/dist/opensim-kit-*.zip "$stage/dist/"
+ln -s "$DEPS_ENGINE" "$stage/deps/engine"
+ln -s "$DEPS_REST" "$stage/deps/rest"
+ln -s "$DEPS_HELPERS" "$stage/deps/helpers"
+ln -s "$PWD/tests/Packaging/lib.sh" "$stage/test/lib.sh"
+COPYFILE_DISABLE=1 tar -chf - -C "$stage" dist deps test | podman run --rm -i --memory="${MEMORY:-400m}" "$BASE" bash -c '
+tar -xf - --no-same-owner --warning=no-unknown-keyword -C /
+source /test/lib.sh
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq >/dev/null
+apt-get install -y -qq ca-certificates curl gpg unzip >/dev/null 2>&1
+magiiic_repository
+apt-get install -y -qq /deps/rest/*.deb /deps/engine/*.deb /deps/helpers/*.deb /dist/opensim-tools_*.deb >/dev/null 2>&1
+
+tools=/usr/share/opensim-tools
+check "the package is installed, it depends on the engine, the helpers and rest-php" "dpkg -s opensim-tools | grep -q \"^Depends:.*opensim-engine.*opensim-helpers.*opensim-rest-php\""
+check "the three come from their packages, by links" "[ -L $tools/vendor/magicoli/opensim-engine ] && [ -L $tools/vendor/magicoli/opensim-helpers ] && [ -L $tools/vendor/magicoli/opensim-rest-php ] && [ -f $tools/vendor/magicoli/opensim-engine/bootstrap.php ] && [ -f $tools/vendor/magicoli/opensim-helpers/query.php ] && [ -f $tools/vendor/magicoli/opensim-rest-php/opensim-rest-cli.php ]"
+check "the libraries it brings itself are in its vendor folder" "[ -d $tools/vendor/laravel/prompts ] && [ -d $tools/vendor/symfony/yaml ]"
+check "the command runs" "opensim --help | grep -q \"display this help\""
+check "the console client runs through it, from the package of rest-php" "opensim rest --help | grep -q Usage"
+check "the archives of the scripts are made" "[ -f $tools/share/ossl-scripts/fix-parcel-name.oar ]"
+check "it has no tests, no packaging files" "[ ! -e $tools/tests ] && [ ! -e $tools/packaging ] && [ ! -e $tools/composer.lock ]"
+
+mkdir /tmp/zip && cd /tmp/zip && unzip -q /dist/opensim-kit-*.zip
+check "the zip has the tools and a complete vendor folder" "[ -f opensim-kit/bin/opensim ] && [ -f opensim-kit/vendor/laravel/prompts/composer.json ] && [ -f opensim-kit/vendor/magicoli/opensim-engine/bootstrap.php ] && [ -f opensim-kit/vendor/magicoli/opensim-helpers/query.php ] && [ ! -L opensim-kit/vendor/magicoli/opensim-engine ]"
+check "the zip has no composer.lock, no tests" "[ ! -e opensim-kit/composer.lock ] && [ ! -e opensim-kit/tests ]"
+check "the archives of the scripts are in the zip" "[ -f opensim-kit/share/ossl-scripts/fix-parcel-name.oar ]"
+check "the console client runs from the zip" "bash opensim-kit/bin/opensim rest --help | grep -q Usage"
+exit $FAILED'

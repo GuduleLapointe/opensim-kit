@@ -1,5 +1,7 @@
 # OpenSim tools, built by apt-package from build/opensim-tools, prepared by
-# packaging/build. ${VERSION} comes from the git tag.
+# packaging/build (packaging/stage). ${VERSION} comes from the git tag. The
+# projects of packaging/siblings come from their own packages, linked into the
+# vendor folder.
 # The tools in /usr/share/opensim-tools, the opensim command, the service
 # account and the system layout: config in /etc/opensim, data in
 # /var/lib/opensim, logs in /var/log/opensim, cache in /var/cache/opensim,
@@ -30,6 +32,9 @@ depends:
   - crudini
   - curl
   - default-mysql-client | virtual-mysql-client
+  - opensim-engine
+  - opensim-helpers
+  - opensim-rest-php
   - php-cli (>= 2:8.2)
   - php-curl
   - php-intl
@@ -53,6 +58,15 @@ contents:
   - src: /usr/share/opensim-tools/bin/opensim
     dst: /usr/bin/opensim
     type: symlink
+  - src: /usr/share/opensim-engine
+    dst: /usr/share/opensim-tools/vendor/magicoli/opensim-engine
+    type: symlink
+  - src: /usr/share/opensim-helpers
+    dst: /usr/share/opensim-tools/vendor/magicoli/opensim-helpers
+    type: symlink
+  - src: /usr/share/opensim-rest-php
+    dst: /usr/share/opensim-tools/vendor/magicoli/opensim-rest-php
+    type: symlink
   - src: packaging/opensim.service
     dst: /usr/lib/systemd/system/opensim.service
     file_info:
@@ -63,6 +77,10 @@ contents:
       mode: 0644
   - src: packaging/opensim-tools.copyright
     dst: /usr/share/doc/opensim-tools/copyright
+    file_info:
+      mode: 0644
+  - src: packaging/opensim-tools.README.Debian
+    dst: /usr/share/doc/opensim-tools/README.Debian
     file_info:
       mode: 0644
   # The system layout, owned by opensim through dpkg-statoverride (postinst);

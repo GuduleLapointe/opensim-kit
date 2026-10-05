@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Prepares in DIR (made new) the tools as they are distributed: the committed files and their PHP dependencies
+# (packaging/stage), the compiled translations and the archives of the OSSL scripts.
+#
+#   packaging/tools DIR zip    every dependency in the vendor folder
+#   packaging/tools DIR deb    the projects of packaging/siblings come from their own packages
+
+set -e
+cd "$(dirname "$0")/.."
+BUILD=$1
+mode=${2:-zip}
+
+packaging/stage "$BUILD" "$mode"
+
+# Compiled translations (the .po are the sources)
+if command -v msgfmt >/dev/null; then
+    for po in "$BUILD"/locales/*.po; do
+        [[ -f "$po" ]] || continue
+        lang=$(basename "$po" .po)
+        mkdir -p "$BUILD/locales/$lang/LC_MESSAGES"
+        msgfmt -o "$BUILD/locales/$lang/LC_MESSAGES/opensim-kit.mo" "$po"
+    done
+fi
+
+# The archives of the scripts (share/ossl-scripts/<name>-src, laid out as their content) are made here, with
+# the engine; the sources stay beside them, to change a script and make its archive again (opensim oar pack).
+# In a Debian package the engine comes from its own package: linked here for the duration
+linked=()
+while read -r name _; do
+    [[ -n "$name" && "$name" != \#* && ! -e "$BUILD/vendor/$name" ]] || continue
+    if [[ ! -d "vendor/$name" ]]; then
+        echo "vendor/$name is missing: composer install, then build again" >&2
+        exit 1
+    fi
+    mkdir -p "$BUILD/vendor/$(dirname "$name")"
+    ln -s "$(cd "vendor/$name" && pwd -P)" "$BUILD/vendor/$name"
+    linked+=("$BUILD/vendor/$name")
+done <packaging/siblings
+for src in "$BUILD"/share/ossl-scripts/*-src; do
+    [[ -d "$src" ]] || continue
+    php "$BUILD/libexec/oar.php" pack "$src" >/dev/null
+done
+[[ ${#linked[@]} -eq 0 ]] || rm -f "${linked[@]}"
+
+# Installed read-only for everyone but root, whatever the local umask
+chmod -R go-w "$BUILD"

@@ -1,21 +1,18 @@
-opensim-helpers
-===============
+opensim-tools: the web side of a grid
+=====================================
 
-The helpers of a grid: the scripts the viewers and the simulators query for the economy, the search and
-the offline messages, with the pages to manage them. They are the helpers of this project, made for the
-OpenSim kit; any other implementation (w4os, the fork of Kevin Cozens, wiredux) follows the same
-protocols and can be used instead, nothing here is needed for it.
-
-The scripts are in /usr/share/opensim-helpers, to be served by a web server. Nothing is enabled by
-installing the package.
+The scripts the viewers and the simulators query for the economy, the search and the offline messages are the
+helpers of this project, in the opensim-helpers package (a dependency of the tools): they are in
+/usr/share/opensim-helpers, to be served by a web server. Nothing is enabled by installing the packages. Any other
+implementation (w4os, the fork of Kevin Cozens, wiredux) follows the same protocols and can be used instead, nothing
+here is needed for it.
 
 Settings
 --------
 
-None to edit here. The settings of the grid are read from the OpenSim kit: /etc/opensim/opensim.conf,
-the Robust config of the grid and its helpers.ini (/etc/opensim/grids/<grid>/helpers.ini), written by
-`opensim setup`. The helpers are specific to a grid: with several grids on a machine, the virtual host
-of each one sets OPENSIM_GRID (the snippets below do).
+The helpers read the config of the grid: the Robust config of the grid and its helpers.ini, in
+/etc/opensim/grids/<grid>/, written by `opensim setup`. Nothing to edit in the helpers. They are specific to a grid:
+with several grids on a machine, the virtual host of each one sets OPENSIM_GRID (the snippets below do).
 
 In helpers.ini, the operator chooses:
 

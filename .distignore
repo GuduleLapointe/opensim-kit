@@ -1,0 +1,25 @@
+# What git tracks and the packages and the zip do not distribute (rsync style: /name at the root, name anywhere,
+# a trailing / for a folder, globs are fine). What .gitignore ignores is not in the build at all.
+/.distignore
+/.editorconfig
+/.gitignore
+/.gitmodules
+/.php-version
+/.phpactor.json
+/.prettierignore
+/.prettierrc.json
+/DEVELOPERS.md
+/ROADMAP.md
+/deploy
+/deploy.yaml
+/packaging
+/phpcs.xml.dist
+/phpunit.xml
+/tests
+/upstream
+# Folders of the bundled layout, created by the package in /etc, /var and /usr/share/opensim instead
+/core
+/etc
+/var
+# Add-on binaries for OpenSim 0.9.1 and 0.9.2 (Mono), used by no script
+/contrib

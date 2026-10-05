@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# dist/opensim-kit-VERSION.zip: the tools and their vendor folder (see packaging/tools), to unzip and use without
+# composer or any other tool.
+
+set -e
+cd "$(dirname "$0")/.."
+
+eval "$(packaging/version)"
+packaging/tools build/zip/opensim-kit zip
+mkdir -p dist
+rm -f "dist/opensim-kit-$VERSION.zip"
+(cd build/zip && zip -qr "$OLDPWD/dist/opensim-kit-$VERSION.zip" opensim-kit)
+echo "dist/opensim-kit-$VERSION.zip"

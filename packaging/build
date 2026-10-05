@@ -3,9 +3,10 @@
 # Run by apt-package from the repository root.
 #
 # opensim-tools: build/opensim-tools, the tools as committed (HEAD), without
-#   what they do not distribute (packaging/distignore), with their PHP
-#   dependencies, but not the development ones: bash-tools comes from its
-#   package. The working copy is left untouched.
+#   what they do not distribute (.distignore), with their PHP dependencies, but
+#   not the development ones (packaging/stage): bash-tools and the projects of
+#   packaging/siblings come from their packages. The working copy is left
+#   untouched.
 # opensim-core, opensim, opensim-kit: the OpenSimulator release of
 #   packaging/opensim-core.versions, the last one or OPENSIM_VERSION; for
 #   opensim-core, build/opensim-core from its tarball, downloaded into src/
@@ -22,6 +23,7 @@
 # The variables of the definitions go to build/packaging.env.
 
 set -e
+cd "$(dirname "$0")/.."
 
 URL=${OPENSIM_DIST_URL:-http://opensimulator.org/dist}
 SDK_IMAGE=mcr.microsoft.com/dotnet/sdk:8.0
@@ -52,55 +54,10 @@ distribution() {
 }
 
 mkdir -p build
-: >build/packaging.env
-
-# A build that is not on a version tag carries the version being worked on,
-# .version (a pre-release such as 3.0.0-dev), not the last tag: 3.0.0-dev.1234+g1a2b3c4
-# sorts before the 3.0.0 release, after the former dev builds
-if ! git describe --tags --exact-match --match '[0-9]*' --match 'v[0-9]*' >/dev/null 2>&1; then
-    base=$(tr -d '[:space:]' <.version)
-    [[ "$base" == *-* ]] || base=$base-dev
-    dirty=
-    git diff --quiet HEAD || dirty=.dirty
-    dev=$base.$(git rev-list --count HEAD)+g$(git rev-parse --short HEAD)$dirty
-    cat >>build/packaging.env <<EOF
-VERSION=$dev
-DEB_VERSION=${dev/-/\~}
-EOF
-fi
+packaging/version >build/packaging.env
 
 if wants opensim-tools; then
-    BUILD=build/opensim-tools
-    rm -rf "$BUILD"
-    mkdir -p "$BUILD"
-    git archive HEAD | tar -x -C "$BUILD"
-
-    while read -r entry; do
-        [[ -z "$entry" || "$entry" == \#* ]] || rm -rf "${BUILD:?}/${entry%/}"
-    done <packaging/distignore
-
-    composer install --no-dev --no-interaction --quiet --optimize-autoloader --working-dir="$BUILD"
-
-    # Compiled translations (the .po are the sources)
-    if command -v msgfmt >/dev/null; then
-        for po in "$BUILD"/locales/*.po; do
-            [[ -f "$po" ]] || continue
-            lang=$(basename "$po" .po)
-            mkdir -p "$BUILD/locales/$lang/LC_MESSAGES"
-            msgfmt -o "$BUILD/locales/$lang/LC_MESSAGES/opensim-kit.mo" "$po"
-        done
-    fi
-
-    # The archives of the scripts (share/ossl-scripts/<name>-src, laid out as their content) are made here, with
-    # the engine; the sources stay beside them, to change a script and make its archive again
-    # (opensim oar pack)
-    for src in "$BUILD"/share/ossl-scripts/*-src; do
-        [[ -d "$src" ]] || continue
-        php "$BUILD/libexec/oar.php" pack "$src" >/dev/null
-    done
-
-    # Installed read-only for everyone but root, whatever the local umask
-    chmod -R go-w "$BUILD"
+    packaging/tools build/opensim-tools deb
 
     # The bash-tools package is at least the version composer bundles (^1.0.4: 1.0.4), as the
     # scripts use the bundled copy first and the package after it (see libexec/load-helpers)
@@ -192,31 +149,6 @@ ${prefix}_VERSION=$module_version
 ${prefix}_REVISION=$module_revision
 EOF
 done
-
-# The helpers of a grid, as their own project with their dependencies (a webroot), at the version the kit
-# requires (a branch while it is developed, a release after)
-if wants opensim-helpers; then
-    BUILD=build/opensim-helpers
-    rm -rf "$BUILD"
-    constraint=${HELPERS_CONSTRAINT:-$(sed -n 's/.*"magicoli\/opensim-helpers": *"\([^"]*\)".*/\1/p' composer.json | head -1)}
-    if [[ -z "$constraint" ]]; then
-        echo "magicoli/opensim-helpers is not in composer.json" >&2
-        exit 1
-    fi
-    composer create-project --no-dev --no-interaction --quiet --prefer-dist --stability=dev \
-        magicoli/opensim-helpers "$BUILD" "$constraint"
-    # What is not for the web, or only for the development
-    rm -rf "$BUILD"/.git* "$BUILD"/tests "$BUILD"/tools "$BUILD"/phpcs.xml.dist "$BUILD"/phpunit.xml "$BUILD"/composer.lock
-    chmod -R u+rwX,go+rX,go-w "$BUILD"
-    if [[ ! -s "$BUILD/.version" ]]; then
-        echo "The helpers have no .version, which gives the version of the package" >&2
-        exit 1
-    fi
-    cat >>build/packaging.env <<EOF
-HELPERS_VERSION=$(tr -d '[:space:]' <"$BUILD/.version" | tr '-' '~')
-HELPERS_REVISION=1
-EOF
-fi
 
 if wants opensim-unstable; then
     source=upstream/opensim
