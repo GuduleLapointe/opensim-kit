@@ -10,7 +10,7 @@
 # The packages of the libraries the tools depend on are taken from the dist folders of their projects (DEPS_ENGINE,
 # DEPS_REST and DEPS_HELPERS say where they are). What the container needs is sent to it as a tar stream, so it can run
 # on any machine: CONTAINER_CONNECTION=name (see podman system connection) uses the podman of another one; it and MEMORY
-# can be set in tests/.env (see tests/.env.example), the environment of the command wins.
+# can be set in tests/.env (see tests/.env.example), after the .env of the project.
 
 set -eo pipefail
 
@@ -19,24 +19,17 @@ TEST_DIR=tests/Packaging
 name=opensim-kit-test-$(basename "$BASE" | tr ':.' '--')
 
 cd "$(git rev-parse --show-toplevel)"
+BASE_DIR=$PWD
+source dev/lib.sh
 
-# tests/.env (KEY=value lines) gives what the environment of the command does not: CONTAINER_CONNECTION, MEMORY...
-if [ -f tests/.env ]; then
-    while IFS='=' read -r key value || [ -n "$key" ]; do
-        case $key in '' | '#'* | *[!A-Za-z0-9_]*) continue ;; esac
-        value=${value%$'\r'}
-        value=${value#[\"\']}
-        value=${value%[\"\']}
-        [ -n "${!key+x}" ] || export "$key=$value"
-    done <tests/.env
-fi
-[ -z "${CONTAINER_CONNECTION:-}" ] || echo "Podman connection: $CONTAINER_CONNECTION"
+# The environment of the project (.env) and the one of the tests (tests/.env): CONTAINER_CONNECTION, MEMORY...
+ENV_SLUG=tests read_env || true
+[[ -z "${CONTAINER_CONNECTION:-}" ]] || log "Podman connection: $CONTAINER_CONNECTION"
 
 # The packages to install: those of dist/ and those of the libraries
 for dir in dist "${DEPS_ENGINE:-../opensim-engine/dist}" "${DEPS_REST:-../opensim-rest-php/dist}" "${DEPS_HELPERS:-../opensim-helpers/dist}"; do
     if ! ls "$dir"/*.deb >/dev/null 2>&1; then
-        echo "tests/Packaging/run: no Debian package in $dir: build it first (dev/build.sh in that project)" >&2
-        exit 1
+        die "no Debian package in $dir: build it first (dev/build.sh in that project)"
     fi
 done
 
@@ -45,8 +38,7 @@ podman build -q -t "$name" --build-arg BASE="$BASE" "$TEST_DIR" >/dev/null
 # lacks the memory the test may use, before it stops a container of another project
 available=$(podman run --rm --pull=never --entrypoint awk "$name" '/MemAvailable/ {print int($2 / 1024)}' /proc/meminfo 2>/dev/null || true)
 if [[ "${available:-0}" -gt 0 && "${available:-0}" -lt 800 ]]; then
-    echo "Only ${available} MB of memory are available in the machine of podman: stop the containers you do not need first," >&2
-    echo "or the test may make it stop one of them (see DEVELOPERS.md)." >&2
+    warning "Only ${available} MB of memory are available in the machine of podman: stop the containers you do not need first, or the test may make it stop one of them (see DEVELOPERS.md)."
 fi
 podman rm -f "$name" >/dev/null 2>&1 || true
 # The memory is capped: a machine that lacks memory stops the biggest process

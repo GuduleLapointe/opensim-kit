@@ -80,6 +80,10 @@ It does what remains, whatever was done before: run it again after an interrupti
 
 `dev/switch.sh dev|release` does the composer part alone, and updates `composer.lock`. `dev` links the projects next to this one (path repositories, `@dev`). `release` requires `^` the latest version tag of each, and refuses a project that changed since that release (release it first); if composer does not find the tag, it is tried again for `SWITCH_WAIT` seconds (1200 by default) and says why. A step that fails leaves the files as they were.
 
+## Shell scripts
+
+The scripts of `dev/`, `packaging/` and `tests/Packaging` use the functions of [bash-tools](https://github.com/magicoli/bash-tools) to ask, tell and fail: `log`, `success`, `warning`, `die`, `end`, `yesno`, `require`, `usage`, `read_env`. It is a development dependency of the project, loaded by `dev/lib.sh` (the copy of `vendor`, else the package, else the PATH); loading it also reads the `.env` of the project. Write the new ones the same way, not with their own prompts and `echo`.
+
 ## Tests
 
 One command runs every test, `vendor/bin/pest` (`composer test`): the PHP ones with [Pest](https://pestphp.com), the shell scripts with [bashunit](https://bashunit.typeddevs.com) (`tests/lib/bashunit`), run from Pest. Everything is in `tests/`:
@@ -99,7 +103,7 @@ tests/Packaging/run docker.io/library/ubuntu:24.04    # Ubuntu 24.04
 
 `SCENARIO=web-scenario.sh tests/Packaging/run` serves the site of a grid with real nginx, Apache and Caddy, each with the example the setup writes for it; `lib.sh` has the checks the scenarios share. The packages of the helpers, the engine and rest-php are taken from the `dist` folders of their projects (`DEPS_HELPERS`, `DEPS_ENGINE` and `DEPS_REST` say where else they are): build them first.
 
-`tests/Packaging/check` is the quick one, without systemd: the tools install with those three packages and the command runs, the zip is used without composer. What a test container needs is sent to it as a tar stream, so it can run on the podman of another machine: `CONTAINER_CONNECTION=name` (a `podman system connection`), and `MEMORY=`, can be set in `tests/.env` (see `tests/.env.example`), the environment of the command wins.
+`tests/Packaging/check` is the quick one, without systemd: the tools install with those three packages and the command runs, the zip is used without composer. What a test container needs is sent to it as a tar stream, so it can run on the podman of another machine: `CONTAINER_CONNECTION=name` (a `podman system connection`), and `MEMORY=`, can be set in `tests/.env` (see `tests/.env.example`), read after the `.env` of the project (bash-tools `read_env`: what the files set wins over the environment of the command).
 
 `tests/Packaging/distro-pest` runs the Pest suites of the kit and of its libraries with the PHP of a distribution and only the extensions the packages depend on (`tests/Packaging/distro-pest docker.io/library/ubuntu:24.04` for another one): this is what checks that the PHP minimum and the dependencies of the packages are the real ones. `tests/Packaging/container-image` checks the container image.
 

@@ -25,16 +25,8 @@
 set -e
 cd "$(dirname "$0")/.."
 
-# .env (KEY=value lines) gives what the environment of the command does not: BUILD_HOST (see .env.example)
-if [ -f .env ]; then
-    while IFS='=' read -r key value || [ -n "$key" ]; do
-        case $key in '' | '#'* | *[!A-Za-z0-9_]*) continue ;; esac
-        value=${value%$'\r'}
-        value=${value#[\"\']}
-        value=${value%[\"\']}
-        [ -n "${!key+x}" ] || export "$key=$value"
-    done <.env
-fi
+# Sourcing bash-tools reads the .env of the project: BUILD_HOST (see .env.example)
+source dev/lib.sh
 
 URL=${OPENSIM_DIST_URL:-http://opensimulator.org/dist}
 SDK_IMAGE=mcr.microsoft.com/dotnet/sdk:8.0
@@ -74,8 +66,7 @@ if wants opensim-tools; then
     # scripts use the bundled copy first and the package after it (see libexec/load-helpers)
     BASH_TOOLS_VERSION=$(sed -n 's/.*"magicoli\/bash-tools": *"[^0-9]*\([0-9][0-9.]*\)".*/\1/p' composer.json | head -1)
     if [[ -z "$BASH_TOOLS_VERSION" ]]; then
-        echo "magicoli/bash-tools is not in composer.json" >&2
-        exit 1
+        die "magicoli/bash-tools is not in composer.json"
     fi
     echo "BASH_TOOLS_VERSION=$BASH_TOOLS_VERSION" >>build/packaging.env
 fi
@@ -96,8 +87,7 @@ if wants opensim-core opensim opensim-kit || [[ -n "$modules" ]]; then
         awk -v v="${OPENSIM_VERSION:-}" '!/^#/ && NF && (v == "" || $1 == v)' packaging/opensim-core.versions | tail -1
     ) || true
     if [[ -z "$version" ]]; then
-        echo "OpenSimulator $OPENSIM_VERSION is not in packaging/opensim-core.versions" >&2
-        exit 1
+        die "OpenSimulator $OPENSIM_VERSION is not in packaging/opensim-core.versions"
     fi
     cat >>build/packaging.env <<EOF
 OPENSIM_VERSION=$version
@@ -150,8 +140,7 @@ for module in $modules; do
         fi
     done < <(awk -v m="$module" -v c="$MODULES_CORE" '!/^#/ && $1 == m && $2 == c' packaging/opensim-modules.versions)
     if [[ -z "$found" ]]; then
-        echo "No $module for OpenSimulator $MODULES_CORE in packaging/opensim-modules.versions" >&2
-        exit 1
+        die "No $module for OpenSimulator $MODULES_CORE in packaging/opensim-modules.versions"
     fi
     chmod -R u+rwX,go+rX,go-w "$BUILD"
     prefix=$(echo "$module" | tr '[:lower:]-' '[:upper:]_')
@@ -182,22 +171,20 @@ EOF
         mkdir -p "$(dirname "$cache")"
         if [[ -n "${BUILD_HOST:-}" ]]; then
             # On another machine, which fetches the commit itself, and sends back what the package needs
-            echo "Building OpenSimulator $number $flavour ($commit) on $BUILD_HOST, once for this commit"
+            log "Building OpenSimulator $number $flavour ($commit) on $BUILD_HOST, once for this commit"
             if ! SDK_IMAGE=$SDK_IMAGE packaging/remote-build "$BUILD_HOST" "$commit" "$cache.tmp" >"$cache.log" 2>&1; then
                 tail -20 "$cache.log" >&2
-                echo "Build failed, see $cache.log" >&2
-                exit 1
+                die "Build failed, see $cache.log"
             fi
         else
-            echo "Building OpenSimulator $number $flavour ($commit), once for this commit"
+            log "Building OpenSimulator $number $flavour ($commit), once for this commit"
             mkdir -p "$cache.tmp"
             git -C "$source" archive "$commit" | tar -x -C "$cache.tmp"
             if ! ${CONTAINER:-podman} run --rm -v "$PWD/$cache.tmp:/opensim" -w /opensim "$SDK_IMAGE" \
                 bash -c './runprebuild.sh && dotnet build --configuration Release OpenSim.sln' \
                 >"$cache.log" 2>&1; then
                 tail -20 "$cache.log" >&2
-                echo "Build failed, see $cache.log" >&2
-                exit 1
+                die "Build failed, see $cache.log"
             fi
         fi
         mv "$cache.tmp" "$cache"

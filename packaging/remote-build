@@ -15,26 +15,25 @@ host=$1
 commit=$2
 dest=$3
 if [[ -z "$host" || -z "$commit" || -z "$dest" ]]; then
-    echo "usage: packaging/remote-build HOST COMMIT DEST" >&2
+    USAGE="packaging/remote-build HOST COMMIT DEST"
+    usage >&2
     exit 2
 fi
 cd "$(dirname "$0")/.."
+source dev/lib.sh
 
 url=${OPENSIM_SOURCE_URL:-$(git config -f .gitmodules submodule.upstream/opensim.url)}
 image=${SDK_IMAGE:-mcr.microsoft.com/dotnet/sdk:8.0}
 ssh=(ssh -o BatchMode=yes -o ConnectTimeout=10)
 
 if ! command -v rsync >/dev/null; then
-    echo "rsync is needed to bring the build back" >&2
-    exit 1
+    die "rsync is needed to bring the build back"
 fi
 if ! missing=$("${ssh[@]}" "$host" 'for tool in git podman rsync; do command -v $tool >/dev/null || printf "%s " $tool; done'); then
-    echo "Cannot reach $host with ssh (BUILD_HOST), without a password" >&2
-    exit 1
+    die "Cannot reach $host with ssh (BUILD_HOST), without a password"
 fi
 if [[ -n "$missing" ]]; then
-    echo "$host lacks: $missing" >&2
-    exit 1
+    die "$host lacks: $missing"
 fi
 
 # The build on the other machine; its messages go to stderr, the last line it prints is where the result is
@@ -69,7 +68,7 @@ built=$(tail -1 <<<"$built")
 
 rm -rf "$dest"
 mkdir -p "$dest"
-echo "Bringing the build back from $host" >&2
+log "Bringing the build back from $host"
 rsync -a \
     --include='/bin/' --include='/bin/**' --include='/doc/' --include='/doc/**' --include='/share/' --include='/share/**' \
     --include='/addon-modules/' --include='/addon-modules/**' --include='/ThirdPartyLicenses/' \

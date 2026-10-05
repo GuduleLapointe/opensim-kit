@@ -10,6 +10,7 @@
 
 set -e
 cd "$(dirname "$0")/.."
+source dev/lib.sh
 
 formats=()
 packages=()
@@ -25,17 +26,15 @@ fi
 
 # A build is made from the last commit and from composer.lock: both are checked, not left to be remembered
 if [[ -z "${DIRTY:-}" && -n "$(git status --porcelain --untracked-files=no)" ]]; then
-    echo "dev/build.sh: commit your changes first, a build is made from the last commit (DIRTY=1 builds it anyway):" >&2
-    git status --short --untracked-files=no >&2
-    exit 1
+    die "commit your changes first, a build is made from the last commit (DIRTY=1 builds it anyway):
+$(git status --short --untracked-files=no)"
 fi
 if ! composer validate --no-check-publish --no-check-all --no-interaction >/dev/null 2>&1; then
-    echo "dev/build.sh: composer.lock is not up to date with composer.json (composer update the packages that changed, commit):" >&2
-    composer validate --no-check-publish --no-check-all --no-interaction >&2 || true
-    exit 1
+    die "composer.lock is not up to date with composer.json (composer update the packages that changed, commit):
+$(composer validate --no-check-publish --no-check-all --no-interaction 2>&1 || true)"
 fi
 untracked=$(git ls-files --others --exclude-standard)
-[[ -z "$untracked" ]] || echo "note: files git does not track are not in the build: $(tr '\n' ' ' <<<"$untracked")" >&2
+[[ -z "$untracked" ]] || log "note: files git does not track are not in the build: $(tr '\n' ' ' <<<"$untracked")"
 
 mkdir -p dist
 
@@ -48,10 +47,9 @@ for format in "${formats[@]}"; do
                 [[ -n "$apt_package" || ! -x "$candidate" ]] || apt_package=$candidate
             done
             if [[ -z "$apt_package" ]]; then
-                echo "dev/build.sh: apt-package is not installed (the apt-repo project, see DEVELOPERS.md)" >&2
-                exit 1
+                die "apt-package is not installed (the apt-repo project, see DEVELOPERS.md)"
             fi
-            command -v nfpm >/dev/null || { echo "dev/build.sh: nfpm is not installed (https://nfpm.goreleaser.com)" >&2; exit 1; }
+            require nfpm
             # dist/ holds the build just made of the packages that carry the version of the project, not the former ones
             for definition in packaging/*.yaml; do
                 name=$(basename "$definition" .yaml)
@@ -68,4 +66,4 @@ for format in "${formats[@]}"; do
     esac
 done
 
-echo "Built from the commit $(git rev-parse --short HEAD), ${DIRTY:+with uncommitted changes, }\"$(git log -1 --format=%s)\"; in a version, g is for git and the hash follows it."
+success "Built from the commit $(git rev-parse --short HEAD), ${DIRTY:+with uncommitted changes, }\"$(git log -1 --format=%s)\"; in a version, g is for git and the hash follows it."

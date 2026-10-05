@@ -7,6 +7,7 @@
 
 set -e
 cd "$(dirname "$0")/.."
+source dev/lib.sh
 BUILD=$1
 mode=${2:-zip}
 
@@ -29,8 +30,7 @@ linked=()
 while read -r name _; do
     [[ -n "$name" && "$name" != \#* && ! -e "$BUILD/vendor/$name" ]] || continue
     if [[ ! -d "vendor/$name" ]]; then
-        echo "vendor/$name is missing: composer install, then build again" >&2
-        exit 1
+        die "vendor/$name is missing: composer install, then build again"
     fi
     mkdir -p "$BUILD/vendor/$(dirname "$name")"
     ln -s "$(cd "vendor/$name" && pwd -P)" "$BUILD/vendor/$name"

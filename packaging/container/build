@@ -16,10 +16,11 @@ BASE=${BASE:-docker.io/library/ubuntu:24.04}
 tag=${1:-opensim-kit:dev}
 
 cd "$(git rev-parse --show-toplevel)"
+source dev/lib.sh
 case "${ARCH:-$(uname -m)}" in
 x86_64 | amd64) arch=amd64 ;;
 aarch64 | arm64) arch=arm64 ;;
-*) echo "Unknown architecture ${ARCH:-$(uname -m)}" >&2; exit 1 ;;
+*) die "Unknown architecture ${ARCH:-$(uname -m)}" ;;
 esac
 
 # The newest of a package, by its version
@@ -27,7 +28,7 @@ newest() { ls dist/"$1"_*_"$2".deb 2>/dev/null | sort -V | tail -1; }
 
 tools=$(newest opensim-tools all)
 core=$(ls dist/opensim-[0-9]*_*_"$arch".deb 2>/dev/null | sort -V | tail -1)
-[[ -n "$tools" && -n "$core" ]] || { echo "Build the packages first: apt-package opensim-tools opensim-core" >&2; exit 1; }
+[[ -n "$tools" && -n "$core" ]] || die "Build the packages first: apt-package opensim-tools opensim-core"
 version=$(basename "$core" | sed -E 's/^opensim-([0-9.]+)_.*/\1/')
 
 context=$(mktemp -d)
@@ -40,7 +41,7 @@ for project in "opensim-engine:${DEPS_ENGINE:-}" "opensim-rest-php:${DEPS_REST:-
     name=${project%%:*}
     dir=${project#*:}
     dep=$(ls "${dir:-../$name/dist}/${name}_"*_all.deb 2>/dev/null | sort -V | tail -1)
-    [[ -n "$dep" ]] || { echo "Build $name first: dev/build.sh in its project (or say where its package is: DEPS_*)" >&2; exit 1; }
+    [[ -n "$dep" ]] || die "Build $name first: dev/build.sh in its project (or say where its package is: DEPS_*)"
     cp "$dep" "$context/pkgs/"
 done
 for module in opensimsearch gloebit; do
