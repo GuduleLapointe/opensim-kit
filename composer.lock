@@ -128,16 +128,16 @@
         },
         {
             "name": "magicoli/bash-tools",
-            "version": "1.0.4",
+            "version": "1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/magicoli/bash-tools.git",
-                "reference": "1e55f10704070f6e445f42ea0644f1e2121466d4"
+                "reference": "28bc96a7bb9327c8996ec2c448290c7dda5277fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/magicoli/bash-tools/zipball/1e55f10704070f6e445f42ea0644f1e2121466d4",
-                "reference": "1e55f10704070f6e445f42ea0644f1e2121466d4",
+                "url": "https://api.github.com/repos/magicoli/bash-tools/zipball/28bc96a7bb9327c8996ec2c448290c7dda5277fe",
+                "reference": "28bc96a7bb9327c8996ec2c448290c7dda5277fe",
                 "shasum": ""
             },
             "bin": [
@@ -173,9 +173,9 @@
             "description": "Eclectic collection of bash tools and helpers.",
             "support": {
                 "issues": "https://github.com/magicoli/bash-tools/issues",
-                "source": "https://github.com/magicoli/bash-tools/tree/1.0.4"
+                "source": "https://github.com/magicoli/bash-tools/tree/1.0.5"
             },
-            "time": "2026-09-30T12:31:49+00:00"
+            "time": "2026-10-05T14:58:00+00:00"
         },
         {
             "name": "magicoli/opensim-engine",
@@ -183,7 +183,7 @@
             "dist": {
                 "type": "path",
                 "url": "../opensim-engine",
-                "reference": "85226f19ab1c38e2c6d8355843f36e9ac133a4c3"
+                "reference": "669db40b471c2cf94f7626b206827dc5f33f4e1b"
             },
             "require": {
                 "ext-curl": "*",
@@ -203,6 +203,7 @@
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+                "magicoli/bash-tools": "^1.0.5",
                 "magicoli/pest-failure-summary": "^1.0",
                 "pestphp/pest": "^3.0",
                 "phpcompatibility/php-compatibility": "dev-develop",
@@ -249,7 +250,7 @@
             "dist": {
                 "type": "path",
                 "url": "../opensim-helpers",
-                "reference": "eaa11a98132e3526777df739dac1ab42f82ff02c"
+                "reference": "decc75ee742b74046b7cb80ce771fd28784a01c4"
             },
             "require": {
                 "ext-curl": "*",
@@ -270,6 +271,7 @@
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+                "magicoli/bash-tools": "^1.0.5",
                 "magicoli/pest-failure-summary": "^1.0",
                 "pestphp/pest": "^3.0",
                 "phpcompatibility/php-compatibility": "dev-develop",
@@ -305,7 +307,7 @@
             "dist": {
                 "type": "path",
                 "url": "../opensim-rest-php",
-                "reference": "170679d185147dbc57e27b583ba90101d36976ac"
+                "reference": "9d823dcbfa6dd82ddb0218848a4502c3f7d5981b"
             },
             "require": {
                 "ext-curl": "*",
@@ -315,6 +317,7 @@
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+                "magicoli/bash-tools": "^1.0.5",
                 "magicoli/pest-failure-summary": "^1.0",
                 "pestphp/pest": "^3.0",
                 "phpcompatibility/php-compatibility": "dev-develop",
