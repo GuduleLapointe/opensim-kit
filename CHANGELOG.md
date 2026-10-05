@@ -1,6 +1,6 @@
 ## Changelog
 
-### Unreleased
+### 3.0.0-beta.4
 
 - new: `dev/release.sh` makes the whole release, `dev/switch.sh` the composer part
 - fix: web server files are complete, for the site of the web URL: to include, or to use alone
