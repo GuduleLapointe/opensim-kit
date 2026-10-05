@@ -1,5 +1,11 @@
 ## Changelog
 
+### Unreleased
+
+- update: `dev/` runs [build-tools](https://github.com/magicoli/build-tools) instead of its own copy of the scripts
+- update: `apt-package` and `apt-publish` come from build-tools (`vendor/bin`), no longer from apt-repo
+- update: [bash-tools](https://github.com/magicoli/bash-tools) 1.0.7, the tools depend on the package (>= 1.0.7)
+
 ### 3.0.0-beta.4
 
 - new: `dev/release.sh` makes the whole release, `dev/switch.sh` the composer part

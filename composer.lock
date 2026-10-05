@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc4fe2435e1f788ee0ce370e66932afb",
+    "content-hash": "196fe8a134721c302cd3974619574a58",
     "packages": [
         {
             "name": "laminas/laminas-escaper",
@@ -128,16 +128,16 @@
         },
         {
             "name": "magicoli/bash-tools",
-            "version": "1.0.6",
+            "version": "1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/magicoli/bash-tools.git",
-                "reference": "b4425142a024b9413686e19e126d1c256b32a8cb"
+                "reference": "60ecf4fa3c4ab9144251428e7bf784c0aa4aff10"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/magicoli/bash-tools/zipball/b4425142a024b9413686e19e126d1c256b32a8cb",
-                "reference": "b4425142a024b9413686e19e126d1c256b32a8cb",
+                "url": "https://api.github.com/repos/magicoli/bash-tools/zipball/60ecf4fa3c4ab9144251428e7bf784c0aa4aff10",
+                "reference": "60ecf4fa3c4ab9144251428e7bf784c0aa4aff10",
                 "shasum": ""
             },
             "bin": [
@@ -173,9 +173,9 @@
             "description": "Eclectic collection of bash tools and helpers.",
             "support": {
                 "issues": "https://github.com/magicoli/bash-tools/issues",
-                "source": "https://github.com/magicoli/bash-tools/tree/1.0.6"
+                "source": "https://github.com/magicoli/bash-tools/tree/1.0.7"
             },
-            "time": "2026-10-05T15:18:25+00:00"
+            "time": "2026-10-05T18:34:19+00:00"
         },
         {
             "name": "magicoli/opensim-engine",
@@ -1865,6 +1865,46 @@
                 "source": "https://github.com/Jean85/pretty-package-versions/tree/2.1.1"
             },
             "time": "2025-03-19T14:43:43+00:00"
+        },
+        {
+            "name": "magicoli/build-tools",
+            "version": "0.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/magicoli/build-tools.git",
+                "reference": "d5dfae0fb129944dd21e50bf56b9325e7e40ff43"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/magicoli/build-tools/zipball/d5dfae0fb129944dd21e50bf56b9325e7e40ff43",
+                "reference": "d5dfae0fb129944dd21e50bf56b9325e7e40ff43",
+                "shasum": ""
+            },
+            "require": {
+                "magicoli/bash-tools": "^1.0.6"
+            },
+            "bin": [
+                "bin/build-tools",
+                "bin/apt-package",
+                "bin/apt-publish"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "AGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Olivier van Helden",
+                    "homepage": "https://magiiic.com"
+                }
+            ],
+            "description": "Build, release and publish a project: Debian packages, zip, GitHub release, apt repository.",
+            "support": {
+                "issues": "https://github.com/magicoli/build-tools/issues",
+                "source": "https://github.com/magicoli/build-tools/tree/0.1.4"
+            },
+            "time": "2026-10-05T22:56:18+00:00"
         },
         {
             "name": "magicoli/pest-failure-summary",

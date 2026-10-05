@@ -1,5 +1,5 @@
 # OpenSim tools, built by apt-package from build/opensim-tools, prepared by
-# packaging/build (packaging/stage). ${VERSION} comes from the git tag. The
+# packaging/build (build-tools stage). ${VERSION} comes from the git tag. The
 # projects of packaging/siblings come from their own packages, linked into the
 # vendor folder.
 # The tools in /usr/share/opensim-tools, the opensim command, the service

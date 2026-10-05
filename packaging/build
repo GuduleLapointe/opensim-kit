@@ -4,7 +4,7 @@
 #
 # opensim-tools: build/opensim-tools, the tools as committed (HEAD), without
 #   what they do not distribute (.distignore), with their PHP dependencies, but
-#   not the development ones (packaging/stage): bash-tools and the projects of
+#   not the development ones (build-tools stage): bash-tools and the projects of
 #   packaging/siblings come from their packages. The working copy is left
 #   untouched.
 # opensim-core, opensim, opensim-kit: the OpenSimulator release of
@@ -26,7 +26,8 @@ set -e
 cd "$(dirname "$0")/.."
 
 # Sourcing bash-tools reads the .env of the project: BUILD_HOST (see .env.example)
-source dev/lib.sh
+[[ -f vendor/bin/bash-helpers ]] || { echo "bash-tools is not installed: composer install" >&2; exit 1; }
+source vendor/bin/bash-helpers
 
 URL=${OPENSIM_DIST_URL:-http://opensimulator.org/dist}
 SDK_IMAGE=mcr.microsoft.com/dotnet/sdk:8.0
@@ -57,7 +58,7 @@ distribution() {
 }
 
 mkdir -p build
-packaging/version >build/packaging.env
+vendor/bin/build-tools version >build/packaging.env
 
 if wants opensim-tools; then
     packaging/tools build/opensim-tools deb

@@ -20,7 +20,8 @@ name=opensim-kit-test-$(basename "$BASE" | tr ':.' '--')
 
 cd "$(git rev-parse --show-toplevel)"
 BASE_DIR=$PWD
-source dev/lib.sh
+[[ -f vendor/bin/bash-helpers ]] || { echo "bash-tools is not installed: composer install" >&2; exit 1; }
+source vendor/bin/bash-helpers
 
 # The environment of the project (.env) and the one of the tests (tests/.env): CONTAINER_CONNECTION, MEMORY...
 ENV_SLUG=tests read_env || true

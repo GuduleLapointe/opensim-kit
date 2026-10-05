@@ -20,7 +20,8 @@ if [[ -z "$host" || -z "$commit" || -z "$dest" ]]; then
     exit 2
 fi
 cd "$(dirname "$0")/.."
-source dev/lib.sh
+[[ -f vendor/bin/bash-helpers ]] || { echo "bash-tools is not installed: composer install" >&2; exit 1; }
+source vendor/bin/bash-helpers
 
 url=${OPENSIM_SOURCE_URL:-$(git config -f .gitmodules submodule.upstream/opensim.url)}
 image=${SDK_IMAGE:-mcr.microsoft.com/dotnet/sdk:8.0}

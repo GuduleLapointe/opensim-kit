@@ -12,7 +12,6 @@ src/*
 etc/*
 dev/*
 !dev/build.sh
-!dev/lib.sh
 !dev/switch.sh
 !dev/release.sh
 /lib/opensim/

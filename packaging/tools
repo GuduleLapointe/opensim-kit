@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 # Prepares in DIR (made new) the tools as they are distributed: the committed files and their PHP dependencies
-# (packaging/stage), the compiled translations and the archives of the OSSL scripts.
+# (build-tools stage), the compiled translations and the archives of the OSSL scripts.
 #
 #   packaging/tools DIR zip    every dependency in the vendor folder
 #   packaging/tools DIR deb    the projects of packaging/siblings come from their own packages
 
 set -e
 cd "$(dirname "$0")/.."
-source dev/lib.sh
+[[ -f vendor/bin/bash-helpers ]] || { echo "bash-tools is not installed: composer install" >&2; exit 1; }
+source vendor/bin/bash-helpers
 BUILD=$1
 mode=${2:-zip}
 
-packaging/stage "$BUILD" "$mode"
+vendor/bin/build-tools stage "$BUILD" "$mode"
 
 # Compiled translations (the .po are the sources)
 if command -v msgfmt >/dev/null; then

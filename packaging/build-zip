@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # dist/opensim-kit-VERSION.zip: the tools and their vendor folder (see packaging/tools), to unzip and use without
-# composer or any other tool.
+# composer or any other tool. Run by build-tools instead of its generic zip.
 
 set -e
 cd "$(dirname "$0")/.."
 
-eval "$(packaging/version)"
+eval "$(vendor/bin/build-tools version)"
 packaging/tools build/zip/opensim-kit zip
 mkdir -p dist
 rm -f "dist/opensim-kit-$VERSION.zip"

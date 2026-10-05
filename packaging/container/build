@@ -16,7 +16,8 @@ BASE=${BASE:-docker.io/library/ubuntu:24.04}
 tag=${1:-opensim-kit:dev}
 
 cd "$(git rev-parse --show-toplevel)"
-source dev/lib.sh
+[[ -f vendor/bin/bash-helpers ]] || { echo "bash-tools is not installed: composer install" >&2; exit 1; }
+source vendor/bin/bash-helpers
 case "${ARCH:-$(uname -m)}" in
 x86_64 | amd64) arch=amd64 ;;
 aarch64 | arm64) arch=arm64 ;;

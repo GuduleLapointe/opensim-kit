@@ -14,7 +14,7 @@ It uses libraries `opensim-helpers`, `opensim-engine`, and `opensim-rest-php`. E
 
 ## Packaging
 
-The packages are built with [nfpm](https://nfpm.goreleaser.com) and published to the Magiiic apt repository with the tools of apt-repo (`git@git.magiiic.com:magic/apt-repo.git`, cloned in `/opt/apt-repo`), whose README documents the whole chain. Everything lives in `packaging/`, one definition per package:
+The packages are built with [nfpm](https://nfpm.goreleaser.com) and published to an apt repository with the tools of [build-tools](https://github.com/magicoli/build-tools) (`apt-package`, `apt-publish`), the repository being the one `APT_REPO_DIR` names in `.env`. Everything lives in `packaging/`, one definition per package:
 
 | Package                   | Definition              | Version                          | Content                                                                                                                                                            |
 | ------------------------- | ----------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -40,22 +40,22 @@ The version of the tools and of the metapackages is the version tag when the bui
 dev/build.sh                                 # every package and the zip of the tools, into dist/
 dev/build.sh deb opensim-tools               # only this package
 dev/build.sh zip                             # dist/opensim-kit-<version>.zip, the tools with their vendor folder
-/opt/apt-repo/bin/apt-package --publish      # publish, on a version tag of this repository
-/opt/apt-repo/bin/apt-package --publish opensim-core opensim   # a new release, without a tag
+vendor/bin/apt-package --publish      # publish, on a version tag of this repository
+vendor/bin/apt-package --publish opensim-core opensim   # a new release, without a tag
 ```
 
-`dev/build.sh` builds the last commit and refuses when changes are not committed or when `composer.lock` is not up to date (`DIRTY=1` builds the last commit anyway). The Debian packages are made by `apt-package`, the tool of the apt repository. The version carries the commit: `3.0.0~beta.4.709+gb98c10a` (`g` is for git, as `git describe` writes it, the hash follows it). The scripts are in `packaging/`: `version`, `stage` (the committed files without what `.distignore` leaves out, and the vendor folder composer makes without the development tools, from the repositories of `composer.json`), `tools` (the tools as distributed: stage, translations, OSSL script archives), `zip`, `siblings` (the projects the Debian package gets from their own packages), `build` (prepares the packages), `remote-build`.
+`dev/build.sh` builds the last commit and refuses when changes are not committed or when `composer.lock` is not up to date (`DIRTY=1` builds the last commit anyway). The Debian packages are made by `apt-package`, of build-tools. The version carries the commit: `3.0.0~beta.4.709+gb98c10a` (`g` is for git, as `git describe` writes it, the hash follows it). The scripts are those of [build-tools](https://github.com/magicoli/build-tools) (`vendor/bin/build-tools`, a development dependency): the version, `stage` (the committed files without what `.distignore` leaves out, and the vendor folder composer makes without the development tools, from the repositories of `composer.json`), the release. The project keeps its own `packaging/`: `tools` (the tools as distributed: stage, translations, OSSL script archives), `build-zip` (the zip of the tools), `siblings` (the projects the Debian package gets from their own packages), `build` (prepares the packages), `remote-build`.
 
 Publishing skips the packages whose version is already in the repository, so the tools and the releases keep their own pace. The packages with the version of this repository need a version tag (`v3.0.0`, the `v` is optional), and are attached to its GitHub release, marked as a pre-release when the version has one (`v3.0.0-beta.1`).
 
 `packaging/build` runs first and prepares only the packages asked for:
 
 - `opensim-tools`: `build/opensim-tools` from the committed tree (`packaging/tools`), with the PHP dependencies (`composer install --no-dev`, bash-tools included), without what `.distignore` lists, and without the projects of `packaging/siblings`, which come from their packages. The `bash-tools` package it depends on is at least the version composer bundles (`BASH_TOOLS_VERSION`, read from `composer.json`). Uncommitted changes are not packaged.
-- `opensim-core`, `opensim`: the release of `packaging/opensim-core.versions`, the last one or `OPENSIM_VERSION`, e.g. `OPENSIM_VERSION=0.9.3.0 /opt/apt-repo/bin/apt-package opensim-core`. Its tarball is downloaded into `src/` and checked against its SHA256.
+- `opensim-core`, `opensim`: the release of `packaging/opensim-core.versions`, the last one or `OPENSIM_VERSION`, e.g. `OPENSIM_VERSION=0.9.3.0 vendor/bin/apt-package opensim-core`. Its tarball is downloaded into `src/` and checked against its SHA256.
 
 - `opensim-web`: `share/web` as it is.
 - `opensim-unstable`: OpenSimulator built from the commit of the `upstream/opensim` submodule (a shallow clone of the upstream repository, `master`), in a .NET SDK container (podman, or `CONTAINER=docker`). Each commit is built once, into `build/cache/`. With `BUILD_HOST=name` in `.env` (an ssh host with git, podman and rsync, see `.env.example`) the build runs on that machine instead, in the same container, so its system does not matter: it keeps a clone of the repository and the NuGet packages in `~/.cache/opensim-kit`, always builds from the files of the commit, and only what the package needs (`bin/` and the documents) comes back. The build is much faster there than in the podman machine of a laptop. Update it with `git submodule update --remote upstream/opensim`.
-- `opensim-<module>`: the files listed for the module in `packaging/opensim-modules.versions`, for the release of `opensim-core`, or the core of `MODULES_CORE` (a release or `unstable`), e.g. `MODULES_CORE=unstable /opt/apt-repo/bin/apt-package opensim-gloebit`. The files downloaded go to `src/`, checked against their SHA256. The packages are named after the modules.
+- `opensim-<module>`: the files listed for the module in `packaging/opensim-modules.versions`, for the release of `opensim-core`, or the core of `MODULES_CORE` (a release or `unstable`), e.g. `MODULES_CORE=unstable vendor/bin/apt-package opensim-gloebit`. The files downloaded go to `src/`, checked against their SHA256. The packages are named after the modules.
 
 A new OpenSimulator release is added at the end of `packaging/opensim-core.versions`, with its checksum. A published package is never changed: a packaging change of a published release gets the next revision in that file, as for the modules in `packaging/opensim-modules.versions`.
 
@@ -74,15 +74,14 @@ One command in each project, in the order of the family (rest-php, engine, helpe
 ```bash
 dev/release.sh          # the whole release, after one question
 dev/release.sh status   # what is done and what remains
+dev/release.sh beta     # patch|minor|major|stable|dev|alpha|beta|rc|1.2.3-beta.4: see the versions in the README of build-tools
 ```
 
-It does what remains, whatever was done before: run it again after an interruption or an error. It makes the release commit (`.version`, the projects of the family required by version, `CHANGELOG.md`; its message is `v<version>` followed by the lines of the changelog, verbatim, and the tag says the same), the tag, the push to the `github` remote (`RELEASE_REMOTE` for another), the zip, the publication through `apt-package --publish` (the apt repository, and the GitHub release with the Debian packages and their checksums) with the zip added to that release, then the next development version, pushed. The tag is built and published in a folder of its own (`tmp/release-<tag>`), so the current commit does not matter. `dev/release.sh VERSION` releases another version than the one `.version` gives, `RELEASE_YES=1` answers yes to the question. It needs `gh` (logged in), `apt-package`, `nfpm`; it says what is missing before it does anything.
-
-`dev/switch.sh dev|release` does the composer part alone, and updates `composer.lock`. `dev` links the projects next to this one (path repositories, `@dev`). `release` requires `^` the latest version tag of each, and refuses a project that changed since that release (release it first); if composer does not find the tag, it is tried again for `SWITCH_WAIT` seconds (1200 by default) and says why. A step that fails leaves the files as they were.
+It needs the `.env` of the project to say where the apt repository is (`APT_REPO_DIR`, see `.env.example` of build-tools), `gh` (logged in) and `nfpm`, and says what is missing before it does anything. `dev/switch.sh dev|release` does the composer part alone: the projects of the family linked next to this one (path repositories, `@dev`), or required by version (`^` the latest version tag of each, refused when a project changed since that release).
 
 ## Shell scripts
 
-The scripts of `dev/`, `packaging/` and `tests/Packaging` use the functions of [bash-tools](https://github.com/magicoli/bash-tools) to ask, tell and fail: `log`, `success`, `warning`, `die`, `end`, `yesno`, `require`, `usage`, `read_env`. It is a development dependency of the project, loaded by `dev/lib.sh` (the copy of `vendor`, else the package, else the PATH); loading it also reads the `.env` of the project. Write the new ones the same way, not with their own prompts and `echo`.
+The scripts of `dev/` are wrappers of build-tools. The scripts of `packaging/` and `tests/Packaging` use the functions of [bash-tools](https://github.com/magicoli/bash-tools) to ask, tell and fail (`log`, `success`, `warning`, `die`, `end`, `yesno`, `require`, `usage`, `read_env`), loaded from `vendor/bin/bash-helpers`: write the new ones the same way, not with their own prompts and `echo`.
 
 ## Tests
 
