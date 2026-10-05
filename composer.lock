@@ -1868,16 +1868,16 @@
         },
         {
             "name": "magicoli/build-tools",
-            "version": "0.1.4",
+            "version": "0.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/magicoli/build-tools.git",
-                "reference": "d5dfae0fb129944dd21e50bf56b9325e7e40ff43"
+                "reference": "aadb088d5eaccb25aa92e3e69e7d663ac1cd472b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/magicoli/build-tools/zipball/d5dfae0fb129944dd21e50bf56b9325e7e40ff43",
-                "reference": "d5dfae0fb129944dd21e50bf56b9325e7e40ff43",
+                "url": "https://api.github.com/repos/magicoli/build-tools/zipball/aadb088d5eaccb25aa92e3e69e7d663ac1cd472b",
+                "reference": "aadb088d5eaccb25aa92e3e69e7d663ac1cd472b",
                 "shasum": ""
             },
             "require": {
@@ -1902,9 +1902,9 @@
             "description": "Build, release and publish a project: Debian packages, zip, GitHub release, apt repository.",
             "support": {
                 "issues": "https://github.com/magicoli/build-tools/issues",
-                "source": "https://github.com/magicoli/build-tools/tree/0.1.4"
+                "source": "https://github.com/magicoli/build-tools/tree/0.1.5"
             },
-            "time": "2026-10-05T22:56:18+00:00"
+            "time": "2026-10-05T23:43:37+00:00"
         },
         {
             "name": "magicoli/pest-failure-summary",
