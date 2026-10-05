@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Builds the container image of the kit from the packages of dist/ (tools, the
-# latest release of the core, its modules), for the architecture of the
+# latest release of the core, its modules) and those of the libraries the tools
+# depend on (the dist folders of their projects), for the architecture of the
 # machine. Not published anywhere: the image stays on this machine.
 #
 # Usage, from the repository root, after building the packages:
@@ -33,6 +34,15 @@ context=$(mktemp -d)
 trap 'rm -rf "$context"' EXIT
 mkdir "$context/pkgs"
 cp "$tools" "$core" "$context/pkgs/"
+# The packages of the family the tools depend on, from the dist folder of each project (DEPS_ENGINE, DEPS_REST and
+# DEPS_HELPERS say where they are)
+for project in "opensim-engine:${DEPS_ENGINE:-}" "opensim-rest-php:${DEPS_REST:-}" "opensim-helpers:${DEPS_HELPERS:-}"; do
+    name=${project%%:*}
+    dir=${project#*:}
+    dep=$(ls "${dir:-../$name/dist}/${name}_"*_all.deb 2>/dev/null | sort -V | tail -1)
+    [[ -n "$dep" ]] || { echo "Build $name first: dev/build.sh in its project (or say where its package is: DEPS_*)" >&2; exit 1; }
+    cp "$dep" "$context/pkgs/"
+done
 for module in opensimsearch gloebit; do
     deb=$(newest "opensim-$version-$module" all)
     [[ -z "$deb" ]] || cp "$deb" "$context/pkgs/"
