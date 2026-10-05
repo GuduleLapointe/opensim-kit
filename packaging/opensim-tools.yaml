@@ -103,6 +103,7 @@ contents:
     type: dir
 
 scripts:
+  preinstall: packaging/opensim-tools.preinst
   postinstall: packaging/opensim-tools.postinst
   preremove: packaging/opensim-tools.prerm
   postremove: packaging/opensim-tools.postrm

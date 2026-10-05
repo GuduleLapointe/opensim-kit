@@ -54,6 +54,23 @@ ln -s "$PWD/tests/Packaging/lib.sh" "$stage/test/lib.sh"
 COPYFILE_DISABLE=1 tar -chf - -C "$stage" dist deps test | podman run --rm -i --memory="${MEMORY:-400m}" "$BASE" bash -c '
 tar -xf - --no-same-owner --warning=no-unknown-keyword -C /
 source /test/lib.sh
+# A previous version of a package, which had the libraries bundled as folders of vendor/magicoli (dpkg does not
+# replace a folder by a link when it upgrades): installed in place of the real one
+previous() { # package, libraries
+    local pkg=$1 root lib
+    shift
+    root=/tmp/previous-$pkg
+    rm -rf $root
+    mkdir -p $root/DEBIAN
+    for lib in "$@"; do
+        mkdir -p $root/usr/share/$pkg/vendor/magicoli/$lib
+        : >$root/usr/share/$pkg/vendor/magicoli/$lib/bundled.php
+    done
+    printf "Package: $pkg\nVersion: 0.0.1\nArchitecture: all\nMaintainer: test <test@example.org>\nDescription: previous version, libraries bundled\n" >$root/DEBIAN/control
+    dpkg-deb -b $root /tmp/previous-$pkg.deb >/dev/null
+    dpkg -r $pkg >/dev/null 2>&1
+    dpkg -i /tmp/previous-$pkg.deb >/dev/null 2>&1
+}
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq >/dev/null
 apt-get install -y -qq ca-certificates curl gpg unzip >/dev/null 2>&1
@@ -68,6 +85,9 @@ check "the command runs" "opensim --help | grep -q \"display this help\""
 check "the console client runs through it, from the package of rest-php" "opensim rest --help | grep -q Usage"
 check "the archives of the scripts are made" "[ -f $tools/share/ossl-scripts/fix-parcel-name.oar ]"
 check "it has no tests, no packaging files" "[ ! -e $tools/tests ] && [ ! -e $tools/packaging ] && [ ! -e $tools/composer.lock ]"
+previous opensim-tools opensim-engine opensim-helpers opensim-rest-php
+dpkg -i /dist/opensim-tools_*.deb >/dev/null 2>&1
+check "an upgrade from a version that bundled the libraries leaves links, not empty folders" "[ -L $tools/vendor/magicoli/opensim-engine ] && [ -L $tools/vendor/magicoli/opensim-helpers ] && [ -L $tools/vendor/magicoli/opensim-rest-php ] && opensim rest --help | grep -q Usage"
 
 mkdir /tmp/zip && cd /tmp/zip && unzip -q /dist/opensim-kit-*.zip
 check "the zip has the tools and a complete vendor folder" "[ -f opensim-kit/bin/opensim ] && [ -f opensim-kit/vendor/laravel/prompts/composer.json ] && [ -f opensim-kit/vendor/magicoli/opensim-engine/bootstrap.php ] && [ -f opensim-kit/vendor/magicoli/opensim-helpers/query.php ] && [ ! -L opensim-kit/vendor/magicoli/opensim-engine ]"
