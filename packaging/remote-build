@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Builds OpenSimulator from a commit of its upstream repository on another machine, and brings back what the package
+# needs (what `distribution` of packaging/build copies). Nothing of this machine is sent, the other one fetches the
+# commit itself.
+#
+#   packaging/remote-build HOST COMMIT DEST
+#
+# HOST is an ssh host (BUILD_HOST in .env) with git, podman and rsync: the build runs in the .NET SDK container, so the
+# system of that machine does not matter. It keeps a clone of the repository, and the NuGet packages, in
+# ~/.cache/opensim-kit (a build is always a clean one, from the files of the commit), and each commit built.
+# DEST is made new.
+
+set -e
+host=$1
+commit=$2
+dest=$3
+if [[ -z "$host" || -z "$commit" || -z "$dest" ]]; then
+    echo "usage: packaging/remote-build HOST COMMIT DEST" >&2
+    exit 2
+fi
+cd "$(dirname "$0")/.."
+
+url=${OPENSIM_SOURCE_URL:-$(git config -f .gitmodules submodule.upstream/opensim.url)}
+image=${SDK_IMAGE:-mcr.microsoft.com/dotnet/sdk:8.0}
+ssh=(ssh -o BatchMode=yes -o ConnectTimeout=10)
+
+if ! command -v rsync >/dev/null; then
+    echo "rsync is needed to bring the build back" >&2
+    exit 1
+fi
+if ! missing=$("${ssh[@]}" "$host" 'for tool in git podman rsync; do command -v $tool >/dev/null || printf "%s " $tool; done'); then
+    echo "Cannot reach $host with ssh (BUILD_HOST), without a password" >&2
+    exit 1
+fi
+if [[ -n "$missing" ]]; then
+    echo "$host lacks: $missing" >&2
+    exit 1
+fi
+
+# The build on the other machine; its messages go to stderr, the last line it prints is where the result is
+built=$("${ssh[@]}" "$host" bash -s -- "$url" "$commit" "$image" <<'REMOTE'
+set -e
+url=$1
+commit=$2
+image=$3
+cache=${XDG_CACHE_HOME:-$HOME/.cache}/opensim-kit
+built=$cache/built/opensim-$commit
+if [ ! -f "$built/bin/OpenSim.dll" ]; then
+    mkdir -p "$cache"
+    repo=$cache/opensim.git
+    [ -d "$repo" ] || git init -q --bare "$repo"
+    echo "Fetching $commit" >&2
+    git -C "$repo" fetch -q --depth 1 "$url" "$commit"
+    work=$cache/work/opensim-$commit
+    rm -rf "$work"
+    mkdir -p "$work"
+    git -C "$repo" archive "$commit" | tar -x -C "$work"
+    echo "Building in $image" >&2
+    podman run --rm -v "$work:/opensim" -v opensim-kit-nuget:/root/.nuget/packages -w /opensim "$image" \
+        bash -c './runprebuild.sh && dotnet build --configuration Release OpenSim.sln' >&2
+    mkdir -p "$cache/built"
+    rm -rf "$built"
+    mv "$work" "$built"
+fi
+echo "$built"
+REMOTE
+)
+built=$(tail -1 <<<"$built")
+
+rm -rf "$dest"
+mkdir -p "$dest"
+echo "Bringing the build back from $host" >&2
+rsync -a \
+    --include='/bin/' --include='/bin/**' --include='/doc/' --include='/doc/**' --include='/share/' --include='/share/**' \
+    --include='/addon-modules/' --include='/addon-modules/**' --include='/ThirdPartyLicenses/' \
+    --include='/ThirdPartyLicenses/**' --include='/CONTRIBUTORS.txt' --include='/LICENSE.txt' --include='/README.md' \
+    --exclude='*' -e 'ssh -o BatchMode=yes' "$host:$built/" "$dest/"

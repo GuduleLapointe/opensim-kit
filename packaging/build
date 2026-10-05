@@ -17,13 +17,24 @@
 #   against their SHA256.
 # opensim-unstable: build/opensim-unstable, OpenSimulator built from the
 #   commit of the upstream/opensim submodule, in a .NET SDK container
-#   (podman, or CONTAINER=docker). Each commit is built once, into
-#   build/cache/.
+#   (podman, or CONTAINER=docker), or on another machine (BUILD_HOST, see
+#   packaging/remote-build). Each commit is built once, into build/cache/.
 #
 # The variables of the definitions go to build/packaging.env.
 
 set -e
 cd "$(dirname "$0")/.."
+
+# .env (KEY=value lines) gives what the environment of the command does not: BUILD_HOST (see .env.example)
+if [ -f .env ]; then
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+        case $key in '' | '#'* | *[!A-Za-z0-9_]*) continue ;; esac
+        value=${value%$'\r'}
+        value=${value#[\"\']}
+        value=${value%[\"\']}
+        [ -n "${!key+x}" ] || export "$key=$value"
+    done <.env
+fi
 
 URL=${OPENSIM_DIST_URL:-http://opensimulator.org/dist}
 SDK_IMAGE=mcr.microsoft.com/dotnet/sdk:8.0
@@ -167,16 +178,27 @@ EOF
 
     cache=build/cache/opensim-$commit
     if [[ ! -f "$cache/bin/OpenSim.dll" ]]; then
-        echo "Building OpenSimulator $number $flavour ($commit), once for this commit"
         rm -rf "$cache.tmp"
-        mkdir -p "$cache.tmp"
-        git -C "$source" archive "$commit" | tar -x -C "$cache.tmp"
-        if ! ${CONTAINER:-podman} run --rm -v "$PWD/$cache.tmp:/opensim" -w /opensim "$SDK_IMAGE" \
-            bash -c './runprebuild.sh && dotnet build --configuration Release OpenSim.sln' \
-            >"$cache.log" 2>&1; then
-            tail -20 "$cache.log" >&2
-            echo "Build failed, see $cache.log" >&2
-            exit 1
+        mkdir -p "$(dirname "$cache")"
+        if [[ -n "${BUILD_HOST:-}" ]]; then
+            # On another machine, which fetches the commit itself, and sends back what the package needs
+            echo "Building OpenSimulator $number $flavour ($commit) on $BUILD_HOST, once for this commit"
+            if ! SDK_IMAGE=$SDK_IMAGE packaging/remote-build "$BUILD_HOST" "$commit" "$cache.tmp" >"$cache.log" 2>&1; then
+                tail -20 "$cache.log" >&2
+                echo "Build failed, see $cache.log" >&2
+                exit 1
+            fi
+        else
+            echo "Building OpenSimulator $number $flavour ($commit), once for this commit"
+            mkdir -p "$cache.tmp"
+            git -C "$source" archive "$commit" | tar -x -C "$cache.tmp"
+            if ! ${CONTAINER:-podman} run --rm -v "$PWD/$cache.tmp:/opensim" -w /opensim "$SDK_IMAGE" \
+                bash -c './runprebuild.sh && dotnet build --configuration Release OpenSim.sln' \
+                >"$cache.log" 2>&1; then
+                tail -20 "$cache.log" >&2
+                echo "Build failed, see $cache.log" >&2
+                exit 1
+            fi
         fi
         mv "$cache.tmp" "$cache"
     fi
