@@ -7,14 +7,39 @@
 #   tests/Packaging/run [base image]
 #   e.g. tests/Packaging/run docker.io/library/ubuntu:24.04
 # KEEP=1 keeps the container for inspection, SCENARIO=web-scenario.sh runs another script of this folder.
+# The packages of the libraries the tools depend on are taken from the dist folders of their projects (DEPS_ENGINE,
+# DEPS_REST and DEPS_HELPERS say where they are). What the container needs is sent to it as a tar stream, so it can run
+# on any machine: CONTAINER_CONNECTION=name (see podman system connection) uses the podman of another one; it and MEMORY
+# can be set in tests/.env (see tests/.env.example), the environment of the command wins.
 
-set -e
+set -eo pipefail
 
 BASE=${1:-docker.io/library/debian:bookworm}
 TEST_DIR=tests/Packaging
 name=opensim-kit-test-$(basename "$BASE" | tr ':.' '--')
 
 cd "$(git rev-parse --show-toplevel)"
+
+# tests/.env (KEY=value lines) gives what the environment of the command does not: CONTAINER_CONNECTION, MEMORY...
+if [ -f tests/.env ]; then
+    while IFS='=' read -r key value || [ -n "$key" ]; do
+        case $key in '' | '#'* | *[!A-Za-z0-9_]*) continue ;; esac
+        value=${value%$'\r'}
+        value=${value#[\"\']}
+        value=${value%[\"\']}
+        [ -n "${!key+x}" ] || export "$key=$value"
+    done <tests/.env
+fi
+[ -z "${CONTAINER_CONNECTION:-}" ] || echo "Podman connection: $CONTAINER_CONNECTION"
+
+# The packages to install: those of dist/ and those of the libraries
+for dir in dist "${DEPS_ENGINE:-../opensim-engine/dist}" "${DEPS_REST:-../opensim-rest-php/dist}" "${DEPS_HELPERS:-../opensim-helpers/dist}"; do
+    if ! ls "$dir"/*.deb >/dev/null 2>&1; then
+        echo "tests/Packaging/run: no Debian package in $dir: build it first (dev/build.sh in that project)" >&2
+        exit 1
+    fi
+done
+
 podman build -q -t "$name" --build-arg BASE="$BASE" "$TEST_DIR" >/dev/null
 # The machine of podman is shared with every other container: say so when it
 # lacks the memory the test may use, before it stops a container of another project
@@ -26,8 +51,25 @@ fi
 podman rm -f "$name" >/dev/null 2>&1 || true
 # The memory is capped: a machine that lacks memory stops the biggest process
 # of any container, so the test must not reach that limit outside its own
-podman run -d --name "$name" --systemd=always --memory="${MEMORY:-700m}" \
-    -v "$PWD/dist:/dist:ro" -v "$PWD/$TEST_DIR:/test:ro" "$name" >/dev/null
-[[ -n "${KEEP:-}" ]] || trap 'podman rm -f "$name" >/dev/null' EXIT
+podman run -d --name "$name" --systemd=always --memory="${MEMORY:-700m}" "$name" >/dev/null
+stage=$(mktemp -d)
+cleanup() {
+    rm -rf "$stage"
+    [[ -n "${KEEP:-}" ]] || podman rm -f "$name" >/dev/null
+}
+trap cleanup EXIT
 sleep 3
+
+# The packages for the architecture of the container (and the ones for all), and the test scripts
+arch=$(podman exec "$name" dpkg --print-architecture)
+mkdir "$stage/dist" "$stage/test"
+for dir in dist "${DEPS_ENGINE:-../opensim-engine/dist}" "${DEPS_REST:-../opensim-rest-php/dist}" "${DEPS_HELPERS:-../opensim-helpers/dist}"; do
+    for deb in "$dir"/*_all.deb "$dir"/*_"$arch".deb; do
+        [[ ! -e "$deb" ]] || ln -sf "$(cd "$(dirname "$deb")" && pwd)/$(basename "$deb")" "$stage/dist/"
+    done
+done
+for file in "$TEST_DIR"/*; do
+    [[ ! -f "$file" ]] || ln -s "$PWD/$file" "$stage/test/"
+done
+COPYFILE_DISABLE=1 tar -chf - -C "$stage" dist test | podman exec -i "$name" tar -xf - --no-same-owner --warning=no-unknown-keyword -C /
 podman exec "$name" bash "/test/${SCENARIO:-scenario.sh}"

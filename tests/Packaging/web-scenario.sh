@@ -7,7 +7,7 @@ source /test/lib.sh
 magiiic_repository
 
 ts "packages, grid"
-apt_q install "$(deb opensim-0.9.3.0)" "$(deb opensim-tools)" "$(deb opensim-helpers)" "$(deb opensim-web)"
+apt_q install "$(deb opensim-0.9.3.0)" "$(deb opensim-rest-php)" "$(deb opensim-engine)" "$(deb opensim-helpers)" "$(deb opensim-tools)" "$(deb opensim-web)"
 systemctl start mariadb
 mysql -e "CREATE DATABASE testgrid_robust; CREATE USER opensim@localhost IDENTIFIED BY 'testpass';
     GRANT ALL ON testgrid_robust.* TO opensim@localhost;"

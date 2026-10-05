@@ -4,7 +4,8 @@
 
 source /test/lib.sh
 core=$(deb opensim-0.9.3.0)
-tools=$(deb opensim-tools)
+# The tools with the packages of the family they depend on (the helpers, the engine, rest-php)
+tools="$(deb opensim-rest-php) $(deb opensim-engine) $(deb opensim-helpers) $(deb opensim-tools)"
 # The metapackages, with the local packages they depend on
 metas="$(deb opensim) $(deb opensim-0.9.3.0-opensimsearch) $(deb opensim-0.9.3.0-gloebit) $(deb opensim-kit)"
 # The dotnet process only: the screen session running it has the same arguments
@@ -39,12 +40,12 @@ ts dotnet
 opensim install-dotnet -y 2>&1 | tail -1
 check ".NET runtime" "runuser -u opensim -- dotnet --list-runtimes | grep -q NETCore.App"
 
-# The web side of a grid: the helpers and the default site, installed before the grid so that its setup
-# writes its helpers.ini (the user of the instances joins the group of the web server)
+# The web side of a grid: the default site (the helpers came with the tools), installed before the grid so that its
+# setup writes its helpers.ini (the user of the instances joins the group of the web server)
 ts "web packages"
-apt_q install "$(deb opensim-helpers)" "$(deb opensim-web)"
-check "the helpers and the default site are installed" "[ -f /usr/share/opensim-helpers/query.php ] &&
-    [ -f /usr/share/opensim-helpers/includes/config.php ] && [ -f /var/www/html/index.php ]"
+apt_q install "$(deb opensim-web)"
+check "the helpers and the default site are installed, the helpers have no config of their own" "[ -f /usr/share/opensim-helpers/query.php ] &&
+    [ ! -e /usr/share/opensim-helpers/includes/config.php ] && [ -f /var/www/html/index.php ]"
 
 ts "grid from the wizard"
 systemctl start mariadb
@@ -61,7 +62,7 @@ check "the setup wrote the files for the web server, in the folder of the grid" 
 cat >/tmp/helpers-settings.php <<'EOF'
 <?php
 chdir('/usr/share/opensim-helpers');
-require 'includes/config.php';
+require 'includes/bootstrap.php';
 echo OPENSIM_GRID_NAME;
 EOF
 check "the helpers read the settings of the grid as the user of the web server" "[ \"\$(OPENSIM_GRID=testgrid runuser -u www-data -- php /tmp/helpers-settings.php)\" = Testgrid ]"
