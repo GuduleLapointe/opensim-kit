@@ -11,6 +11,7 @@
 /DEVELOPERS.md
 /ROADMAP.md
 /deploy
+/dev
 /deploy.yaml
 /packaging
 /phpcs.xml.dist
