@@ -2,7 +2,7 @@
 
 ### Unreleased
 
-- new: `dev/switch.sh` and `dev/release.sh`, the steps of a release
+- new: `dev/release.sh` makes the whole release, `dev/switch.sh` the composer part
 - fix: web server files are complete, for the site of the web URL: to include, or to use alone
 - new: `--keep N` on `opensim backup` and `opensim save iar|oar` removes the older ones
 - new: `dev/build.sh` makes the Debian packages and the zip of the tools
