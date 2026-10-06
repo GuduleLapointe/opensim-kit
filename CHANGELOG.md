@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+- fix: the OpenSimSearch module is built for 0.9.3.0 and unstable, it was the DLL of 0.9.2
+- update: the module comes from a fork in `modules/OpenSimSearch` (BSD-3-Clause), no longer from `contrib/`
 - update: `dev/` runs [build-tools](https://github.com/magicoli/build-tools) instead of its own copy of the scripts
 - update: `apt-package` and `apt-publish` come from build-tools (`vendor/bin`), no longer from apt-repo
 - update: [bash-tools](https://github.com/magicoli/bash-tools) 1.0.7, the tools depend on the package (>= 1.0.7)

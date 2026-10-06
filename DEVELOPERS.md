@@ -28,7 +28,7 @@ The packages are built with [nfpm](https://nfpm.goreleaser.com) and published to
 
 `opensim-helpers`, `opensim-engine` and `opensim-rest-php` are built and packaged by their own projects (`dev/build.sh` in each one): `opensim-tools` depends on them, and its `vendor/magicoli/` folder has links to their folders in `/usr/share` instead of copies (`packaging/siblings`). The tools and the releases install without each other. `opensim-tools` adds an install profile for each release in `/usr/share/opensim`, and removes it with the release, through a dpkg trigger.
 
-The modules are installed in their own folders, as some fail when loaded without their config: installing one does not enable it. They only suggest their core, so a build made elsewhere can use them and removing a core keeps them. `opensim-kit` installs the handful of essential modules for the latest release; the others are only in the repository. Third-party terms are in `contrib/README.md` and in the `copyright` file of each module package (OpenSimSearch states no license, and is not covered by the license of this project).
+The modules are installed in their own folders, as some fail when loaded without their config: installing one does not enable it. They only suggest their core, so a build made elsewhere can use them and removing a core keeps them. `opensim-kit` installs the handful of essential modules for the latest release; the others are only in the repository. Third-party terms are in `contrib/README.md`, `modules/README.md` and in the `copyright` file of each module package.
 
 Removing `opensim-<version>` or `opensim-unstable` stops the instances running from that core only, found by the full path of their assembly in the process list: instances of another release or of a build installed elsewhere are left alone. Nothing in an OpenSim instance needs a clean shutdown, its state is in the database, so a plain stop is enough.
 
@@ -115,7 +115,7 @@ tests/Packaging/run docker.io/library/ubuntu:24.04    # Ubuntu 24.04
 
 **Main modules**
 
-- **Search**: https://github.com/kcozens/OpenSimSearch (very old, but it still seems to be the source for builds)
+- **Search**: https://github.com/GuduleLapointe/OpenSimSearch, in `modules/OpenSimSearch` (fork of https://github.com/kcozens/OpenSimSearch, very old but still the source for builds)
 
 **Currency modules**
 

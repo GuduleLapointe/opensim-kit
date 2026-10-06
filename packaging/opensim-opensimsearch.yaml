@@ -17,8 +17,8 @@ description: |-
   web search engine. Installed in
   /usr/share/opensim-modules/${MODULES_CORE}/opensimsearch, not loaded until
   enabled.
-homepage: https://github.com/kcozens/OpenSimSearch
-license: none stated upstream
+homepage: https://github.com/GuduleLapointe/OpenSimSearch
+license: BSD-3-Clause
 
 # The module keeps nothing in a database: it queries a search web service
 # (its web part is another package). No dependency on the core package: a
