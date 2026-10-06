@@ -66,7 +66,9 @@
     - [ ] a grid follows the profile of its own install, the default profile is only the default of the new grids
     - [ ] the system user to run the instances as is per profile, not only `SystemUser` of `[Defaults]`
     - [ ] the setup offers to register an install (the core menu), and no script assumes `/etc/opensim`, `/var/lib/opensim` or `/usr/share/opensim` (review, one fix per file, with a test)
-- [ ] test the OpenSimSearch module from end to end with a parcel shown in search: the chain works up to the snapshot (the sim registers on `register.php`, `parser.php` fetches it, `query.php` answers); a new region has no searchable parcel, the flag is `ShowDirectory` = 4096 in `Flags` of the `land` table of the simulator, to set in the test then check that `query.php` finds the parcel
+- [x] the search is tested on the grid of the package scenario (`STOP_AFTER=search tests/Packaging/run`): registering, the snapshot, places, popular places, land, events, classifieds, people, with the keys the module sends (`tests/Packaging/search.sh`)
+- [ ] a parcel of the real simulator shown in search (`ShowDirectory` = 4096 in `Flags` of its `land` table, the simulator has to tell it again), and the registration the simulator makes by itself when it starts: its URL is `https://localhost` in the test, which nothing serves
+- [ ] search: the parser counts a simulator that answers "try later" (503, one request a minute per address) as unreachable, and it asks again at each run (`nextcheck` is set to 0, not to the delay it computes): to decide
 - [ ] add to the README of opensim-helpers (and of the engine) a short section on how to use them with the OpenSim kit
 - [ ] install instructions in the README of `lsl-ossl-zed` (rust, clone, `zed: install dev extension`, the prebuilt LSP binaries only cover Linux x86_64 and macOS)
 

@@ -265,6 +265,10 @@ check "the result is private, and holds the passwords made here, not the ones gi
 check "an account that exists is skipped" "grep -q 'exists' /tmp/bulk-again.out && [ \"\$(mysql -BN -e \"SELECT COUNT(*) FROM testgrid_robust.UserAccounts WHERE FirstName='Bulk'\")\" = 2 ]"
 rm -f users-result-*.csv /tmp/users-result-*.csv
 
+# The search, on the grid as it is: Robust, a simulator, the accounts (STOP_AFTER=search ends the scenario here)
+source /test/search.sh
+[[ ${STOP_AFTER:-} != search ]] || { ts "done after the search: $([ $FAILED = 0 ] && echo 'all checks passed' || echo 'SOME CHECKS FAILED')"; exit $FAILED; }
+
 # A region that exists is changed in place: its place, not its identity
 regionfile=/etc/opensim/grids/testgrid/sims/testgrid_sim1/regions/Sim1North.ini
 regionuuid=$(grep -m1 '^RegionUUID' $regionfile)

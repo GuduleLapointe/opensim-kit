@@ -6,7 +6,8 @@
 # Usage, from the repository root, after building the packages:
 #   tests/Packaging/run [base image]
 #   e.g. tests/Packaging/run docker.io/library/ubuntu:24.04
-# KEEP=1 keeps the container for inspection, SCENARIO=web-scenario.sh runs another script of this folder.
+# KEEP=1 keeps the container for inspection, SCENARIO=web-scenario.sh runs another script of this folder, STOP_AFTER=search
+# ends scenario.sh after the search tests (search.sh).
 # The packages of the libraries the tools depend on are taken from the dist folders of their projects (DEPS_ENGINE,
 # DEPS_REST and DEPS_HELPERS say where they are). What the container needs is sent to it as a tar stream, so it can run
 # on any machine: CONTAINER_CONNECTION=name (see podman system connection) uses the podman of another one; it and MEMORY
@@ -62,7 +63,7 @@ for dir in dist "${DEPS_ENGINE:-../opensim-engine/dist}" "${DEPS_REST:-../opensi
     done
 done
 for file in "$TEST_DIR"/*; do
-    [[ ! -f "$file" ]] || ln -s "$PWD/$file" "$stage/test/"
+    ln -s "$PWD/$file" "$stage/test/"
 done
 COPYFILE_DISABLE=1 tar -chf - -C "$stage" dist test | podman exec -i "$name" tar -xf - --no-same-owner --warning=no-unknown-keyword -C /
-podman exec "$name" bash "/test/${SCENARIO:-scenario.sh}"
+podman exec ${STOP_AFTER:+-e STOP_AFTER="$STOP_AFTER"} "$name" bash "/test/${SCENARIO:-scenario.sh}"
