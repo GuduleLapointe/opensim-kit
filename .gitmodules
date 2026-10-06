@@ -22,3 +22,6 @@
 	url = https://github.com/opensim/opensim.git
 	branch = master
 	shallow = true
+[submodule "modules/OpenSimSearch"]
+	path = modules/OpenSimSearch
+	url = https://github.com/GuduleLapointe/OpenSimSearch.git
