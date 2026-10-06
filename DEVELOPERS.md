@@ -143,7 +143,7 @@ Outdated:
 
 - https://www.osgrid.org/download (most popular)
 - https://github.com/Outworldz/DreamGrid-Opensim (dist 7.2 but based on opensim 0.9.3.1)
-- https://metaverseink.com/Downloads.html (outdated 0.9.2.0), https://github.com/diva (outdated)
+- https://github.com/diva (outdated)
 
 **OpenSimulator.org resources**
 
