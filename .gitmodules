@@ -14,9 +14,6 @@
 [submodule "webtools/currency-omc/helper/phpxmlrpc"]
 	path = dev/contrib/currency-omc/helper/phpxmlrpc
 	url = https://github.com/gggeek/phpxmlrpc.git
-[submodule "contrib/OpenSimSearch"]
-	path = contrib/OpenSimSearch/src
-	url = https://github.com/kcozens/OpenSimSearch
 [submodule "upstream/opensim"]
 	path = upstream/opensim
 	url = https://github.com/opensim/opensim.git
