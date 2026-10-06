@@ -436,7 +436,7 @@ cat <<EOF | sed -e "s/^[[:blank:]]*//" >$TMP.OpenSim.tweaks
   ; default_snapshot_period = 1200
   snapshot_cache_directory = "\$Const|DataDirectory/\${Launch|simslug}/DataSnapshot"
   ;; New way of specifying data services, one per service
-  ;DATA_SRV_MISearch = "\${Const|WebURL}/helpers/register"
+  ;DATA_SRV_YourGrid = "\${Const|WebURL}/helpers/register"
 
 [Economy]
   ; economymodule = BetaGridLikeMoneyModule

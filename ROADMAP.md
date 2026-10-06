@@ -26,7 +26,7 @@
 - [x] opensim status "down" count should not be displayed when none of the instances are down
 - [x] a new region is named after itself without a restart of the simulator (the object of `share/ossl-scripts`, loaded through the console)
 - [x] firewall: `opensim ports --ufw` tells the rules, `INSTALLATION.md` has a Firewall section, the setup does not apply them
-- [x] the simulators of a grid with helpers know where `offline.php` (`[Messaging]`) and `register.php` (`DATA_SRV_MISearch` of `[DataSnapshot]`) are
+- [x] the simulators of a grid with helpers know where `offline.php` (`[Messaging]`) and `register.php` (`DATA_SRV_<Grid>` of `[DataSnapshot]`) are
 - [x] the message of the day: `[LoginService] MessageUrl` is a URL whose text is shown at login (read by Robust when it starts, `WelcomeMessage` when it cannot be), found in the code of the core (`LLLoginService`); `motd.php` of opensim-helpers serves the `motd` of `helpers.ini`
 - [x] the destination guide is `guide.php` of the helpers, `DestinationGuide` of the Robust config points to it
 - [ ] the search page of the web site: not in opensim-helpers (no branch has a page, only the backend behind `query.php`), it is probably in the WordPress plugin; find out where it reads from, so that it finds what `parser.php` indexes, and write the `search` URL of `[GridInfoService]` when it exists (found: the `web-search` block of w4os has no source of its own, it asks `query.php` of the helpers: `dir_places_query` over XML-RPC with `websearch`, `gk` and the flags)

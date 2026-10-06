@@ -51,6 +51,7 @@ it('enables OSSL in a grid', function () {
 it('tells a sim the helpers URLs', function () {
     $plan = new SimPlan();
     $plan->simName = 'Alpha';
+    $plan->gridNick = 'alpha-world';
     $plan->gridName = 'Test';
     $plan->offlineUrl = 'https://play.example.org/helpers/offline.php';
     $plan->registerUrl = 'https://play.example.org/helpers/register.php';
@@ -60,7 +61,7 @@ it('tells a sim the helpers URLs', function () {
         ->toBe('https://play.example.org/helpers/offline.php')
         ->and($ini['Messaging']['OfflineMessageModule'])
         ->toBe('OfflineMessageModule')
-        ->and($ini['DataSnapshot']['DATA_SRV_MISearch'])
+        ->and($ini['DataSnapshot']['DATA_SRV_AlphaWorld'])
         ->toBe('https://play.example.org/helpers/register.php')
         ->and($ini['DataSnapshot']['index_sims'])
         ->toBe('true')
@@ -74,5 +75,26 @@ it('writes nothing of them for a grid without helpers', function () {
     $plan->gridName = 'Test';
     $ini = parse_ini_string((new SimConfig())->render($plan), true, INI_SCANNER_RAW);
 
-    expect($ini)->not->toHaveKey('Messaging')->and($ini['DataSnapshot'])->not->toHaveKey('DATA_SRV_MISearch');
+    expect($ini)->not->toHaveKey('Messaging')->and($ini['DataSnapshot'])->not->toHaveKey('DATA_SRV_Test');
+});
+
+it('names the data service after the grid: its nick, else its name, in PascalCase', function () {
+    $name = function (string $nick, string $gridName): string {
+        $plan = new SimPlan();
+        $plan->gridNick = $nick;
+        $plan->gridName = $gridName;
+
+        return SimConfig::dataServiceName($plan);
+    };
+
+    expect($name('vonda', 'Vonda'))
+        ->toBe('Vonda')
+        ->and($name('my-grid', 'Whatever'))
+        ->toBe('MyGrid')
+        ->and($name('', 'Speculoos World'))
+        ->toBe('SpeculoosWorld')
+        ->and($name('', "L'Île 2"))
+        ->toBe('LIle2')
+        ->and($name('', ''))
+        ->toBe('ThisGrid');
 });

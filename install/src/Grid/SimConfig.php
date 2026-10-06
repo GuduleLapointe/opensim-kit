@@ -78,7 +78,7 @@ final class SimConfig
                     ';; The search of the grid: the simulator tells its regions to the helpers',
                     'index_sims = true',
                     'gridname = "' . $plan->gridName . '"',
-                    'DATA_SRV_MISearch = "' . $plan->registerUrl . '"',
+                    'DATA_SRV_' . self::dataServiceName($plan) . ' = "' . $plan->registerUrl . '"',
                 ]
                 : [],
             '',
@@ -108,6 +108,20 @@ final class SimConfig
         ];
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * The name of the data service of the grid in [DataSnapshot], DATA_SRV_<name>: the nick of the grid, else its name,
+     * in PascalCase (vonda: Vonda, my-grid: MyGrid). Any name does, as long as it is the only one of its kind: a
+     * simulator can register to several search services (its grid, 2do...).
+     */
+    public static function dataServiceName(SimPlan $plan): string
+    {
+        $text = $plan->gridNick !== '' ? $plan->gridNick : $plan->gridName;
+        $words = preg_split('/[^A-Za-z0-9]+/', Slug::ascii($text), -1, PREG_SPLIT_NO_EMPTY);
+        $name = implode('', array_map('ucfirst', $words ?: []));
+
+        return $name !== '' ? $name : 'ThisGrid';
     }
 
     /** The name a simulator was given, from the first line of its config, null when it has none. */

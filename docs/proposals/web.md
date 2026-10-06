@@ -11,7 +11,7 @@ A grid needs a web side from the first day: a landing page (the `welcome` and `D
 - **opensim-engine** already has `Engine_Settings` (the one place of settings of the PHP libraries) and `class-ini.php`; opensim-helpers requires it.
 - The former `opensim-manfredaabye-helpers` package (removed) showed how a webroot is packaged: files in `/usr/share/<package>`, settings in `/etc/opensim/<package>`, and snippets for nginx and apache that `Alias` a path to the webroot (see its files in the history of `packaging/`).
 - Other implementations of the helpers exist (w4os for WordPress, the fork of Kevin Cozens and Manfred Aabye, wiredux): all follow the protocols of OpenSimulator and its viewers, so they are interchangeable in principle. The kit does not package them: the operator chooses `opensim-helpers` or a third-party solution, and the web URLs of the setup are only URLs.
-- The sim and Robust configs the setup writes have the web URLs commented (`;economy`, `;search`, `;message`, `DATA_SRV_MISearch`), none active.
+- The sim and Robust configs the setup writes have the web URLs commented (`;economy`, `;search`, `;message`, `DATA_SRV_<Grid>`), none active.
 
 ## Proposed
 
@@ -30,7 +30,7 @@ A grid needs a web side from the first day: a landing page (the `welcome` and `D
 ### 3. The placeholder site
 
 - A static page (one `index.html`, no build step, light and dark theme) with the name of the grid, how to connect (the login URI, the viewers' grid manager entry, Hypergrid address), the status (`/helper/` `get_grid_info` or the `GridStatus` URL), and where the helpers are; the grid name and URI come from a small generated `site.json` (the setup rewrites it when the grid changes), so the page is not a template to edit by hand.
-- The setup offers, when a grid is made, to write the web URLs in the config: `[GridInfoService] welcome` and `economy` (`{weburl}/helpers`, the viewer adds the name of the script) and `[LoginService] SearchURL` (`{weburl}/helpers/query.php`, the API of the in-world search; the search page of the web site is another script, not in opensim-helpers yet; there is no `message` URL: `offline.php` is for offline messages, not for the message of the day), the simulator `[Economy]`, `[Search]`, `[Messaging]`, `DATA_SRV_MISearch` (`{weburl}/helpers/register.php`), active only when the helpers are installed (the check is the presence of the package or of a URL that answers).
+- The setup offers, when a grid is made, to write the web URLs in the config: `[GridInfoService] welcome` and `economy` (`{weburl}/helpers`, the viewer adds the name of the script) and `[LoginService] SearchURL` (`{weburl}/helpers/query.php`, the API of the in-world search; the search page of the web site is another script, not in opensim-helpers yet; there is no `message` URL: `offline.php` is for offline messages, not for the message of the day), the simulator `[Economy]`, `[Search]`, `[Messaging]`, `DATA_SRV_<Grid>` (`{weburl}/helpers/register.php`), active only when the helpers are installed (the check is the presence of the package or of a URL that answers).
 
 ### 4. A command
 

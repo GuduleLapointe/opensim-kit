@@ -211,7 +211,7 @@ check "the region is registered in the grid" "[ \"\$(mysql -BN -e \"SELECT CONCA
 # The simulator wizard gives the roles of the default region (not the fallback one, which is not checked by default)
 # to the first region, the one that lets visitors in: without it a login fails with "destination not found"
 check "the simulator knows where the offline messages and the search index of the grid are" "grep -q '^OfflineMessageURL = \"https://localhost/helpers/offline.php\"' /etc/opensim/grids/testgrid/sims/testgrid_sim1.ini &&
-    grep -q '^DATA_SRV_MISearch = \"https://localhost/helpers/register.php\"' /etc/opensim/grids/testgrid/sims/testgrid_sim1.ini"
+    grep -q '^DATA_SRV_Testgrid = \"https://localhost/helpers/register.php\"' /etc/opensim/grids/testgrid/sims/testgrid_sim1.ini"
 check "the first region is the default region of the grid, and Robust says so" "grep -q '^Region_Sim1 = \"DefaultRegion, DefaultHGRegion, Persistent\"' /etc/opensim/grids/testgrid/Robust.HG.ini &&
     [ \"\$(mysql -BN -e \"SELECT (flags & 1 AND flags & 1024) FROM testgrid_robust.regions WHERE regionName='Sim1'\")\" = 1 ] &&
     curl -s -d 'METHOD=get_default_regions&SCOPEID=00000000-0000-0000-0000-000000000000' http://127.0.0.1:8003/grid | grep -q '>Sim1<'"
